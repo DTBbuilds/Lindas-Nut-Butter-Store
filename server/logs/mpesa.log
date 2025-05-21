@@ -1,0 +1,1575 @@
+[2025-05-21T12:37:08.854Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:08.854Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-028829"
+  }
+}
+
+[2025-05-21T12:37:08.856Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:08.856Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:10.590Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:10.590Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-028829"
+  }
+}
+
+[2025-05-21T12:37:10.591Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:10.591Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:11.802Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:11.802Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-028829"
+  }
+}
+
+[2025-05-21T12:37:11.804Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:11.803Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:15.961Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:15.961Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-035956"
+  }
+}
+
+[2025-05-21T12:37:15.961Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:15.961Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:17.178Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:17.178Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-035956"
+  }
+}
+
+[2025-05-21T12:37:17.179Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:17.179Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:18.350Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:18.350Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-035956"
+  }
+}
+
+[2025-05-21T12:37:18.351Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:18.351Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:38.020Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:38.020Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-058014"
+  }
+}
+
+[2025-05-21T12:37:38.021Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:38.021Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:39.537Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:39.537Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-058014"
+  }
+}
+
+[2025-05-21T12:37:39.538Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:39.538Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:37:40.721Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:37:40.721Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-058014"
+  }
+}
+
+[2025-05-21T12:37:40.721Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:37:40.721Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:38:22.601Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:38:22.600Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-102596"
+  }
+}
+
+[2025-05-21T12:38:22.601Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:38:22.601Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:38:24.057Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:38:24.057Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-102596"
+  }
+}
+
+[2025-05-21T12:38:24.057Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:38:24.057Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:38:25.249Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:38:25.249Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-102596"
+  }
+}
+
+[2025-05-21T12:38:25.249Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:38:25.249Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:38:28.663Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:38:28.663Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-108659"
+  }
+}
+
+[2025-05-21T12:38:28.664Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:38:28.664Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:38:30.027Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:38:30.027Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-108659"
+  }
+}
+
+[2025-05-21T12:38:30.028Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:38:30.028Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:38:31.198Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:38:31.198Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 3450,
+    "orderId": "LINDA-NUT-108659"
+  }
+}
+
+[2025-05-21T12:38:31.199Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:38:31.199Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:43:35.982Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:43:35.982Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-415965"
+  }
+}
+
+[2025-05-21T12:43:35.983Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:43:35.983Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:43:37.741Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:43:37.741Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-415965"
+  }
+}
+
+[2025-05-21T12:43:37.742Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:43:37.742Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:43:38.915Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:43:38.915Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-415965"
+  }
+}
+
+[2025-05-21T12:43:38.916Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:43:38.916Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:44:29.063Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:44:29.063Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-469058"
+  }
+}
+
+[2025-05-21T12:44:29.064Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:44:29.063Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:44:30.716Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:44:30.716Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-469058"
+  }
+}
+
+[2025-05-21T12:44:30.717Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:44:30.717Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:44:31.923Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:44:31.922Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-469058"
+  }
+}
+
+[2025-05-21T12:44:31.924Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:44:31.924Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:45:15.156Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:45:15.156Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-515149"
+  }
+}
+
+[2025-05-21T12:45:15.157Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:45:15.157Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:45:16.538Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:45:16.538Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-515149"
+  }
+}
+
+[2025-05-21T12:45:16.539Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:45:16.539Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:45:17.822Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:45:17.822Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-515149"
+  }
+}
+
+[2025-05-21T12:45:17.822Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:45:17.822Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:45:26.504Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:45:26.503Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-526498"
+  }
+}
+
+[2025-05-21T12:45:26.504Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:45:26.504Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:45:27.702Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:45:27.702Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-526498"
+  }
+}
+
+[2025-05-21T12:45:27.703Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:45:27.703Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:45:28.900Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:45:28.900Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 2800,
+    "orderId": "LINDA-NUT-526498"
+  }
+}
+
+[2025-05-21T12:45:28.901Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:45:28.901Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:16.913Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:16.912Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-176897"
+  }
+}
+
+[2025-05-21T12:56:16.914Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:16.914Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:18.734Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:18.734Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-176897"
+  }
+}
+
+[2025-05-21T12:56:18.734Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:18.734Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:19.934Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:19.934Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-176897"
+  }
+}
+
+[2025-05-21T12:56:19.935Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:19.934Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:24.339Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:24.338Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-184335"
+  }
+}
+
+[2025-05-21T12:56:24.339Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:24.339Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:25.597Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:25.597Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-184335"
+  }
+}
+
+[2025-05-21T12:56:25.598Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:25.598Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:26.823Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:26.823Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-184335"
+  }
+}
+
+[2025-05-21T12:56:26.824Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:26.823Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:30.706Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:30.706Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-190702"
+  }
+}
+
+[2025-05-21T12:56:30.707Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:30.707Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:31.879Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:31.879Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-190702"
+  }
+}
+
+[2025-05-21T12:56:31.880Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:31.880Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T12:56:33.063Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T12:56:33.063Z",
+  "data": {
+    "phoneNumber": "254708374150",
+    "amount": 3800,
+    "orderId": "LINDA-NUT-190702"
+  }
+}
+
+[2025-05-21T12:56:33.064Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T12:56:33.064Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:12:26.327Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:12:26.326Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-146307"
+  }
+}
+
+[2025-05-21T13:12:26.328Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:12:26.328Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:12:28.045Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:12:28.045Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-146307"
+  }
+}
+
+[2025-05-21T13:12:28.046Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:12:28.046Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:12:29.267Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:12:29.267Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-146307"
+  }
+}
+
+[2025-05-21T13:12:29.268Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:12:29.268Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:13:06.089Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:13:06.089Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-186082"
+  }
+}
+
+[2025-05-21T13:13:06.090Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:13:06.090Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:13:07.475Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:13:07.475Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-186082"
+  }
+}
+
+[2025-05-21T13:13:07.476Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:13:07.476Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:13:08.675Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:13:08.674Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-186082"
+  }
+}
+
+[2025-05-21T13:13:08.675Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:13:08.675Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:18:15.603Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:18:15.603Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-495586"
+  }
+}
+
+[2025-05-21T13:18:15.606Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:18:15.605Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:18:17.359Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:18:17.359Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-495586"
+  }
+}
+
+[2025-05-21T13:18:17.360Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:18:17.360Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:18:18.538Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:18:18.537Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-495586"
+  }
+}
+
+[2025-05-21T13:18:18.539Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:18:18.539Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:18:46.390Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:18:46.390Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-526384"
+  }
+}
+
+[2025-05-21T13:18:46.391Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:18:46.390Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:18:47.748Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:18:47.748Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-526384"
+  }
+}
+
+[2025-05-21T13:18:47.748Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:18:47.748Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:18:48.928Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:18:48.928Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-526384"
+  }
+}
+
+[2025-05-21T13:18:48.929Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:18:48.929Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:28:47.135Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:28:47.134Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-127120"
+  }
+}
+
+[2025-05-21T13:28:47.137Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:28:47.136Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:28:48.784Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:28:48.784Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-127120"
+  }
+}
+
+[2025-05-21T13:28:48.784Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:28:48.784Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:28:49.957Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:28:49.957Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-127120"
+  }
+}
+
+[2025-05-21T13:28:49.958Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:28:49.958Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:30:16.358Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:30:16.357Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-216352"
+  }
+}
+
+[2025-05-21T13:30:16.358Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:30:16.358Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:30:18.452Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:30:18.452Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-216352"
+  }
+}
+
+[2025-05-21T13:30:18.453Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:30:18.453Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:30:20.458Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:30:20.458Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-216352"
+  }
+}
+
+[2025-05-21T13:30:20.459Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:30:20.459Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:33:35.176Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:33:35.175Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-415160"
+  }
+}
+
+[2025-05-21T13:33:35.177Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:33:35.176Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:33:36.826Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:33:36.825Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-415160"
+  }
+}
+
+[2025-05-21T13:33:36.826Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:33:36.826Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:33:38.021Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:33:38.021Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-415160"
+  }
+}
+
+[2025-05-21T13:33:38.021Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:33:38.021Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:33:45.321Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:33:45.321Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-425317"
+  }
+}
+
+[2025-05-21T13:33:45.322Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:33:45.322Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:33:46.507Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:33:46.506Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-425317"
+  }
+}
+
+[2025-05-21T13:33:46.507Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:33:46.507Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:33:47.690Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:33:47.690Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-425317"
+  }
+}
+
+[2025-05-21T13:33:47.690Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:33:47.690Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:47:06.183Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:47:06.183Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-226166"
+  }
+}
+
+[2025-05-21T13:47:06.184Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:47:06.184Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:47:07.961Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:47:07.961Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-226166"
+  }
+}
+
+[2025-05-21T13:47:07.961Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:47:07.961Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:47:09.154Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:47:09.154Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-226166"
+  }
+}
+
+[2025-05-21T13:47:09.155Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:47:09.155Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:49:45.248Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:49:45.248Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-385242"
+  }
+}
+
+[2025-05-21T13:49:45.249Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:49:45.249Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:49:46.609Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:49:46.609Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-385242"
+  }
+}
+
+[2025-05-21T13:49:46.610Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:49:46.610Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T13:49:47.810Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T13:49:47.810Z",
+  "data": {
+    "phoneNumber": "254727068107",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-385242"
+  }
+}
+
+[2025-05-21T13:49:47.811Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T13:49:47.810Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:10:43.760Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:10:43.760Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-643745"
+  }
+}
+
+[2025-05-21T14:10:43.762Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:10:43.762Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:10:45.403Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:10:45.403Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-643745"
+  }
+}
+
+[2025-05-21T14:10:45.404Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:10:45.403Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:10:46.603Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:10:46.602Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-643745"
+  }
+}
+
+[2025-05-21T14:10:46.604Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:10:46.603Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:10:50.307Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:10:50.307Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-650304"
+  }
+}
+
+[2025-05-21T14:10:50.308Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:10:50.308Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:10:51.495Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:10:51.494Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-650304"
+  }
+}
+
+[2025-05-21T14:10:51.496Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:10:51.495Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:10:52.686Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:10:52.685Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-650304"
+  }
+}
+
+[2025-05-21T14:10:52.687Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:10:52.686Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:16:40.251Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:16:40.250Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-000231"
+  }
+}
+
+[2025-05-21T14:16:40.253Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:16:40.253Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:16:41.881Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:16:41.881Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-000231"
+  }
+}
+
+[2025-05-21T14:16:41.883Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:16:41.883Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+
+[2025-05-21T14:16:43.080Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-21T14:16:43.080Z",
+  "data": {
+    "phoneNumber": "254708374149",
+    "amount": 1800,
+    "orderId": "LINDA-NUT-000231"
+  }
+}
+
+[2025-05-21T14:16:43.082Z] {
+  "action": "Requesting OAuth Token",
+  "timestamp": "2025-05-21T14:16:43.082Z",
+  "data": {
+    "url": "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    "environment": "SANDBOX",
+    "consumerKey": "GvzjN...",
+    "paybillNumber": "174379"
+  }
+}
+

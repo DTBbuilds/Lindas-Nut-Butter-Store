@@ -1,0 +1,47 @@
+[2025-05-11T14:10:31.668Z] Log file cleared
+[2025-05-11T14:10:31.670Z] 
+🔍 UPDATING CONFIG FILE
+[2025-05-11T14:10:31.670Z] ==========================================
+[2025-05-11T14:10:31.671Z] ✅ Config file updated with correct Paybill and Account Number
+[2025-05-11T14:10:31.672Z] 
+🔍 UPDATING DARAJA API CLIENT
+[2025-05-11T14:10:31.673Z] ==========================================
+[2025-05-11T14:10:31.674Z] ✅ Daraja API client updated with correct authentication format
+[2025-05-11T14:10:31.675Z] 
+🔍 CREATING .ENV FILE
+[2025-05-11T14:10:31.675Z] ==========================================
+[2025-05-11T14:10:31.677Z] ✅ .env file created with correct configuration
+[2025-05-11T14:10:31.678Z] 
+🔍 TESTING DARAJA API AUTHENTICATION
+[2025-05-11T14:10:31.678Z] ==========================================
+[2025-05-11T14:10:31.679Z] Making auth request with provided credentials...
+[2025-05-11T14:10:32.387Z] ✅ Auth successful!
+[2025-05-11T14:10:32.388Z] Response: {
+  "access_token": "eGZ3rqRX0kCr9LfhOnvyyWxyWAVh",
+  "expires_in": "3599"
+}
+[2025-05-11T14:10:32.388Z] Access Token: eGZ3r...yWAVh
+[2025-05-11T14:10:32.389Z] Expires In: 3599 seconds
+[2025-05-11T14:10:32.389Z] 
+🔍 TESTING M-PESA STK PUSH
+[2025-05-11T14:10:32.390Z] ==========================================
+[2025-05-11T14:10:32.391Z] STK Push payload: {
+  "BusinessShortCode": "247247",
+  "Password": "MjQ3MjQ3YmZiMjc5ZjlhYTliZGJjZjE1OGU5N2RkNzFhNDY3Y2QyZTBjODkzMDU5YjEwZjc4ZTZiNzJhZGExZWQyYzkxOTIwMjUwNTExMTQx",
+  "Timestamp": "20250511141",
+  "TransactionType": "CustomerPayBillOnline",
+  "Amount": 1,
+  "PartyA": "254708374149",
+  "PartyB": "247247",
+  "PhoneNumber": "254708374149",
+  "CallBackURL": "https://mydomain.com/callback",
+  "AccountReference": "0725317864",
+  "TransactionDesc": "Test Payment"
+}
+[2025-05-11T14:10:32.596Z] ❌ STK Push failed: Request failed with status code 500
+[2025-05-11T14:10:32.597Z] Status: 500
+[2025-05-11T14:10:32.598Z] Data: {
+  "requestId": "801f-4ce5-97b8-f81bf214ea04410785",
+  "errorCode": "500.003.02",
+  "errorMessage": "System is busy. Please try again in few minutes."
+}
