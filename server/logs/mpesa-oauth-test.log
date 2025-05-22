@@ -1,0 +1,534 @@
+M-Pesa OAuth Test Log - 2025-05-22T06:41:01.510Z
+
+[2025-05-22T06:41:01.513Z] 🔍 Starting M-Pesa OAuth token diagnostic tests
+[2025-05-22T06:41:01.516Z] ================================================
+[2025-05-22T06:41:01.517Z] 
+🌐 Testing with base URL: https://sandbox.safaricom.co.ke
+[2025-05-22T06:41:01.517Z] 
+🔑 Testing credentials set: Official Safaricom docs
+[2025-05-22T06:41:01.519Z] 
+🔐 Using auth method: Standard base64 encoding
+[2025-05-22T06:41:01.520Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:01.520Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:02.182Z] Response status: 400
+[2025-05-22T06:41:02.183Z] Response data: ""
+[2025-05-22T06:41:02.184Z] ❌ This combination failed
+[2025-05-22T06:41:02.186Z] ------------------------------------------------
+[2025-05-22T06:41:02.187Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:02.188Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:02.358Z] Response status: 400
+[2025-05-22T06:41:02.359Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246274",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:02.359Z] ❌ This combination failed
+[2025-05-22T06:41:02.360Z] ------------------------------------------------
+[2025-05-22T06:41:02.360Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:02.361Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:02.523Z] Response status: 404
+[2025-05-22T06:41:02.524Z] Response data: ""
+[2025-05-22T06:41:02.524Z] ❌ This combination failed
+[2025-05-22T06:41:02.525Z] ------------------------------------------------
+[2025-05-22T06:41:02.526Z] 
+🔐 Using auth method: URL-safe base64 encoding
+[2025-05-22T06:41:02.527Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:02.527Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:02.696Z] Response status: 400
+[2025-05-22T06:41:02.698Z] Response data: ""
+[2025-05-22T06:41:02.698Z] ❌ This combination failed
+[2025-05-22T06:41:02.699Z] ------------------------------------------------
+[2025-05-22T06:41:02.700Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:02.701Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:02.875Z] Response status: 400
+[2025-05-22T06:41:02.876Z] Response data: {
+  "requestId": "460d-4349-86e3-4ffbec8560951182482",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:02.876Z] ❌ This combination failed
+[2025-05-22T06:41:02.877Z] ------------------------------------------------
+[2025-05-22T06:41:02.877Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:02.878Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:03.053Z] Response status: 404
+[2025-05-22T06:41:03.054Z] Response data: ""
+[2025-05-22T06:41:03.054Z] ❌ This combination failed
+[2025-05-22T06:41:03.055Z] ------------------------------------------------
+[2025-05-22T06:41:03.056Z] 
+🔐 Using auth method: No colon separator
+[2025-05-22T06:41:03.056Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:03.057Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:03.223Z] Response status: 400
+[2025-05-22T06:41:03.224Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246278",
+  "errorCode": "400.008.01",
+  "errorMessage": "Invalid Authentication passed"
+}
+[2025-05-22T06:41:03.225Z] ❌ This combination failed
+[2025-05-22T06:41:03.225Z] ------------------------------------------------
+[2025-05-22T06:41:03.226Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:03.227Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:03.403Z] Response status: 400
+[2025-05-22T06:41:03.404Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246279",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:03.405Z] ❌ This combination failed
+[2025-05-22T06:41:03.405Z] ------------------------------------------------
+[2025-05-22T06:41:03.406Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:03.407Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:03.571Z] Response status: 404
+[2025-05-22T06:41:03.572Z] Response data: ""
+[2025-05-22T06:41:03.572Z] ❌ This combination failed
+[2025-05-22T06:41:03.573Z] ------------------------------------------------
+[2025-05-22T06:41:03.574Z] 
+🔑 Testing credentials set: Common format credentials 1
+[2025-05-22T06:41:03.574Z] 
+🔐 Using auth method: Standard base64 encoding
+[2025-05-22T06:41:03.575Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:03.575Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:03.763Z] Response status: 400
+[2025-05-22T06:41:03.764Z] Response data: ""
+[2025-05-22T06:41:03.765Z] ❌ This combination failed
+[2025-05-22T06:41:03.765Z] ------------------------------------------------
+[2025-05-22T06:41:03.766Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:03.766Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:03.932Z] Response status: 400
+[2025-05-22T06:41:03.933Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246282",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:03.934Z] ❌ This combination failed
+[2025-05-22T06:41:03.935Z] ------------------------------------------------
+[2025-05-22T06:41:03.937Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:03.937Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:04.098Z] Response status: 404
+[2025-05-22T06:41:04.099Z] Response data: ""
+[2025-05-22T06:41:04.099Z] ❌ This combination failed
+[2025-05-22T06:41:04.099Z] ------------------------------------------------
+[2025-05-22T06:41:04.100Z] 
+🔐 Using auth method: URL-safe base64 encoding
+[2025-05-22T06:41:04.101Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:04.103Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:04.295Z] Response status: 400
+[2025-05-22T06:41:04.296Z] Response data: ""
+[2025-05-22T06:41:04.297Z] ❌ This combination failed
+[2025-05-22T06:41:04.297Z] ------------------------------------------------
+[2025-05-22T06:41:04.298Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:04.298Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:04.510Z] Response status: 400
+[2025-05-22T06:41:04.511Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246284",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:04.511Z] ❌ This combination failed
+[2025-05-22T06:41:04.512Z] ------------------------------------------------
+[2025-05-22T06:41:04.513Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:04.513Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:04.673Z] Response status: 404
+[2025-05-22T06:41:04.674Z] Response data: ""
+[2025-05-22T06:41:04.674Z] ❌ This combination failed
+[2025-05-22T06:41:04.675Z] ------------------------------------------------
+[2025-05-22T06:41:04.675Z] 
+🔐 Using auth method: No colon separator
+[2025-05-22T06:41:04.676Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:04.676Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:04.846Z] Response status: 400
+[2025-05-22T06:41:04.847Z] Response data: {
+  "requestId": "460d-4349-86e3-4ffbec8560951182484",
+  "errorCode": "400.008.01",
+  "errorMessage": "Invalid Authentication passed"
+}
+[2025-05-22T06:41:04.847Z] ❌ This combination failed
+[2025-05-22T06:41:04.848Z] ------------------------------------------------
+[2025-05-22T06:41:04.848Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:04.849Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:05.012Z] Response status: 400
+[2025-05-22T06:41:05.012Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246285",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:05.013Z] ❌ This combination failed
+[2025-05-22T06:41:05.013Z] ------------------------------------------------
+[2025-05-22T06:41:05.014Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:05.014Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:05.176Z] Response status: 404
+[2025-05-22T06:41:05.177Z] Response data: ""
+[2025-05-22T06:41:05.177Z] ❌ This combination failed
+[2025-05-22T06:41:05.178Z] ------------------------------------------------
+[2025-05-22T06:41:05.178Z] 
+🔑 Testing credentials set: Common format credentials 2
+[2025-05-22T06:41:05.179Z] 
+🔐 Using auth method: Standard base64 encoding
+[2025-05-22T06:41:05.179Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:05.180Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:05.347Z] Response status: 400
+[2025-05-22T06:41:05.348Z] Response data: ""
+[2025-05-22T06:41:05.348Z] ❌ This combination failed
+[2025-05-22T06:41:05.349Z] ------------------------------------------------
+[2025-05-22T06:41:05.349Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:05.350Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:05.517Z] Response status: 400
+[2025-05-22T06:41:05.519Z] Response data: {
+  "requestId": "460d-4349-86e3-4ffbec8560951182485",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:05.520Z] ❌ This combination failed
+[2025-05-22T06:41:05.521Z] ------------------------------------------------
+[2025-05-22T06:41:05.521Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:05.522Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:05.685Z] Response status: 404
+[2025-05-22T06:41:05.686Z] Response data: ""
+[2025-05-22T06:41:05.687Z] ❌ This combination failed
+[2025-05-22T06:41:05.687Z] ------------------------------------------------
+[2025-05-22T06:41:05.688Z] 
+🔐 Using auth method: URL-safe base64 encoding
+[2025-05-22T06:41:05.689Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:05.689Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:05.857Z] Response status: 400
+[2025-05-22T06:41:05.857Z] Response data: ""
+[2025-05-22T06:41:05.858Z] ❌ This combination failed
+[2025-05-22T06:41:05.859Z] ------------------------------------------------
+[2025-05-22T06:41:05.859Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:05.860Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:06.030Z] Response status: 400
+[2025-05-22T06:41:06.031Z] Response data: {
+  "requestId": "460d-4349-86e3-4ffbec8560951182486",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:06.032Z] ❌ This combination failed
+[2025-05-22T06:41:06.032Z] ------------------------------------------------
+[2025-05-22T06:41:06.033Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.034Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:06.195Z] Response status: 404
+[2025-05-22T06:41:06.196Z] Response data: ""
+[2025-05-22T06:41:06.196Z] ❌ This combination failed
+[2025-05-22T06:41:06.197Z] ------------------------------------------------
+[2025-05-22T06:41:06.197Z] 
+🔐 Using auth method: No colon separator
+[2025-05-22T06:41:06.198Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.199Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:06.364Z] Response status: 400
+[2025-05-22T06:41:06.365Z] Response data: {
+  "requestId": "b8e4-4710-a345-41cd9468f19c1246289",
+  "errorCode": "400.008.01",
+  "errorMessage": "Invalid Authentication passed"
+}
+[2025-05-22T06:41:06.366Z] ❌ This combination failed
+[2025-05-22T06:41:06.367Z] ------------------------------------------------
+[2025-05-22T06:41:06.369Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:06.370Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:06.538Z] Response status: 400
+[2025-05-22T06:41:06.539Z] Response data: {
+  "requestId": "460d-4349-86e3-4ffbec8560951182488",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:06.540Z] ❌ This combination failed
+[2025-05-22T06:41:06.541Z] ------------------------------------------------
+[2025-05-22T06:41:06.542Z] 
+📡 Testing URL: https://sandbox.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.542Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:06.703Z] Response status: 404
+[2025-05-22T06:41:06.704Z] Response data: ""
+[2025-05-22T06:41:06.705Z] ❌ This combination failed
+[2025-05-22T06:41:06.706Z] ------------------------------------------------
+[2025-05-22T06:41:06.707Z] 
+🌐 Testing with base URL: https://api.safaricom.co.ke
+[2025-05-22T06:41:06.707Z] 
+🔑 Testing credentials set: Official Safaricom docs
+[2025-05-22T06:41:06.708Z] 
+🔐 Using auth method: Standard base64 encoding
+[2025-05-22T06:41:06.709Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.710Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.807Z] Response status: 400
+[2025-05-22T06:41:06.808Z] Response data: ""
+[2025-05-22T06:41:06.808Z] ❌ This combination failed
+[2025-05-22T06:41:06.809Z] ------------------------------------------------
+[2025-05-22T06:41:06.809Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:06.810Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.836Z] Response status: 400
+[2025-05-22T06:41:06.837Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184160",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:06.837Z] ❌ This combination failed
+[2025-05-22T06:41:06.838Z] ------------------------------------------------
+[2025-05-22T06:41:06.839Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.840Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.862Z] Response status: 404
+[2025-05-22T06:41:06.863Z] Response data: ""
+[2025-05-22T06:41:06.863Z] ❌ This combination failed
+[2025-05-22T06:41:06.864Z] ------------------------------------------------
+[2025-05-22T06:41:06.865Z] 
+🔐 Using auth method: URL-safe base64 encoding
+[2025-05-22T06:41:06.865Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.866Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.892Z] Response status: 400
+[2025-05-22T06:41:06.893Z] Response data: ""
+[2025-05-22T06:41:06.894Z] ❌ This combination failed
+[2025-05-22T06:41:06.894Z] ------------------------------------------------
+[2025-05-22T06:41:06.895Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:06.896Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.920Z] Response status: 400
+[2025-05-22T06:41:06.920Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184167",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:06.921Z] ❌ This combination failed
+[2025-05-22T06:41:06.922Z] ------------------------------------------------
+[2025-05-22T06:41:06.922Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.923Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.945Z] Response status: 404
+[2025-05-22T06:41:06.946Z] Response data: ""
+[2025-05-22T06:41:06.947Z] ❌ This combination failed
+[2025-05-22T06:41:06.947Z] ------------------------------------------------
+[2025-05-22T06:41:06.948Z] 
+🔐 Using auth method: No colon separator
+[2025-05-22T06:41:06.949Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:06.949Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:06.974Z] Response status: 400
+[2025-05-22T06:41:06.975Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184171",
+  "errorCode": "400.008.01",
+  "errorMessage": "Invalid Authentication passed"
+}
+[2025-05-22T06:41:06.976Z] ❌ This combination failed
+[2025-05-22T06:41:06.976Z] ------------------------------------------------
+[2025-05-22T06:41:06.977Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:06.978Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:07.000Z] Response status: 400
+[2025-05-22T06:41:07.002Z] Response data: {
+  "requestId": "b5f4-44b8-9329-76aaa1392b7470716191",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.003Z] ❌ This combination failed
+[2025-05-22T06:41:07.004Z] ------------------------------------------------
+[2025-05-22T06:41:07.005Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.006Z] Auth header (first 15 chars): Basic YmZiMjc5ZjlhYTl...
+[2025-05-22T06:41:07.027Z] Response status: 404
+[2025-05-22T06:41:07.028Z] Response data: ""
+[2025-05-22T06:41:07.029Z] ❌ This combination failed
+[2025-05-22T06:41:07.029Z] ------------------------------------------------
+[2025-05-22T06:41:07.030Z] 
+🔑 Testing credentials set: Common format credentials 1
+[2025-05-22T06:41:07.031Z] 
+🔐 Using auth method: Standard base64 encoding
+[2025-05-22T06:41:07.032Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.032Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.062Z] Response status: 400
+[2025-05-22T06:41:07.064Z] Response data: ""
+[2025-05-22T06:41:07.064Z] ❌ This combination failed
+[2025-05-22T06:41:07.065Z] ------------------------------------------------
+[2025-05-22T06:41:07.066Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:07.067Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.093Z] Response status: 400
+[2025-05-22T06:41:07.094Z] Response data: {
+  "requestId": "b5f4-44b8-9329-76aaa1392b7470716196",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.095Z] ❌ This combination failed
+[2025-05-22T06:41:07.096Z] ------------------------------------------------
+[2025-05-22T06:41:07.096Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.097Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.122Z] Response status: 404
+[2025-05-22T06:41:07.123Z] Response data: ""
+[2025-05-22T06:41:07.124Z] ❌ This combination failed
+[2025-05-22T06:41:07.124Z] ------------------------------------------------
+[2025-05-22T06:41:07.125Z] 
+🔐 Using auth method: URL-safe base64 encoding
+[2025-05-22T06:41:07.126Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.127Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.159Z] Response status: 400
+[2025-05-22T06:41:07.159Z] Response data: ""
+[2025-05-22T06:41:07.160Z] ❌ This combination failed
+[2025-05-22T06:41:07.161Z] ------------------------------------------------
+[2025-05-22T06:41:07.161Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:07.163Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.188Z] Response status: 400
+[2025-05-22T06:41:07.189Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184182",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.190Z] ❌ This combination failed
+[2025-05-22T06:41:07.190Z] ------------------------------------------------
+[2025-05-22T06:41:07.191Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.192Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.219Z] Response status: 404
+[2025-05-22T06:41:07.220Z] Response data: ""
+[2025-05-22T06:41:07.221Z] ❌ This combination failed
+[2025-05-22T06:41:07.222Z] ------------------------------------------------
+[2025-05-22T06:41:07.223Z] 
+🔐 Using auth method: No colon separator
+[2025-05-22T06:41:07.224Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.224Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.252Z] Response status: 400
+[2025-05-22T06:41:07.253Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184186",
+  "errorCode": "400.008.01",
+  "errorMessage": "Invalid Authentication passed"
+}
+[2025-05-22T06:41:07.254Z] ❌ This combination failed
+[2025-05-22T06:41:07.254Z] ------------------------------------------------
+[2025-05-22T06:41:07.255Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:07.256Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.279Z] Response status: 400
+[2025-05-22T06:41:07.281Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184188",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.281Z] ❌ This combination failed
+[2025-05-22T06:41:07.282Z] ------------------------------------------------
+[2025-05-22T06:41:07.284Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.286Z] Auth header (first 15 chars): Basic R3Z6ak5uWWdOSnR...
+[2025-05-22T06:41:07.310Z] Response status: 404
+[2025-05-22T06:41:07.311Z] Response data: ""
+[2025-05-22T06:41:07.311Z] ❌ This combination failed
+[2025-05-22T06:41:07.312Z] ------------------------------------------------
+[2025-05-22T06:41:07.313Z] 
+🔑 Testing credentials set: Common format credentials 2
+[2025-05-22T06:41:07.313Z] 
+🔐 Using auth method: Standard base64 encoding
+[2025-05-22T06:41:07.314Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.315Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.343Z] Response status: 400
+[2025-05-22T06:41:07.344Z] Response data: ""
+[2025-05-22T06:41:07.344Z] ❌ This combination failed
+[2025-05-22T06:41:07.345Z] ------------------------------------------------
+[2025-05-22T06:41:07.346Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:07.347Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.370Z] Response status: 400
+[2025-05-22T06:41:07.371Z] Response data: {
+  "requestId": "b5f4-44b8-9329-76aaa1392b7470716205",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.372Z] ❌ This combination failed
+[2025-05-22T06:41:07.373Z] ------------------------------------------------
+[2025-05-22T06:41:07.374Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.374Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.400Z] Response status: 404
+[2025-05-22T06:41:07.403Z] Response data: ""
+[2025-05-22T06:41:07.403Z] ❌ This combination failed
+[2025-05-22T06:41:07.404Z] ------------------------------------------------
+[2025-05-22T06:41:07.405Z] 
+🔐 Using auth method: URL-safe base64 encoding
+[2025-05-22T06:41:07.406Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.407Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.436Z] Response status: 400
+[2025-05-22T06:41:07.438Z] Response data: ""
+[2025-05-22T06:41:07.438Z] ❌ This combination failed
+[2025-05-22T06:41:07.439Z] ------------------------------------------------
+[2025-05-22T06:41:07.440Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:07.441Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.464Z] Response status: 400
+[2025-05-22T06:41:07.466Z] Response data: {
+  "requestId": "b5f4-44b8-9329-76aaa1392b7470716208",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.466Z] ❌ This combination failed
+[2025-05-22T06:41:07.467Z] ------------------------------------------------
+[2025-05-22T06:41:07.468Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.470Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.493Z] Response status: 404
+[2025-05-22T06:41:07.494Z] Response data: ""
+[2025-05-22T06:41:07.495Z] ❌ This combination failed
+[2025-05-22T06:41:07.496Z] ------------------------------------------------
+[2025-05-22T06:41:07.497Z] 
+🔐 Using auth method: No colon separator
+[2025-05-22T06:41:07.498Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.498Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.525Z] Response status: 400
+[2025-05-22T06:41:07.526Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184199",
+  "errorCode": "400.008.01",
+  "errorMessage": "Invalid Authentication passed"
+}
+[2025-05-22T06:41:07.527Z] ❌ This combination failed
+[2025-05-22T06:41:07.527Z] ------------------------------------------------
+[2025-05-22T06:41:07.528Z] 
+📡 Testing URL: https://api.safaricom.co.ke/oauth/v1/generate
+[2025-05-22T06:41:07.529Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.553Z] Response status: 400
+[2025-05-22T06:41:07.555Z] Response data: {
+  "requestId": "7178-45fb-a6cf-e6ce650ede3170184201",
+  "errorCode": "400.008.02",
+  "errorMessage": "Invalid grant type passed"
+}
+[2025-05-22T06:41:07.555Z] ❌ This combination failed
+[2025-05-22T06:41:07.556Z] ------------------------------------------------
+[2025-05-22T06:41:07.557Z] 
+📡 Testing URL: https://api.safaricom.co.ke/mpesa/oauth/v1/generate?grant_type=client_credentials
+[2025-05-22T06:41:07.558Z] Auth header (first 15 chars): Basic V3Y5bjQ5ajB3ekZ...
+[2025-05-22T06:41:07.581Z] Response status: 404
+[2025-05-22T06:41:07.582Z] Response data: ""
+[2025-05-22T06:41:07.583Z] ❌ This combination failed
+[2025-05-22T06:41:07.585Z] ------------------------------------------------
+[2025-05-22T06:41:07.586Z] 
+🏁 All tests completed
+[2025-05-22T06:41:07.587Z] 📋 Full test log available at: D:\Lab 2\Lindas-Nut-Butter-Store Monday Updates\Lindas-Nut-Butter-Store-master\server\logs\mpesa-oauth-test.log
+[2025-05-22T06:41:07.588Z] ✅ OAuth token test completed

@@ -20,22 +20,49 @@ const config = {
   
   // M-Pesa API configuration
   mpesa: {
+    // Set API base URLs based on environment
     baseUrl: process.env.NODE_ENV === 'production' 
       ? 'https://api.safaricom.co.ke' 
       : 'https://sandbox.safaricom.co.ke',
-    consumerKey: process.env.MPESA_CONSUMER_KEY || 'GvzjNnYgNJtwgwfLBkZh65VPwfuKvs0V',  // User's Safaricom sandbox credentials
-    consumerSecret: process.env.MPESA_CONSUMER_SECRET || 'oUs2ibY9pzL1A0Az',  // User's Safaricom sandbox credentials
-    paybillNumber: process.env.MPESA_PAYBILL_NUMBER || '174379',  // Linda's Paybill Number  // Linda's Paybill Number  // Linda's Paybill Number
-    tillNumber: process.env.MPESA_TILL_NUMBER || '321798', // Linda's Till Number
-    accountNumber: process.env.MPESA_ACCOUNT_NUMBER || '0725317864', // Linda's Account Number // Linda's Account Number // Linda's Account Number
-    passkey: process.env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', // Default sandbox passkey
+    
+    // SECURITY CRITICAL: Only use environment variables for sensitive credentials in production
+    consumerKey: process.env.MPESA_CONSUMER_KEY || (
+      process.env.NODE_ENV === 'production'
+        ? '' // No default in production - must be provided via env vars
+        : 'uLuFWoZbcHXEA4u0AaLAQVHseUVJWjwDhR4KP2AjLJWTjGwV' // Only use for development
+    ),
+    consumerSecret: process.env.MPESA_CONSUMER_SECRET || (
+      process.env.NODE_ENV === 'production'
+        ? '' // No default in production - must be provided via env vars
+        : '7Z3rc5Y1Hyl68ffeyCPj9FGgrldDaiH8588fFDcEJlfjHXy7NYqojYHZ827BsMm7' // Only use for development
+    ),
+    
+    // Business configuration
+    paybillNumber: process.env.MPESA_PAYBILL_NUMBER || (
+      process.env.NODE_ENV === 'production' ? '247247' : '174379' // Equity paybill in production, Sandbox default otherwise
+    ),
+    tillNumber: process.env.MPESA_TILL_NUMBER || (
+      process.env.NODE_ENV === 'production' ? '' : '321798' // Sandbox default
+    ),
+    accountNumber: process.env.MPESA_ACCOUNT_NUMBER || (
+      process.env.NODE_ENV === 'production' ? '0725317864' : '0725317864' // Same account number for both environments
+    ),
+    passkey: process.env.MPESA_PASSKEY || (
+      process.env.NODE_ENV === 'production' ? '' : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919' // Sandbox default
+    ),
+    
+    // Callback URLs - these should be absolute URLs in production
     callbackUrl: process.env.CALLBACK_URL || 'http://localhost:5000/api/mpesa/callback',
     validationUrl: process.env.VALIDATION_URL || 'http://localhost:5000/api/mpesa/validation',
     confirmationUrl: process.env.CONFIRMATION_URL || 'http://localhost:5000/api/mpesa/confirmation',
     
     // For initiator credentials (used for B2C, B2B and reversal)
-    initiatorName: process.env.MPESA_INITIATOR_NAME || 'testapi',
-    securityCredential: process.env.MPESA_SECURITY_CREDENTIAL || 'Safaricom999!*!'
+    initiatorName: process.env.MPESA_INITIATOR_NAME || (
+      process.env.NODE_ENV === 'production' ? '' : 'testapi'
+    ),
+    securityCredential: process.env.MPESA_SECURITY_CREDENTIAL || (
+      process.env.NODE_ENV === 'production' ? '' : 'Safaricom999!*!'
+    )
   },
   
   // Test configuration for sandbox testing

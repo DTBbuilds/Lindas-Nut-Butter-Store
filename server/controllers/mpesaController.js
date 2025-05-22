@@ -10,6 +10,7 @@ const {
 } = require('../utils/mpesaHelpers');
 const { logMpesaTransaction, logMpesaError } = require('../utils/mpesaLogger');
 const emailService = require('../utils/emailService');
+const socketService = require('../utils/socketService');
 
 // Get M-Pesa configuration from config file
 const MPESA_BASE_URL = config.mpesa.baseUrl;
@@ -113,6 +114,9 @@ exports.initiateSTKPush = async (req, res) => {
       type: 'STK_PUSH',
       timestamp: new Date()
     });
+    
+    // Broadcast transaction creation to connected admin clients
+    socketService.emitTransactionCreated(transaction);
     
     // For testing purposes only - simulate a callback after 5 seconds
     // This is only for sandbox testing when callbacks can't reach our local environment
@@ -340,7 +344,16 @@ exports.stkPushCallback = async (req, res) => {
         
         // Send confirmation to customer
         await sendPaymentConfirmation(order);
+        
+        // Broadcast completed transaction to admin dashboard (with order details)
+        socketService.emitTransactionCompleted(transaction, order);
+      } else {
+        // Broadcast successful transaction even without order
+        socketService.emitTransactionUpdated(transaction);
       }
+    } else {
+      // Transaction failed
+      socketService.emitTransactionFailed(transaction);
     }
     
     await transaction.save();

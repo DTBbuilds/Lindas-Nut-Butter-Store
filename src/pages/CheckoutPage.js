@@ -45,15 +45,18 @@ const NewCheckoutPage = () => {
     name: '',
     email: '',
     phoneNumber: '',
-    pickupLocation: ''
+    address: '',
+    apartment: '',
+    city: 'Nairobi'
   });
   
   const [orderInfo, setOrderInfo] = useState({
     orderId: '',
     orderNumber: generateOrderNumber(),
     orderDate: new Date().toISOString(),
-    estimatedDeliveryDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    orderStatus: 'PENDING'
+    estimatedDeliveryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 48 hours delivery time
+    orderStatus: 'PENDING',
+    shippingFee: 300 // Fixed shipping fee for Nairobi in KES
   });
 
   // Store a copy of the order items and totals for the confirmation page
@@ -267,9 +270,9 @@ const NewCheckoutPage = () => {
       return;
     }
 
-    // Validate pickup location
-    if (!data.pickupLocation) {
-      toast.error('Please select a pickup location', { containerId: 'main-toast-container' });
+    // Validate delivery address
+    if (!data.address || !data.city) {
+      toast.error('Please enter your delivery address', { containerId: 'main-toast-container' });
       return;
     }
 
@@ -379,7 +382,11 @@ const NewCheckoutPage = () => {
           name: customerInfo.name.trim(),
           email: customerInfo.email.trim().toLowerCase(),
           phoneNumber: customerInfo.phoneNumber.trim(), // Fix field name to match backend
-          pickupLocation: customerInfo.pickupLocation?.trim() || 'Main Store'
+          deliveryAddress: {
+            streetAddress: customerInfo.address.trim(),
+            apartment: customerInfo.apartment || '',
+            city: customerInfo.city.trim()
+          }
         },
         items: cartItems.map(item => ({
           productId: item.id || item.productId,

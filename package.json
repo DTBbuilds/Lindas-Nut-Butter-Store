@@ -70,6 +70,7 @@
     "mpesa:auth": "node server/testDarajaAuth.js",
     "mpesa:fix": "node server/fixMpesaAuth.js",
     "mpesa:callbacks": "node server/fixCallbackUrls.js",
-    "mpesa:test": "node server/testStkPush.js"
+    "mpesa:test": "node server/testStkPush.js",
+    "mpesa:setup": "node server/utils/mpesaSetup.js"
   }
 }

@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faLock, faSpinner, faUserShield } from '@fortawesome/free-solid-svg-icons';
 
 // Use the correct API URL based on environment
 const API_URL = process.env.REACT_APP_API_URL || 
@@ -142,6 +142,18 @@ const AccountLoginPage = () => {
             Create Account
           </Link>
         </p>
+      </div>
+      
+      {/* Admin Access Section */}
+      <div className="mt-6 border-t border-gray-200 pt-4 text-center">
+        <p className="text-gray-600 mb-3">Store Administrator?</p>
+        <Link 
+          to="/admin/login" 
+          className="inline-flex items-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition duration-300"
+        >
+          <FontAwesomeIcon icon={faUserShield} className="mr-2" />
+          Admin Login
+        </Link>
       </div>
     </div>
   );

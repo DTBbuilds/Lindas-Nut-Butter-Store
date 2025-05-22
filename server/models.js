@@ -439,10 +439,114 @@ UserSchema.pre(/^find/, function(next) {
 
 const User = mongoose.model('User', UserSchema);
 
+// Feedback Schema
+const FeedbackSchema = new Schema({
+  // Link to the order this feedback is for
+  orderId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Order',
+    required: true,
+    index: true
+  },
+  
+  // Reference to the order number for easier queries
+  orderNumber: {
+    type: String,
+    required: true,
+    index: true
+  },
+  
+  // Customer details
+  customer: {
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    },
+    phoneNumber: {
+      type: String,
+      required: true
+    }
+  },
+  
+  // Feedback scores (1-5 scale)
+  ratings: {
+    overall: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    },
+    productQuality: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    },
+    deliveryExperience: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    },
+    customerService: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    }
+  },
+  
+  // Open feedback comments
+  comments: {
+    type: String,
+    trim: true
+  },
+  
+  // Product recommendations likelihood (0-10 scale)
+  recommendationScore: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 10
+  },
+  
+  // Follow-up preferences
+  allowFollowUp: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Feedback status
+  status: {
+    type: String,
+    enum: ['NEW', 'REVIEWED', 'ADDRESSED', 'CLOSED'],
+    default: 'NEW'
+  },
+  
+  // Administrative notes (for internal use)
+  adminNotes: {
+    type: String,
+    default: ''
+  }
+}, { 
+  timestamps: true 
+});
+
+// Add index for recent feedback queries
+FeedbackSchema.index({ createdAt: -1 });
+
+// Model definition
+const Feedback = mongoose.model('Feedback', FeedbackSchema);
+
 module.exports = {
   Order,
   Transaction,
   Product,
   InventoryLog,
-  User
+  User,
+  Feedback
 };

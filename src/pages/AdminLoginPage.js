@@ -27,7 +27,7 @@ const AdminLoginPage = () => {
     const token = localStorage.getItem('adminToken');
     if (token) {
       // Verify token validity by making a request to the server
-      axios.get(`${API_URL}/api/auth/me`, {
+      axios.get(`${API_URL}/api/admin/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(response => {
@@ -77,13 +77,15 @@ const AdminLoginPage = () => {
         }
       };
       
-      // Try server auth endpoint first
-      let result = await tryLogin(`${API_URL}/api/auth/login`);
+      // Try the direct admin login endpoint
+      let result = await tryLogin(`${API_URL}/api/admin/login`);
       
-      // If that fails, try backend auth endpoint
+      // If that fails, retry with a slight delay (could be a network issue)
       if (!result.success) {
-        console.log('Server auth failed, trying backend auth...');
-        result = await tryLogin(`${API_URL}/api/auth/login`);
+        console.log('Admin auth failed, retrying...');
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        result = await tryLogin(`${API_URL}/api/admin/login`);
       }
       
       if (result.success && result.data.token) {

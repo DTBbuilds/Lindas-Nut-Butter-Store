@@ -1,17 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faInfoCircle, faHome, faPrint, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faCheckCircle, faInfoCircle, faHome, faPrint, faEnvelope, 
+  faTruck, faLocationDot, faComment, faFileDownload, faReceipt 
+} from '@fortawesome/free-solid-svg-icons';
 import { formatKES } from '../../utils/currencyUtils';
 import { formatOrderDate, getStatusLabel, getStatusColor } from '../../utils/orderUtils';
+import { downloadReceipt } from '../../utils/receiptGenerator';
+import { toast } from 'react-toastify';
+import FeedbackForm from '../feedback/FeedbackForm';
 
 /**
  * Order Confirmation Component
  * Displays order details after a successful checkout
  */
 const OrderConfirmation = ({ orderInfo = {}, customerInfo = {}, paymentInfo = {}, cartItems = [], cartTotal = {}, onContinueShopping }) => {
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [receiptDownloaded, setReceiptDownloaded] = useState(false);
+  
   const printOrder = () => {
     window.print();
+  };
+  
+  const handleDownloadReceipt = () => {
+    // Download PDF receipt using the utility function with success callback
+    const result = downloadReceipt(
+      orderInfo, 
+      customerInfo, 
+      paymentInfo, 
+      cartItems, 
+      cartTotal,
+      (filename) => {
+        // Mark receipt as downloaded
+        setReceiptDownloaded(true);
+        
+        // Show success toast notification
+        toast.success(
+          <div>
+            <p className="font-medium">Receipt downloaded successfully!</p>
+            <p className="text-sm mt-1">Saved as: {filename}</p>
+          </div>,
+          { autoClose: 5000 }
+        );
+      }
+    );
+    
+    // Handle any errors
+    if (!result.success) {
+      toast.error(
+        <div>
+          <p className="font-medium">Could not generate receipt</p>
+          <p className="text-sm mt-1">Please try again later</p>
+        </div>
+      );
+    }
+  };
+  
+  const handleFeedbackSubmitted = () => {
+    setFeedbackSubmitted(true);
+    setShowFeedback(false);
   };
   
   // Check if we have the necessary order information
@@ -70,19 +119,24 @@ const OrderConfirmation = ({ orderInfo = {}, customerInfo = {}, paymentInfo = {}
               </div>
             </div>
 
-            {/* Pickup Information */}
+            {/* Delivery Information */}
             <div>
               <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
-                Pickup Information
+                Delivery Information
               </h3>
               <div className="space-y-2">
                 <p className="text-gray-800">
-                  <span className="font-medium">Location:</span> {customerInfo.pickupLocation === 'kabete' ? 'Kabete Store - Along Waiyaki Way' : 
-                    customerInfo.pickupLocation === 'westlands' ? 'Westlands Branch - The Mall' : 
-                    customerInfo.pickupLocation === 'cbd' ? 'CBD Store - Moi Avenue' : 'Unknown Location'}
+                  <span className="font-medium"><FontAwesomeIcon icon={faLocationDot} className="mr-1" /> Address:</span> {customerInfo.address}
+                  {customerInfo.apartment && <span>, {customerInfo.apartment}</span>}
+                </p>
+                <p className="text-gray-800">
+                  <span className="font-medium">City:</span> {customerInfo.city}
                 </p>
                 <p className="text-gray-600">
-                  <span className="font-medium">Pickup Hours:</span> Mon-Sat, 8:00 AM - 6:00 PM
+                  <span className="font-medium"><FontAwesomeIcon icon={faTruck} className="mr-1" /> Delivery:</span> Within 48 hours
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-medium">Shipping Fee:</span> {formatKES(orderInfo.shippingFee || 300)}
                 </p>
               </div>
             </div>
@@ -155,12 +209,20 @@ const OrderConfirmation = ({ orderInfo = {}, customerInfo = {}, paymentInfo = {}
                       {formatKES(cartTotal.subtotal)}
                     </td>
                   </tr>
-                  <tr className="bg-gray-100">
+                  <tr>
+                    <td colSpan="3" className="px-6 py-3 text-right text-sm font-medium text-gray-500">
+                      Shipping Fee
+                    </td>
+                    <td className="px-6 py-3 text-right text-sm font-medium text-gray-900">
+                      {formatKES(orderInfo.shippingFee || 300)}
+                    </td>
+                  </tr>
+                  <tr>
                     <td colSpan="3" className="px-6 py-3 text-right text-base font-semibold text-gray-800">
                       Total
                     </td>
                     <td className="px-6 py-3 text-right text-base font-semibold text-green-700">
-                      {formatKES(cartTotal.total)}
+                      {formatKES((cartTotal.total || cartTotal.subtotal) + (orderInfo.shippingFee || 300))}
                     </td>
                   </tr>
                 </tfoot>
@@ -178,13 +240,47 @@ const OrderConfirmation = ({ orderInfo = {}, customerInfo = {}, paymentInfo = {}
               Continue Shopping
             </button>
             <button
+              onClick={handleDownloadReceipt}
+              className={`flex items-center px-4 py-2 ${receiptDownloaded ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md transition-colors`}
+              disabled={false}
+            >
+              <FontAwesomeIcon icon={receiptDownloaded ? faCheckCircle : faReceipt} className="mr-2" />
+              {receiptDownloaded ? 'Receipt Downloaded' : 'Download Receipt'}
+            </button>
+            <button
               onClick={printOrder}
               className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
             >
               <FontAwesomeIcon icon={faPrint} className="mr-2" />
-              Print Receipt
+              Print Page
             </button>
+            {paymentInfo?.paymentStatus === 'PAID' && !feedbackSubmitted && (
+              <button
+                onClick={() => setShowFeedback(!showFeedback)}
+                className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
+              >
+                <FontAwesomeIcon icon={faComment} className="mr-2" />
+                {showFeedback ? 'Hide Feedback Form' : 'Rate Your Experience'}
+              </button>
+            )}
+            {feedbackSubmitted && (
+              <div className="flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md">
+                <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
+                Thank you for your feedback!
+              </div>
+            )}
           </div>
+          {showFeedback && (
+            <div className="mt-8">
+              <FeedbackForm 
+                order={{
+                  orderId: orderInfo.orderId,
+                  orderNumber: safeOrderNumber
+                }}
+                onFeedbackSubmitted={handleFeedbackSubmitted} 
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -193,12 +289,12 @@ const OrderConfirmation = ({ orderInfo = {}, customerInfo = {}, paymentInfo = {}
         <h3 className="text-lg font-semibold text-gray-800 mb-4">What Happens Next?</h3>
         <ol className="list-decimal ml-6 space-y-2 text-gray-600">
           <li>You'll receive an order confirmation email with your order details.</li>
-          <li>Our team will process your order and prepare it for pickup.</li>
+          <li>Our team will process your order and prepare it for delivery.</li>
           {paymentInfo?.paymentStatus !== 'PAID' && (
             <li>Once your M-Pesa payment is confirmed, we'll begin processing your order.</li>
           )}
-          <li>We'll notify you via SMS when your order is ready for pickup at your selected location.</li>
-          <li>Please bring a valid ID when picking up your order.</li>
+          <li>Your order will be delivered to the address you provided within 48 hours.</li>
+          <li>Our delivery team will contact you before delivery.</li>
           <li>If you have any questions, please contact our customer service team at <span className="font-medium">0712 345 678</span>.</li>
         </ol>
       </div>

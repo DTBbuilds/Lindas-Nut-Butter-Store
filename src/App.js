@@ -8,15 +8,14 @@ import ProductsPage from './pages/ProductsPage';
 import AboutPage from './pages/AboutPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
-// Admin pages (disabled)
-// import AdminLoginPage from './pages/AdminLoginPage';
-// import AdminDashboardPage from './pages/AdminDashboardPage';
+// Admin pages
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 // Customer account pages
 import AccountLoginPage from './pages/AccountLoginPage';
 import AccountRegisterPage from './pages/AccountRegisterPage';
 import AccountPage from './pages/AccountPage';
-import AdminLoginPage from './pages/AdminLoginPage';
 import { Navigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faStore, faInfoCircle, faShoppingCart, faGift, faLeaf, faHeart, faStar, faPhone, faEnvelope, faCopy, faPercent, faStore as faShop, faTrash, faTimes, faLock, faArrowRight, faBars, faSearch, faUser, faShield, faTruck } from '@fortawesome/free-solid-svg-icons';
@@ -743,9 +742,9 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-            {/* Admin routes disabled */}
-            {/* <Route path="/admin/login" element={<AdminLoginPage />} /> */}
-            {/* <Route path="/admin" element={<RequireAdmin><AdminDashboardPage /></RequireAdmin>} /> */}
+            {/* Admin routes */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin" element={<RequireAdmin><AdminDashboardPage /></RequireAdmin>} />
             
             {/* Customer account routes */}
             <Route path="/account/login" element={<AccountLoginPage />} />

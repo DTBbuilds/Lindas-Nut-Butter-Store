@@ -17,12 +17,31 @@ const inventoryManager = require('./utils/inventoryManager');
 const orderManager = require('./utils/orderManager');
 const config = require('./config');
 const authRoutes = require('./routes/authRoutes');
+const adminAuthRoutes = require('./routes/adminAuthRoutes');
+const directAdminRoutes = require('./routes/directAdminRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
+// Import routes
+const routes = require('./routes');
+const emailRoutes = require('./routes/emailRoutes');
+const customerRoutes = require('./routes/customerRoutes');
+// Note: authRoutes already mounted earlier
+
+// Import socket service for real-time updates
+const socketService = require('./utils/socketService');
 
 // Load environment variables
 dotenv.config();
 
 // Initialize express app
 const app = express();
+
+// Create HTTP server for both Express and Socket.io
+const http = require('http');
+const server = http.createServer(app);
+
+// Initialize socket service
+socketService.initialize(server);
 
 // Middleware
 // Configure CORS with explicit options
@@ -75,6 +94,9 @@ app.set('trust proxy', 1);
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', adminAuthRoutes);
+app.use('/api/admin', directAdminRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve static files from the public directory with proper options
 app.use(express.static('public', {
@@ -102,12 +124,6 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// Import routes
-const routes = require('./routes');
-const emailRoutes = require('./routes/emailRoutes');
-const customerRoutes = require('./routes/customerRoutes');
-// Note: authRoutes already mounted earlier
-
 // Use routes
 app.use('/api', routes);
 app.use('/api/email', emailRoutes);
@@ -119,10 +135,12 @@ const orderRoutes = require('./routes/orderRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const productRoutes = require('./routes/productRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 app.use('/api/orders', orderRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Initialize all product inventory statuses
 const { updateAllInventoryStatuses } = require('./utils/inventoryManager');
@@ -594,7 +612,7 @@ connectMongoDB().then(async connected => {
     console.warn('Please check your consumer key, consumer secret, and other M-Pesa configuration in config.js');
   }
 
-  const server = app.listen(PORT, async () => {
+  server.listen(PORT, async () => {
     const baseUrl = `http://localhost:${PORT}`;
     
     // First try to use ngrok if available
@@ -636,6 +654,7 @@ connectMongoDB().then(async connected => {
   console.log(`🚫 User rejects: ${config.test.phoneNumbers.reject}`);
   console.log('========================================================');
   console.log('🔍 Server is ready for M-Pesa integration testing!');
+  console.log(`Socket.io service enabled for real-time transaction updates`);
 });
 
   // Process cleanup

@@ -2,21 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSpinner, faCheckCircle, faTimesCircle, faMoneyBill, 
-  faShoppingBag, faFileDownload, faSync, faCalendarAlt 
+  faShoppingBag, faFileDownload, faSync, faCalendarAlt,
+  faComments, faChartBar, faUsers, faBoxes, faShoppingCart,
+  faChartLine, faTag, faExclamationTriangle, faPercent, faStar,
+  faBell, faBellSlash, faSearch
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import FeedbackDashboard from '../components/admin/FeedbackDashboard';
+import RealtimeTransactions from '../components/admin/RealtimeTransactions';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const AdminDashboardPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [productRankings, setProductRankings] = useState([]);
+  const [recentFeedback, setRecentFeedback] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [lastRealTimeTransaction, setLastRealTimeTransaction] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [showRealtimePanel, setShowRealtimePanel] = useState(true);
   // Date filter
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  // Transaction states
+  const [statusFilter, setStatusFilter] = useState('');
+  const [currentTransaction, setCurrentTransaction] = useState(null);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
+  const [transactionPagination, setTransactionPagination] = useState({ 
+    page: 1, 
+    limit: 10, 
+    total: 0, 
+    pages: 1 
+  });
   
   // Product state declarations moved to the top
   const [products, setProducts] = useState([]);
@@ -59,13 +80,41 @@ const AdminDashboardPage = () => {
     try {
       setLoading(true);
       
+      // Fetch dashboard statistics
+      const statsResponse = await axios.get(`${API_URL}/api/admin/dashboard/stats`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setDashboardStats(statsResponse.data.data || null);
+      
       // Fetch transactions
-      const transactionsResponse = await axios.get(`${API_URL}/api/admin/transactions`);
+      const transactionsResponse = await axios.get(`${API_URL}/api/admin/transactions`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
       setTransactions(transactionsResponse.data.data || []);
       
       // Fetch orders
-      const ordersResponse = await axios.get(`${API_URL}/api/admin/orders`);
+      const ordersResponse = await axios.get(`${API_URL}/api/admin/orders`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
       setOrders(ordersResponse.data.data || []);
+      
+      // Fetch monthly sales data
+      const salesResponse = await axios.get(`${API_URL}/api/admin/dashboard/monthly-sales`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setMonthlySales(salesResponse.data.data || []);
+      
+      // Fetch product rankings
+      const rankingsResponse = await axios.get(`${API_URL}/api/admin/dashboard/product-rankings`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setProductRankings(rankingsResponse.data.data || []);
+      
+      // Fetch recent feedback
+      const feedbackResponse = await axios.get(`${API_URL}/api/admin/dashboard/recent-feedback`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setRecentFeedback(feedbackResponse.data.data || []);
       
       setLoading(false);
     } catch (error) {
@@ -78,64 +127,298 @@ const AdminDashboardPage = () => {
   // Add useEffect hooks
   useEffect(() => {
     fetchData();
-  }, []);
-  
-  useEffect(() => {
     fetchProducts();
   }, []);
   
-  const handleRefresh = () => {
-    fetchData();
-  };
-  
-  const exportTransactions = async () => {
-    try {
-      // Build query string
-      let queryParams = '';
-      if (startDate && endDate) {
-        queryParams = `?startDate=${startDate}&endDate=${endDate}`;
+  useEffect(() => {
+    // Only poll if on transactions tab and not already loading
+    if (activeTab !== 'transactions' || loading) return;
+    
+    console.log('Setting up transaction polling');
+    
+    // Create polling interval (every 10 seconds)
+    const pollInterval = setInterval(async () => {
+      try {
+        // Fetch the most recent transactions
+        const token = localStorage.getItem('adminToken');
+        const response = await axios.get(
+          `${API_URL}/api/admin/transactions?limit=5&sort=-timestamp`, 
+          { headers: { Authorization: `Bearer ${token}` }}
+        );
+        
+        const latestTransactions = response.data.data || [];
+        
+        if (latestTransactions.length > 0) {
+          const newTransaction = latestTransactions[0];
+          
+          // Check if this is a new transaction we haven't seen
+          if (transactions.length === 0) {
+            handleNewTransaction(newTransaction, 'created');
+            return;
+          }
+          
+          const existingTransaction = transactions.find(t => 
+            t._id === newTransaction._id ||
+            t.transactionId === newTransaction.transactionId
+          );
+          
+          // If new transaction, update the UI
+          if (!existingTransaction) {
+            console.log('New transaction detected:', newTransaction);
+            handleNewTransaction(newTransaction, 'created');
+          } 
+          // If status changed to completed, update UI
+          else if (existingTransaction.status !== newTransaction.status && 
+                  newTransaction.status === 'COMPLETED') {
+            console.log('Transaction completed:', newTransaction);
+            handleNewTransaction(newTransaction, 'completed');
+          }
+        }
+      } catch (error) {
+        console.error('Error polling for transactions:', error);
       }
+    }, 10000); // Poll every 10 seconds
+    
+    // Clean up interval on unmount or tab change
+    return () => {
+      console.log('Clearing transaction polling');
+      clearInterval(pollInterval);
+    };
+  }, [activeTab, transactions, loading]);
+  
+  const handleRefresh = () => {
+    // Transaction filtering
+    const filterTransactions = () => {
+      setLoading(true);
+      // Call the API with date filters
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (statusFilter) params.append('status', statusFilter);
+      params.append('page', transactionPagination.page);
+      params.append('limit', transactionPagination.limit);
       
-      // Fetch CSV file
-      window.open(`${API_URL}/api/admin/transactions/export${queryParams}`, '_blank');
-    } catch (error) {
-      console.error('Error exporting transactions:', error);
-      alert('Failed to export transactions');
-    }
+      // Make API request
+      axios.get(`${API_URL}/api/admin/transactions?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      })
+        .then(response => {
+          setTransactions(response.data.data || []);
+          setTransactionPagination(response.data.pagination || { 
+            page: 1, 
+            limit: 10, 
+            total: 0, 
+            pages: 1 
+          });
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error filtering transactions:', error);
+          setError(error.response?.data?.message || 'Failed to filter transactions');
+          setLoading(false);
+        });
+    };
+    
+    // Change transaction page
+    const changeTransactionPage = (newPage) => {
+      if (newPage < 1 || newPage > transactionPagination.pages) return;
+      setTransactionPagination({ ...transactionPagination, page: newPage });
+      // Update and re-fetch
+      setTimeout(filterTransactions, 0);
+    };
+    
+    // View transaction details
+    const viewTransactionDetails = (transaction) => {
+      setCurrentTransaction(transaction);
+      setShowTransactionModal(true);
+    };
+    
+    // Export transactions as CSV
+    const exportTransactions = async () => {
+      try {
+        // Get current date for filename
+        const date = new Date().toISOString().split('T')[0];
+        const filename = `transactions_export_${date}.csv`;
+        
+        // Set up query parameters
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (statusFilter) params.append('status', statusFilter);
+        
+        // Fetch CSV data
+        const response = await axios.get(
+          `${API_URL}/api/admin/transactions/export?${params.toString()}`,
+          { 
+            responseType: 'blob',
+            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+          }
+        );
+        
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (error) {
+        console.error('Error exporting transactions:', error);
+        setError('Failed to export transactions');
+      }
+    };
+    
+    filterTransactions();
   };
   
   const getStatusBadgeClass = (status) => {
-    switch (status) {
+    switch(status) {
       case 'COMPLETED':
-      case 'PAID':
         return 'bg-green-100 text-green-800';
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
       case 'FAILED':
-      case 'CANCELLED':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
   
-  const formatAmount = (amount) => {
-    return parseFloat(amount).toLocaleString('en-KE', {
-      style: 'currency',
-      currency: 'KES'
-    });
-  };
-  
+  // Format date for display
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('en-KE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
   
+  // Format amount with currency
+  const formatAmount = (amount) => {
+    if (!amount && amount !== 0) return 'N/A';
+    return `KES ${parseFloat(amount).toLocaleString()}`;
+  };
+  
+  // Handle real-time transaction updates
+  const handleNewTransaction = (transaction, type) => {
+    // Only update if it's a completed transaction or a new transaction
+    if (type === 'completed' || type === 'created') {
+      // Refresh the transaction list to include the new transaction
+      fetchData();
+      
+      // Show notification for transaction
+      setLastRealTimeTransaction({
+        transaction,
+        type,
+        timestamp: new Date()
+      });
+    }
+  };
+  
+  // Product form submit handler
+  const handleProductSubmit = async (e) => {
+    e.preventDefault();
+    setProductSuccess('');
+    setProductError('');
+    
+    try {
+      // Prepare product data
+      const productData = {
+        name: productName,
+        description: productDescription,
+        price: parseFloat(productPrice),
+        category: productCategory,
+        sku: productSku,
+        stockQuantity: parseInt(productStockQuantity) || 0,
+        lowStockThreshold: parseInt(productLowStockThreshold) || 5,
+        images: productImages.split(',').map(url => url.trim()).filter(url => url !== '')
+      };
+      
+      // Send API request
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.post(`${API_URL}/api/products`, productData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Handle success
+      setProductSuccess('Product added successfully!');
+      
+      // Reset form
+      setProductName('');
+      setProductDescription('');
+      setProductPrice('');
+      setProductCategory('');
+      setProductSku('');
+      setProductStockQuantity('');
+      setProductLowStockThreshold('');
+      setProductImages('');
+      
+      // Refresh product list
+      fetchProducts();
+    } catch (error) {
+      console.error('Error adding product:', error);
+      setProductError(error.response?.data?.message || 'Failed to add product');
+    }
+  };
+  
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    setDeletingId(id);
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.delete(`${API_URL}/api/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProducts(products.filter(p => p._id !== id));
+    } catch (err) {
+      alert('Failed to delete product');
+    }
+    setDeletingId(null);
+  };
+
+  const handleEdit = (product) => {
+    setEditingId(product._id);
+    setEditFields({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      stockQuantity: product.stockQuantity,
+      sku: product.sku
+    });
+  };
+
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setEditFields(fields => ({ ...fields, [name]: value }));
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditFields({});
+  };
+
+  const handleSave = async (id) => {
+    setSavingId(id);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const payload = {
+        name: editFields.name,
+        category: editFields.category,
+        price: parseFloat(editFields.price),
+        stockQuantity: parseInt(editFields.stockQuantity, 10),
+        sku: editFields.sku
+      };
+      await axios.put(`${API_URL}/api/products/${id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProducts(products.map(p => p._id === id ? { ...p, ...payload } : p));
+      setEditingId(null);
+      setEditFields({});
+    } catch (err) {
+      alert('Failed to save changes');
+    }
+    setSavingId(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -166,14 +449,23 @@ const AdminDashboardPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 className="text-3xl font-bold text-golden-brown mb-4 md:mb-0">Admin Dashboard</h1>
-        <button
-          onClick={() => { localStorage.removeItem('adminToken'); window.location.href = '/admin/login'; }}
-          className="py-2 px-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors ml-4 mb-4 md:mb-0"
-        >
-          Logout
-        </button>
+        <div className="flex items-center mb-4 md:mb-0">
+          <h1 className="text-3xl font-bold text-golden-brown">Admin Dashboard</h1>
+          {lastRealTimeTransaction && (
+            <span className="ml-3 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full animate-pulse">
+              New transaction {lastRealTimeTransaction.timestamp.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => setShowRealtimePanel(!showRealtimePanel)}
+            className={`py-2 px-4 ${showRealtimePanel ? 'bg-gray-200 text-gray-700' : 'bg-blue-600 text-white'} font-semibold rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center`}
+          >
+            <FontAwesomeIcon icon={faBell} className="mr-2" />
+            {showRealtimePanel ? 'Hide Live Updates' : 'Show Live Updates'}
+          </button>
+          
           <button 
             onClick={handleRefresh}
             className="py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors flex items-center justify-center"
@@ -191,45 +483,60 @@ const AdminDashboardPage = () => {
               Export CSV
             </button>
           )}
+          
+          <button
+            onClick={() => { localStorage.removeItem('adminToken'); window.location.href = '/admin/login'; }}
+            className="py-2 px-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors flex items-center justify-center"
+          >
+            Logout
+          </button>
         </div>
       </div>
       
+      {/* Real-time transactions panel */}
+      {showRealtimePanel && (
+        <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+          <h3 className="text-lg font-medium text-gray-800 mb-3">Real-time Transaction Updates</h3>
+          <RealtimeTransactions onNewTransaction={handleNewTransaction} />
+        </div>
+      )}
+      
       {/* Tab Navigation */}
-      <div className="flex border-b mb-6">
-        <button
+      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+        <button 
+          className={`px-4 py-2 ${activeTab === 'dashboard' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+          Dashboard
+        </button>
+        <button 
+          className={`px-4 py-2 ${activeTab === 'transactions' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
           onClick={() => setActiveTab('transactions')}
-          className={`py-3 px-6 font-semibold ${
-            activeTab === 'transactions' 
-              ? 'text-golden-brown border-b-2 border-golden-brown' 
-              : 'text-gray-600 hover:text-golden-brown'
-          }`}
         >
           <FontAwesomeIcon icon={faMoneyBill} className="mr-2" />
           Transactions
         </button>
-        
-        <button
+        <button 
+          className={`px-4 py-2 ${activeTab === 'orders' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
           onClick={() => setActiveTab('orders')}
-          className={`py-3 px-6 font-semibold ${
-            activeTab === 'orders' 
-              ? 'text-golden-brown border-b-2 border-golden-brown' 
-              : 'text-gray-600 hover:text-golden-brown'
-          }`}
         >
           <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
           Orders
         </button>
-
-        <button
+        <button 
+          className={`px-4 py-2 ${activeTab === 'products' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
           onClick={() => setActiveTab('products')}
-          className={`py-3 px-6 font-semibold ${
-            activeTab === 'products' 
-              ? 'text-golden-brown border-b-2 border-golden-brown' 
-              : 'text-gray-600 hover:text-golden-brown'
-          }`}
         >
-          <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
+          <FontAwesomeIcon icon={faBoxes} className="mr-2" />
           Products
+        </button>
+        <button 
+          className={`px-4 py-2 ${activeTab === 'feedback' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
+          onClick={() => setActiveTab('feedback')}
+        >
+          <FontAwesomeIcon icon={faComments} className="mr-2" />
+          Feedback
         </button>
       </div>
       
@@ -289,76 +596,446 @@ const AdminDashboardPage = () => {
         </div>
       )}
       
+      {/* Dashboard Tab */}
+      {activeTab === 'dashboard' && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Dashboard Overview</h2>
+          
+          {!dashboardStats ? (
+            <div className="flex justify-center py-8">
+              <FontAwesomeIcon icon={faSpinner} spin className="text-3xl text-green-600" />
+            </div>
+          ) : (
+            <div>
+              {/* Real-time Transaction Notification */}
+              {lastRealTimeTransaction && (
+                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm animate-fade-in
+                  ${lastRealTimeTransaction.type === 'completed' ? 'bg-green-100 border-green-500' : 
+                    lastRealTimeTransaction.type === 'failed' ? 'bg-red-100 border-red-500' : 
+                    'bg-blue-100 border-blue-500'} border-l-4`}
+                >
+                  <div className="flex items-start">
+                    <div className="mr-3">
+                      <FontAwesomeIcon 
+                        icon={lastRealTimeTransaction.type === 'completed' ? faCheckCircle : 
+                              lastRealTimeTransaction.type === 'failed' ? faTimesCircle : 
+                              faMoneyBill} 
+                        className={`${lastRealTimeTransaction.type === 'completed' ? 'text-green-500' : 
+                                  lastRealTimeTransaction.type === 'failed' ? 'text-red-500' : 
+                                  'text-blue-500'} text-xl`}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800">
+                        {lastRealTimeTransaction.type === 'completed' ? 'Payment Completed' : 
+                         lastRealTimeTransaction.type === 'failed' ? 'Payment Failed' : 
+                         'New Transaction'}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {lastRealTimeTransaction.transaction.amount ? 
+                          `KES ${lastRealTimeTransaction.transaction.amount.toLocaleString()}` : ''}
+                        {lastRealTimeTransaction.transaction.phoneNumber ? 
+                          ` - ${lastRealTimeTransaction.transaction.phoneNumber}` : ''}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(lastRealTimeTransaction.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setLastRealTimeTransaction(null)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <FontAwesomeIcon icon={faTimesCircle} />
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Dashboard Statistics Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {/* Orders Stats */}
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100 shadow-sm">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
+                      <p className="text-2xl font-bold text-gray-800">{dashboardStats.orders.total}</p>
+                    </div>
+                    <div className="bg-green-100 p-2 rounded-full">
+                      <FontAwesomeIcon icon={faShoppingCart} className="text-green-600" />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex justify-between text-sm">
+                    <span className="text-gray-500">Today: {dashboardStats.orders.today}</span>
+                    <span className="text-gray-500">This Month: {dashboardStats.orders.month}</span>
+                  </div>
+                </div>
+                
+                {/* Revenue Stats */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 shadow-sm">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Total Revenue</h3>
+                      <p className="text-2xl font-bold text-gray-800">KES {dashboardStats.revenue.total.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-blue-100 p-2 rounded-full">
+                      <FontAwesomeIcon icon={faMoneyBill} className="text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex justify-between text-sm">
+                    <span className="text-gray-500">Today: KES {dashboardStats.revenue.today.toLocaleString()}</span>
+                    <span className="text-gray-500">This Month: KES {dashboardStats.revenue.month.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                {/* Products Stats */}
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 shadow-sm">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Products</h3>
+                      <p className="text-2xl font-bold text-gray-800">{dashboardStats.products.total}</p>
+                    </div>
+                    <div className="bg-purple-100 p-2 rounded-full">
+                      <FontAwesomeIcon icon={faBoxes} className="text-purple-600" />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center text-sm">
+                    <FontAwesomeIcon icon={faExclamationTriangle} className="text-amber-500 mr-1" />
+                    <span className="text-gray-500">{dashboardStats.products.lowStock} Low Stock</span>
+                  </div>
+                </div>
+                
+                {/* Feedback Stats */}
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 shadow-sm">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Customer Feedback</h3>
+                      <p className="text-2xl font-bold text-gray-800">{dashboardStats.feedback.total}</p>
+                    </div>
+                    <div className="bg-amber-100 p-2 rounded-full">
+                      <FontAwesomeIcon icon={faStar} className="text-amber-600" />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex justify-between text-sm">
+                    <span className="text-gray-500">Avg Rating: {dashboardStats.feedback.averageRating}/5</span>
+                    <span className="text-gray-500">NPS: {dashboardStats.feedback.averageNps}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Monthly Sales Chart */}
+              <div className="mb-8">
+                <h3 className="text-lg font-medium text-gray-700 mb-4">Monthly Sales (2025)</h3>
+                <div className="h-64 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <div className="flex h-full">
+                    {monthlySales.map((data, index) => {
+                      // Calculate height as percentage of max value (max 90% of container height)
+                      const maxValue = Math.max(...monthlySales.map(d => d.sales));
+                      const height = maxValue > 0 ? (data.sales / maxValue * 90) : 0;
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      
+                      return (
+                        <div key={index} className="flex-1 flex flex-col justify-end items-center">
+                          <div className="relative group">
+                            <div 
+                              className="bg-green-500 w-8 rounded-t-sm transition-all duration-300 hover:bg-green-600"
+                              style={{ height: `${height}%` }}
+                            ></div>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 mb-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              KES {data.sales.toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">{monthNames[data.month - 1]}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Top Products & Recent Feedback */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Top Products */}
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <h3 className="font-medium text-gray-700">Top Selling Products</h3>
+                  </div>
+                  <div className="divide-y divide-gray-200">
+                    {productRankings.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">No product data available</div>
+                    ) : (
+                      productRankings.slice(0, 5).map((product, index) => (
+                        <div key={index} className="px-4 py-3 flex items-center justify-between">
+                          <div>
+                            <span className="text-gray-900 font-medium">{product.name}</span>
+                            <div className="text-sm text-gray-500">{product.totalSold} sold</div>
+                          </div>
+                          <div className="text-green-600 font-medium">KES {product.totalRevenue.toLocaleString()}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+                
+                {/* Recent Feedback */}
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <h3 className="font-medium text-gray-700">Recent Customer Feedback</h3>
+                  </div>
+                  <div className="divide-y divide-gray-200">
+                    {recentFeedback.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">No feedback available</div>
+                    ) : (
+                      recentFeedback.slice(0, 5).map((feedback, index) => (
+                        <div key={index} className="px-4 py-3">
+                          <div className="flex justify-between">
+                            <span className="text-gray-900 font-medium">{feedback.customer.name}</span>
+                            <div className="flex items-center">
+                              <span className="text-amber-500 mr-1">{feedback.ratings.overall}</span>
+                              <FontAwesomeIcon icon={faStar} className="text-amber-500 text-sm" />
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{feedback.comments || 'No comment provided'}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Transactions Tab */}
       {activeTab === 'transactions' && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Transaction ID
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone Number
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {transactions.length === 0 ? (
+          {/* Filter Section */}
+          <div className="p-4 bg-gray-50 border-b border-gray-200">
+            <div className="flex flex-wrap items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-700">Transaction Records</h3>
+              <button 
+                onClick={exportTransactions}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-1 text-sm flex items-center"
+              >
+                <FontAwesomeIcon icon={faFileDownload} className="mr-1" />
+                Export CSV
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                <input 
+                  type="date" 
+                  id="startDate"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                <input 
+                  type="date" 
+                  id="endDate"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">Transaction Status</label>
+                <select
+                  id="statusFilter"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Statuses</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="FAILED">Failed</option>
+                  <option value="CANCELLED">Cancelled</option>
+                  <option value="REFUNDED">Refunded</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button 
+                  onClick={filterTransactions}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm font-medium"
+                >
+                  <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <FontAwesomeIcon icon={faSpinner} spin className="text-3xl text-green-600" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                      No transactions found
-                    </td>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Transaction ID
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Phone Number
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
-                  transactions.map((transaction) => (
-                    <tr key={transaction._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {transaction.transactionId || 'N/A'}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Order: {transaction.orderId || 'N/A'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(transaction.timestamp)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {formatAmount(transaction.amount)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {transaction.phoneNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {transaction.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(transaction.status)}`}>
-                          {transaction.status}
-                        </span>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {transactions.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                        No transactions found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    transactions.map((transaction) => (
+                      <tr key={transaction._id || transaction.transactionId} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {transaction.transactionId || 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Order: {transaction.orderId?.referenceNumber || transaction.orderId || 'N/A'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(transaction.timestamp)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {formatAmount(transaction.amount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {transaction.phoneNumber}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {transaction.type || 'MPESA'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(transaction.status)}`}>
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                          <button onClick={() => viewTransactionDetails(transaction)} className="hover:text-blue-800">
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+
+              {/* Pagination */}
+              {transactions.length > 0 && (
+                <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200 bg-gray-50">
+                  <div className="flex-1 flex justify-between sm:hidden">
+                    <button
+                      onClick={() => changeTransactionPage(transactionPagination.page - 1)}
+                      disabled={transactionPagination.page === 1}
+                      className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${transactionPagination.page === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => changeTransactionPage(transactionPagination.page + 1)}
+                      disabled={transactionPagination.page === transactionPagination.pages}
+                      className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${transactionPagination.page === transactionPagination.pages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                  <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm text-gray-700">
+                        Showing <span className="font-medium">{Math.min((transactionPagination.page - 1) * transactionPagination.limit + 1, transactionPagination.total)}</span> to <span className="font-medium">{Math.min(transactionPagination.page * transactionPagination.limit, transactionPagination.total)}</span> of <span className="font-medium">{transactionPagination.total}</span> results
+                      </p>
+                    </div>
+                    <div>
+                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button
+                          onClick={() => changeTransactionPage(transactionPagination.page - 1)}
+                          disabled={transactionPagination.page === 1}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${transactionPagination.page === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                        >
+                          <span className="sr-only">Previous</span>
+                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                        
+                        {Array.from({ length: Math.min(5, transactionPagination.pages) }, (_, i) => {
+                          // Calculate page numbers to show (centered around current page)
+                          const totalPages = transactionPagination.pages;
+                          const currentPage = transactionPagination.page;
+                          let startPage = Math.max(1, currentPage - 2);
+                          const endPage = Math.min(startPage + 4, totalPages);
+                          
+                          if (endPage - startPage < 4) {
+                            startPage = Math.max(1, endPage - 4);
+                          }
+                          
+                          const pageNum = startPage + i;
+                          if (pageNum > totalPages) return null;
+                          
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => changeTransactionPage(pageNum)}
+                              aria-current={pageNum === currentPage ? 'page' : undefined}
+                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pageNum === currentPage
+                                ? 'z-10 bg-green-50 border-green-500 text-green-600'
+                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                        
+                        <button
+                          onClick={() => changeTransactionPage(transactionPagination.page + 1)}
+                          disabled={transactionPagination.page === transactionPagination.pages}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${transactionPagination.page === transactionPagination.pages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                        >
+                          <span className="sr-only">Next</span>
+                          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
       
@@ -443,6 +1120,13 @@ const AdminDashboardPage = () => {
         </div>
       )}
       
+      {/* Feedback Tab */}
+      {activeTab === 'feedback' && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <FeedbackDashboard />
+        </div>
+      )}
+
       {/* Products Tab */}
       {activeTab === 'products' && (
         <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
@@ -572,117 +1256,99 @@ const AdminDashboardPage = () => {
           </div>
         </div>
       )}
+      
+      {/* Transaction Details Modal */}
+      {showTransactionModal && currentTransaction && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h3 className="text-lg font-medium text-gray-900">Transaction Details</h3>
+          <button 
+            onClick={() => setShowTransactionModal(false)}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <div className="px-6 py-4">
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Transaction ID</p>
+              <p className="mt-1 text-sm text-gray-900">{currentTransaction.transactionId}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Order Reference</p>
+              <p className="mt-1 text-sm text-gray-900">
+                {currentTransaction.orderId?.referenceNumber || currentTransaction.orderId || 'N/A'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Amount</p>
+              <p className="mt-1 text-sm text-gray-900 font-medium">KES {currentTransaction.amount?.toLocaleString() || '0'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Payment Type</p>
+              <p className="mt-1 text-sm text-gray-900">{currentTransaction.type || 'MPESA'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Status</p>
+              <p className="mt-1">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                  ${currentTransaction.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 
+                    currentTransaction.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
+                    currentTransaction.status === 'FAILED' ? 'bg-red-100 text-red-800' :
+                    currentTransaction.status === 'CANCELLED' ? 'bg-gray-100 text-gray-800' :
+                    currentTransaction.status === 'REFUNDED' ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'}
+                `}>
+                  {currentTransaction.status}
+                </span>
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Phone Number</p>
+              <p className="mt-1 text-sm text-gray-900">{currentTransaction.phoneNumber || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Date & Time</p>
+              <p className="mt-1 text-sm text-gray-900">{new Date(currentTransaction.timestamp).toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Created By</p>
+              <p className="mt-1 text-sm text-gray-900">{currentTransaction.createdBy || 'System'}</p>
+            </div>
+          </div>
+          
+          {/* Additional transaction details if available */}
+          {currentTransaction.mpesaReceipt && (
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">M-Pesa Details</h4>
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm"><span className="font-medium">Receipt Number:</span> {currentTransaction.mpesaReceipt}</p>
+                {currentTransaction.mpesaPhoneNumber && (
+                  <p className="text-sm"><span className="font-medium">M-Pesa Phone:</span> {currentTransaction.mpesaPhoneNumber}</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="px-6 py-3 bg-gray-50 text-right rounded-b-lg">
+          <button
+            onClick={() => setShowTransactionModal(false)}
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
     </div>
   );
 
-  // Product form submit handler
-  const handleProductSubmit = async (e) => {
-    e.preventDefault();
-    setProductSuccess('');
-    setProductError('');
-    
-    try {
-      // Prepare product data
-      const productData = {
-        name: productName,
-        description: productDescription,
-        price: parseFloat(productPrice),
-        category: productCategory,
-        sku: productSku,
-        stockQuantity: parseInt(productStockQuantity) || 0,
-        lowStockThreshold: parseInt(productLowStockThreshold) || 5,
-        images: productImages.split(',').map(url => url.trim()).filter(url => url !== '')
-      };
-      
-      // Send API request
-      const token = localStorage.getItem('adminToken');
-      const response = await axios.post(`${API_URL}/api/products`, productData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      // Handle success
-      setProductSuccess('Product added successfully!');
-      
-      // Reset form
-      setProductName('');
-      setProductDescription('');
-      setProductPrice('');
-      setProductCategory('');
-      setProductSku('');
-      setProductStockQuantity('');
-      setProductLowStockThreshold('');
-      setProductImages('');
-      
-      // Refresh product list
-      fetchProducts();
-    } catch (error) {
-      console.error('Error adding product:', error);
-      setProductError(error.response?.data?.message || 'Failed to add product');
-    }
-  };
-  
-  // Edit product state declarations were moved to the top of the component
-
-  // fetchProducts function moved to the top of the component
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-    setDeletingId(id);
-    try {
-      const token = localStorage.getItem('adminToken');
-      await axios.delete(`${API_URL}/api/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProducts(products.filter(p => p._id !== id));
-    } catch (err) {
-      alert('Failed to delete product');
-    }
-    setDeletingId(null);
-  };
-
-  const handleEdit = (product) => {
-    setEditingId(product._id);
-    setEditFields({
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      stockQuantity: product.stockQuantity,
-      sku: product.sku
-    });
-  };
-
-  const handleFieldChange = (e) => {
-    const { name, value } = e.target;
-    setEditFields(fields => ({ ...fields, [name]: value }));
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditFields({});
-  };
-
-  const handleSave = async (id) => {
-    setSavingId(id);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const payload = {
-        name: editFields.name,
-        category: editFields.category,
-        price: parseFloat(editFields.price),
-        stockQuantity: parseInt(editFields.stockQuantity, 10),
-        sku: editFields.sku
-      };
-      await axios.put(`${API_URL}/api/products/${id}`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProducts(products.map(p => p._id === id ? { ...p, ...payload } : p));
-      setEditingId(null);
-      setEditFields({});
-    } catch (err) {
-      alert('Failed to save changes');
-    }
-    setSavingId(null);
-  };
+  // These functions were moved above the JSX return
 
   // The product table has been moved into the products tab section
 };

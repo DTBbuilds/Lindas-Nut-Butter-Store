@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faStore, faShoppingCart, faInfoCircle, faSearch, faUser, faHeart, faLock } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faHome, faStore, faShoppingCart, faInfoCircle, 
+  faSearch, faUser, faHeart, faTag, faLeaf,
+  faBoxOpen, faStar
+} from '@fortawesome/free-solid-svg-icons';
 import '../styles/animations.css';
 import { useCart } from '../contexts/CartContext';
 
@@ -84,81 +88,116 @@ const MobileBottomNav = ({ setCartOpen }) => {
     return null;
   }
 
-  // Enhanced navigation items with micro-interactions
+  // Enhanced navigation items with modern look and micro-interactions
   const navItems = [
-    { path: '/', icon: faHome, label: 'Home', color: 'from-teal-400 to-green-500' },
-    { path: '/products', icon: faStore, label: 'Shop', color: 'from-purple-400 to-indigo-500' },
-    { type: 'cart', icon: faShoppingCart, label: 'Cart', color: 'from-amber-400 to-yellow-500' },
-    { path: '/about', icon: faInfoCircle, label: 'About', color: 'from-blue-400 to-teal-500' },
-    { path: '/account', icon: faUser, label: 'Account', color: 'from-blue-400 to-indigo-500' }
+    { path: '/', icon: faHome, label: 'Home', color: 'from-soft-green to-green-600' },
+    { path: '/products', icon: faLeaf, label: 'Products', color: 'from-rich-brown to-amber-700' },
+    { type: 'cart', icon: faShoppingCart, label: 'Cart', color: 'from-golden-yellow to-amber-600' },
+    { path: '/account', icon: faUser, label: 'Account', color: 'from-blue-500 to-blue-700' }
   ];
 
   return (
     <div 
-      className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transform transition-transform duration-300 ease-in-out ${isNavVisible ? 'translate-y-0' : 'translate-y-full'}`}
+      className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transform transition-all duration-300 ease-in-out ${isNavVisible ? 'translate-y-0' : 'translate-y-full'}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Improved Swipe Indicator - more visible */}
-      <div className="absolute -top-2 left-0 right-0 flex justify-center pointer-events-none">
-        <div className="h-1.5 w-20 bg-gray-300 rounded-full opacity-80 shadow-sm"></div>
-      </div>
-      
-      {/* Bottom Navigation Bar with Enhanced Glass Effect */}
-      <div className="bg-warm-beige bg-opacity-95 backdrop-blur-md border-t border-gray-200 shadow-lg">
-        <div className="flex justify-around items-center h-16 max-w-md mx-auto px-2">
-          {navItems.map((item, index) => {
-            // Special handling for cart button
-            if (item.type === 'cart') {
-              return (
-                <button 
-                  key="cart"
-                  onClick={() => {
-                    setCartOpen(true);
-                    if (navigator.vibrate) navigator.vibrate(30);
-                  }}
-                  className="relative flex flex-col items-center justify-center w-1/5 touch-manipulation"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                  aria-label="Open Cart"
-                >
-                  <div className={`relative p-3 rounded-full shadow-md transform transition-all duration-300 ${cartBounce ? 'scale-110' : 'scale-100'} bg-gradient-to-r ${item.color}`}>
-                    <FontAwesomeIcon 
-                      icon={item.icon} 
-                      className={`text-white text-lg ${cartAnimation ? 'animate-wiggle' : ''}`} 
-                    />
-                    
-                    {cartItems.length > 0 && (
-                      <div className={`absolute -top-1 -right-1 bg-white text-rich-brown text-xs min-w-5 h-5 flex items-center justify-center rounded-full shadow-md font-bold transition-all duration-300 ${cartAnimation ? 'scale-125 animate-pulse-custom' : 'scale-100'}`}>
-                        {cartItems.length}
+      {/* Floating pill navigation with curved top */}
+      <div className="relative px-4 pb-2 pt-1">
+        {/* Swipe indicator - modern floating pill design */}
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 flex justify-center items-center z-10 pointer-events-none">
+          <div className="h-1 w-12 bg-gray-400 rounded-full opacity-80"></div>
+        </div>
+        
+        {/* Modern Floating Navigation Bar */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative">
+          {/* Curved background effect */}
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-transparent opacity-70 pointer-events-none"></div>
+          
+          {/* Bottom border indicator that slides */}
+          <div className="absolute bottom-0 h-1 transition-all duration-300 ease-in-out bg-gradient-to-r from-soft-green to-green-600"
+            style={{
+              width: '20%',
+              left: currentPath === '/' ? '0%' :
+                   currentPath === '/products' ? '20%' :
+                   currentPath.includes('/cart') ? '40%' :
+                   currentPath === '/featured' ? '60%' :
+                   currentPath === '/account' ? '80%' : '0%'
+            }}>
+          </div>
+          
+          {/* Nav items container */}
+          <div className="flex justify-around items-center py-3 px-1 relative z-10">
+            {navItems.map((item, index) => {
+              // Special handling for cart button with floating indicator
+              if (item.type === 'cart') {
+                return (
+                  <button 
+                    key="cart"
+                    onClick={() => {
+                      setCartOpen(true);
+                      if (navigator.vibrate) navigator.vibrate([15, 10, 15]); // Double tap feeling
+                    }}
+                    className="relative flex flex-col items-center justify-center px-1 py-2 w-1/5 touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    aria-label="Open Cart"
+                  >
+                    <div className="relative">
+                      <div className={`relative flex items-center justify-center w-12 h-12 rounded-full transform transition-all duration-300 
+                        ${cartBounce ? 'scale-110' : 'scale-100'} 
+                        bg-gradient-to-br ${item.color} shadow-md group-hover:shadow-lg`}>
+                        <FontAwesomeIcon 
+                          icon={item.icon} 
+                          className={`text-white text-lg ${cartAnimation ? 'animate-wiggle' : ''}`} 
+                        />
+                        
+                        {cartItems.length > 0 && (
+                          <div className={`absolute -top-1 -right-1 bg-white text-rich-brown text-xs w-5 h-5 flex items-center justify-center rounded-full shadow-md font-bold border border-golden-yellow transition-all duration-300 ${cartAnimation ? 'scale-125 animate-pulse' : 'scale-100'}`}>
+                            {cartItems.length}
+                          </div>
+                        )}
                       </div>
+                    </div>
+                    <span className="text-xs font-medium mt-1 text-center text-rich-brown">{item.label}</span>
+                  </button>
+                );
+              }
+              
+              // Regular nav items with enhanced visual effects
+              const isActive = currentPath === item.path;
+              return (
+                <Link 
+                  key={index}
+                  to={item.path} 
+                  className="group relative flex flex-col items-center w-1/5 touch-manipulation"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <div className="relative">
+                    {/* Circle background with enhanced animation */}
+                    <div className={`w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300 
+                      ${isActive ? `bg-gradient-to-br ${item.color} shadow-md` : 'bg-gray-100 group-hover:bg-gray-200'}`}>
+                      <FontAwesomeIcon 
+                        icon={item.icon} 
+                        className={`transition-all duration-300 ${isActive ? 'text-white scale-110' : 'text-gray-600 group-hover:scale-105'}`} 
+                        size="lg"
+                      />
+                    </div>
+                    
+                    {/* Subtle ping animation for active item */}
+                    {isActive && (
+                      <span className={`absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-gradient-to-br ${item.color}`}></span>
                     )}
                   </div>
-                  <span className="text-xs text-rich-brown mt-1 font-medium">{item.label}</span>
-                </button>
+                  
+                  {/* Label with subtle animation */}
+                  <span className={`text-xs font-medium mt-1 transition-all duration-300 
+                    ${isActive ? 'text-soft-green font-semibold' : 'text-gray-600 group-hover:text-gray-800'}`}>
+                    {item.label}
+                  </span>
+                </Link>
               );
-            }
-            
-            // Enhanced navigation links with micro-animations
-            const isActive = currentPath === item.path;
-            return (
-              <Link 
-                key={index}
-                to={item.path} 
-                className="relative flex flex-col items-center justify-center w-1/5 touch-manipulation"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
-              >
-                <div className={`p-3 rounded-full transition-all duration-300 ${isActive ? `bg-gradient-to-r ${item.color} shadow-md` : 'bg-transparent hover:bg-gray-100'}`}>
-                  <FontAwesomeIcon 
-                    icon={item.icon} 
-                    className={`text-lg transition-all duration-300 ${isActive ? 'text-white scale-110' : 'text-rich-brown'}`} 
-                  />
-                </div>
-                <span className={`text-xs mt-1 font-medium transition-all duration-300 ${isActive ? 'text-soft-green' : 'text-rich-brown'}`}>
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
+            })}
+          </div>
         </div>
       </div>
     </div>

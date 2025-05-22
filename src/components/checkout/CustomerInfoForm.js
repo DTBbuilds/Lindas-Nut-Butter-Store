@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faPhone, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEnvelope, faPhone, faArrowLeft, faArrowRight, faLocationDot, faBuilding } from '@fortawesome/free-solid-svg-icons';
 
 /**
  * Customer Information Form Component
@@ -12,7 +12,9 @@ const CustomerInfoForm = ({ initialValues, onSubmit, onBack, onChange }) => {
     name: '',
     email: '',
     phoneNumber: '',
-    pickupLocation: ''
+    address: '',
+    apartment: '',
+    city: 'Nairobi'
   });
   
   const [errors, setErrors] = useState({});
@@ -62,9 +64,14 @@ const CustomerInfoForm = ({ initialValues, onSubmit, onBack, onChange }) => {
       newErrors.phoneNumber = 'Please enter a valid Kenyan phone number';
     }
     
-    // Validate pickup location
-    if (!formData.pickupLocation || formData.pickupLocation === '') {
-      newErrors.pickupLocation = 'Please select a pickup location';
+    // Validate delivery address
+    if (!formData.address || formData.address.trim() === '') {
+      newErrors.address = 'Delivery address is required';
+    }
+    
+    // Validate city (should always be Nairobi)
+    if (!formData.city || formData.city !== 'Nairobi') {
+      newErrors.city = 'Currently we only deliver within Nairobi City';
     }
     
     setErrors(newErrors);
@@ -171,28 +178,73 @@ const CustomerInfoForm = ({ initialValues, onSubmit, onBack, onChange }) => {
           </p>
         </div>
 
-        {/* Pickup Location */}
+        {/* Delivery Address */}
         <div className="mb-4">
-          <label htmlFor="pickupLocation" className="block text-sm font-medium text-gray-700 mb-1">
-            Pickup Location *
+          <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+            Delivery Address *
           </label>
-          <select
-            id="pickupLocation"
-            name="pickupLocation"
-            value={formData.pickupLocation}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FontAwesomeIcon icon={faLocationDot} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-3 py-2 border ${errors.address ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors`}
+              placeholder="Street address, neighborhood, etc."
+            />
+          </div>
+          {errors.address && (
+            <p className="mt-1 text-sm text-red-600">{errors.address}</p>
+          )}
+        </div>
+
+        {/* Apartment/Suite/Floor (Optional) */}
+        <div className="mb-4">
+          <label htmlFor="apartment" className="block text-sm font-medium text-gray-700 mb-1">
+            Apartment/Suite/Floor (Optional)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FontAwesomeIcon icon={faBuilding} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              id="apartment"
+              name="apartment"
+              value={formData.apartment}
+              onChange={handleChange}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+              placeholder="Apt, Suite, Floor, etc. (optional)"
+            />
+          </div>
+        </div>
+
+        {/* City - Fixed to Nairobi */}
+        <div className="mb-4">
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+            City *
+          </label>
+          <input
+            type="text"
+            id="city"
+            name="city"
+            value={formData.city}
             onChange={handleChange}
-            className={`w-full pl-3 pr-10 py-2 border ${errors.pickupLocation ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-green-500`}
-          >
-            <option value="">Select a pickup location</option>
-            <option value="kabete">Kabete Store - Along Waiyaki Way</option>
-            <option value="westlands">Westlands Branch - The Mall</option>
-            <option value="cbd">CBD Store - Moi Avenue</option>
-          </select>
-          {errors.pickupLocation && (
-            <p className="mt-1 text-sm text-red-600">{errors.pickupLocation}</p>
+            className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors bg-gray-100"
+            disabled
+          />
+          {errors.city && (
+            <p className="mt-1 text-sm text-red-600">{errors.city}</p>
           )}
           <p className="mt-1 text-xs text-gray-500">
-            Choose the store location where you'll pick up your order
+            Currently we only deliver within Nairobi City. Fixed shipping fee: KES 300
+          </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Delivery takes up to 48 hours from order confirmation
           </p>
         </div>
         
@@ -211,7 +263,7 @@ const CustomerInfoForm = ({ initialValues, onSubmit, onBack, onChange }) => {
             type="submit"
             className="flex items-center px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
           >
-            Continue to Delivery
+            Continue to Payment
             <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
           </button>
         </div>

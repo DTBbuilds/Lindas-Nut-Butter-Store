@@ -29,35 +29,68 @@ const getAccessToken = async () => {
     // Prepare the authentication credentials
     const consumerKey = config.mpesa.consumerKey;
     const consumerSecret = config.mpesa.consumerSecret;
+    
+    // Ensure credentials are properly set
+    if (!consumerKey || !consumerSecret) {
+      throw new Error('M-Pesa consumer key or secret is missing or invalid');
+    }
+    
+    // Generate the base64 auth string correctly
     const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
     
-    // Log the request details for debugging
-    logMpesaTransaction('Requesting OAuth Token', {
-      url: `${config.mpesa.baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+    // Log the request details for debugging (mask sensitive data)
+    console.log('🔑 Using M-Pesa credentials:', {
+      consumerKey: `${consumerKey.substring(0, 5)}...${consumerKey.substring(consumerKey.length - 3)}`,
       environment: config.mpesa.baseUrl.includes('sandbox') ? 'SANDBOX' : 'PRODUCTION',
-      consumerKey: consumerKey.substring(0, 5) + '...',
       paybillNumber: config.mpesa.paybillNumber
     });
     
-    // Make the request with proper authentication
-    const response = await mpesaAxios.get(
-      `${config.mpesa.baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
-      {
-        headers: {
-          'Authorization': `Basic ${auth}`
-        }
-      }
-    );
+    console.log('🔄 Requesting OAuth token from:', `${config.mpesa.baseUrl}/oauth/v1/generate?grant_type=client_credentials`);
     
-    logMpesaTransaction('OAuth Token Response', response.data);
-    console.log('Access token response:', response.data);
+    // Make the request with proper authentication - use a more explicit approach
+    const authHeader = 'Basic ' + auth;
+    console.log('🔐 Authorization header (first 10 chars):', authHeader.substring(0, 15) + '...');
+    
+    const response = await mpesaAxios({
+      method: 'get',
+      url: `${config.mpesa.baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      validateStatus: status => status < 500 // Don't throw on 4xx errors so we can log them
+    });
+    
+    // Check if the response was successful
+    if (response.status !== 200) {
+      console.error(`❌ OAuth token request failed with status ${response.status}:`, response.data);
+      throw new Error(`OAuth token request failed with status ${response.status}: ${JSON.stringify(response.data)}`);
+    }
+    
+    // Log success
+    console.log('✅ OAuth token obtained successfully!');
+    logMpesaTransaction('OAuth Token Response', {
+      status: response.status,
+      success: true,
+      tokenPreview: response.data.access_token ? `${response.data.access_token.substring(0, 5)}...` : 'none',
+      expires_in: response.data.expires_in
+    });
+    
     // Expecting response format: { "access_token": "xTKygG823eFg9dzsGnbaYYWTLcV9", "expires_in": "3599" }
     return response.data.access_token;
   } catch (error) {
-    logMpesaError('OAuth Token Request', error, {
-      url: `${config.mpesa.baseUrl}/oauth/v1/generate?grant_type=client_credentials`
+    console.error('❌ OAuth token error details:', {
+      message: error.message,
+      responseData: error.response?.data,
+      responseStatus: error.response?.status,
     });
-    console.error('OAuth token error:', error.response?.data || error.message);
+    
+    logMpesaError('OAuth Token Request', error, {
+      url: `${config.mpesa.baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+      errorDetails: error.response?.data || error.message
+    });
+    
     throw error;
   }
 };
@@ -72,6 +105,7 @@ const generateStkPassword = (businessShortCode) => {
   const shortCode = businessShortCode || config.mpesa.paybillNumber;
   
   // Format date as YYYYMMDDHHmmss (14 characters) as required by Safaricom
+  // IMPORTANT: Use Safaricom's required format - exactly 14 digits, no timezone conversion
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -83,6 +117,13 @@ const generateStkPassword = (businessShortCode) => {
   // Combine to create the timestamp in the format YYYYMMDDHHmmss
   const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
   
+  // Ensure the timestamp is exactly 14 characters
+  if (timestamp.length !== 14) {
+    console.error(`Invalid timestamp length: ${timestamp.length}, expected 14 characters`);
+    console.error(`Timestamp value: ${timestamp}`);
+  }
+  
+  // Generate the password exactly as required by Safaricom
   const password = Buffer.from(
     `${shortCode}${config.mpesa.passkey}${timestamp}`
   ).toString('base64');
@@ -90,7 +131,9 @@ const generateStkPassword = (businessShortCode) => {
   logMpesaTransaction('Generated STK Password', {
     timestamp,
     businessShortCode: shortCode,
-    passkey: '********' // Masked for security
+    passkey: '********', // Masked for security
+    passwordLength: password.length,
+    timestampLength: timestamp.length
   });
   
   return { password, timestamp };
@@ -104,42 +147,80 @@ const generateStkPassword = (businessShortCode) => {
  * @throws {Error} If the phone number is invalid
  */
 const formatPhoneNumber = (phoneNumber) => {
-  // Handle null or undefined input
   if (!phoneNumber) {
     throw new Error('Phone number is required for M-Pesa payment');
   }
   
   // Convert to string if it's not already
-  let formattedPhone = String(phoneNumber).trim();
+  let formattedPhone = phoneNumber.toString().trim();
   
-  // Remove any spaces, dashes, parentheses, or other special characters
-  formattedPhone = formattedPhone.replace(/\s+|-|\(|\)|\+/g, '');
+  // Log the original input for debugging
+  console.log(`Formatting phone number: original input = "${phoneNumber}"`);
   
-  // Handle different Kenyan phone number formats
-  if (formattedPhone.startsWith('0')) {
-    // Convert format 07XXXXXXXX to 2547XXXXXXXX
-    formattedPhone = '254' + formattedPhone.substring(1);
-  } else if (formattedPhone.startsWith('254')) {
-    // Already in correct format, just ensure there are no extra characters
-    formattedPhone = '254' + formattedPhone.substring(3);
-  } else if (formattedPhone.match(/^7\d{8}$/)) {
-    // Format 7XXXXXXXX to 2547XXXXXXXX
-    formattedPhone = '254' + formattedPhone;
-  } else if (formattedPhone.match(/^1\d{8}$/)) {
-    // Format 1XXXXXXXX to 2541XXXXXXXX
-    formattedPhone = '254' + formattedPhone;
+  // Remove any non-digit characters
+  formattedPhone = formattedPhone.replace(/\D/g, '');
+  console.log(`After removing non-digits: "${formattedPhone}"`);
+  
+  // Check if the number has sufficient digits
+  if (formattedPhone.length < 9) {
+    throw new Error(`Phone number ${phoneNumber} is too short (minimum 9 digits required)`);
   }
   
-  // Validate the final format (254 followed by 9 digits)
+  // Handle different formats
+  if (formattedPhone.startsWith('254')) {
+    // Already in international format
+    console.log(`Phone already in international format: ${formattedPhone}`);
+  } else if (formattedPhone.startsWith('0')) {
+    // Convert from 07xx to 2547xx format
+    formattedPhone = `254${formattedPhone.substring(1)}`;
+    console.log(`Converted from 0xx format: ${formattedPhone}`);
+  } else if (formattedPhone.length === 9 && (formattedPhone.startsWith('7') || formattedPhone.startsWith('1'))) {
+    // Convert from 7xx or 1xx to 254xxx format (Kenyan local numbers)
+    formattedPhone = `254${formattedPhone}`;
+    console.log(`Converted from 9-digit local format: ${formattedPhone}`);
+  } else if (formattedPhone.startsWith('254') && formattedPhone.length > 12) {
+    // Truncate if too long but starts with 254
+    formattedPhone = formattedPhone.substring(0, 12);
+    console.log(`Truncated long number to: ${formattedPhone}`);
+  } else {
+    // For Safaricom sandbox testing numbers, ensure they're in the proper format
+    // The sandbox test numbers should be exactly 12 digits starting with 254
+    if (formattedPhone.length === 12 && !formattedPhone.startsWith('254')) {
+      console.warn(`Potentially invalid phone number format: ${formattedPhone}`);
+      // Since this might be a test number, we'll proceed but with a warning
+    } else if (formattedPhone.length === 10 && !formattedPhone.startsWith('254')) {
+      // Likely a full local number without country code (e.g., 0722XXXXXX)
+      formattedPhone = `254${formattedPhone.substring(1)}`;
+      console.log(`Converted 10-digit local number: ${formattedPhone}`);
+    } else {
+      // Last resort - assume it's a local number and prefix with 254
+      console.warn(`Using phone number as-is with 254 prefix: ${formattedPhone}`);
+      // For sandbox testing, accept numbers like 708374149 (the standard test numbers)
+      formattedPhone = `254${formattedPhone}`;
+    }
+  }
+  
+  // Final validation - must be exactly 12 digits for Kenya numbers starting with 254
   if (!/^254\d{9}$/.test(formattedPhone)) {
-    console.error('Invalid phone format detected:', { 
-      original: phoneNumber, 
-      formatted: formattedPhone,
-      length: formattedPhone.length
-    });
-    throw new Error(`Invalid phone number format: ${phoneNumber}. Expected format: 254XXXXXXXXX`);
+    console.warn(`⚠️ Final phone number ${formattedPhone} may not be in the correct format for M-Pesa. Expected: 254XXXXXXXXX`);
+    
+    // For sandbox testing, we'll allow the standard test numbers
+    // If it's not a valid format but looks like a Safaricom test number, fix it
+    if (formattedPhone.includes('708374149') || 
+        formattedPhone.includes('708374150') || 
+        formattedPhone.includes('708374151') || 
+        formattedPhone.includes('708374152')) {
+      
+      // Extract the test number and reformat it correctly
+      const testNumberMatch = formattedPhone.match(/(708374\d{3})/);
+      if (testNumberMatch) {
+        formattedPhone = `254${testNumberMatch[1]}`;
+        console.log(`✅ Detected Safaricom test number, reformatted to: ${formattedPhone}`);
+      }
+    }
   }
   
+  console.log(`Final formatted phone number: ${formattedPhone}`);
   console.log(`Phone number formatted: ${phoneNumber} → ${formattedPhone}`);
   return formattedPhone;
 };
@@ -247,18 +328,91 @@ const initiateSTK = async (
       retryAttempt: retryCount
     });
     
+    console.error('==== MPESA STK PUSH ERROR DETAILS ====');
+    
+    // Common Safaricom error codes and their meanings
+    const errorCodeGuide = {
+      '400.002.02': 'Invalid Request - Check timestamp format, callback URL, or phone number',
+      '401.002.01': 'Invalid Access Token',
+      '403.001.01': 'Access Denied - API Key doesn\'t match allowed applications',
+      '404.001.01': 'API resource endpoint not found',
+      '405.001.01': 'Method not allowed',
+      '409.001.01': 'Conflict - Transaction already in process',
+      '500.001.01': 'Internal Server Error',
+      '500.002.01': 'Service unavailable - Try again later',
+      '503.001.01': 'Service unavailable - Try again later'
+    };
+    
+    if (error.response) {
+      // Server responded with an error
+      console.error('Status:', error.response.status);
+      console.error('Headers:', JSON.stringify(error.response.headers, null, 2));
+      console.error('Data:', JSON.stringify(error.response.data, null, 2));
+      
+      // Show error guidance if available
+      if (error.response.data && error.response.data.errorCode) {
+        const errorCode = error.response.data.errorCode;
+        const errorGuide = errorCodeGuide[errorCode] || 'Unknown error';
+        console.error(`Error code ${errorCode}: ${errorGuide}`);
+        console.error('Error message:', error.response.data.errorMessage);
+      }
+    } else {
+      // Network error or request setup error
+      console.error('Error message:', error.message);
+    }
+    console.error('==== END ERROR DETAILS ====');
+    
     // Implement retry logic for specific error cases
     const MAX_RETRIES = 2;
     
     // Check if we should retry based on error type or message
     if (retryCount < MAX_RETRIES) {
+      // Handle specific error scenarios and attempt to recover
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        
+        // Handle invalid access token - retry with fresh token
+        if (errorData.errorCode === '401.002.01') {
+          console.log('Access token rejected, retrying with fresh token...');
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return initiateSTK(
+            phoneNumber,
+            amount,
+            accountReference,
+            transactionDesc,
+            callbackUrl,
+            paymentType,
+            retryCount + 1
+          );
+        }
+        
+        // Handle timestamp errors (very common with Daraja API)
+        if (errorData.errorCode === '400.002.02' && 
+            errorData.errorMessage && 
+            errorData.errorMessage.includes('Invalid Timestamp')) {
+          console.log('Invalid timestamp detected, retrying with fresh timestamp...');
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return initiateSTK(
+            phoneNumber,
+            amount,
+            accountReference,
+            transactionDesc,
+            callbackUrl,
+            paymentType,
+            retryCount + 1
+          );
+        }
+      }
+      
       // Determine if this error is retriable
-      const isRetriable = error.response?.status === 401 || // Unauthorized (token issue)
+      const isRetriable = 
           error.message.includes('timeout') || // Timeout
           error.message.includes('network') || // Network error
           error.message.includes('ETIMEDOUT') || // Connection timeout
           error.code === 'ECONNRESET' || // Connection reset
-          (error.response?.data?.errorCode === '500.001.1001'); // Safaricom internal error
+          (error.response?.status >= 500); // Server errors
       
       if (isRetriable) {
         console.log(`Retrying STK Push (Attempt ${retryCount + 1} of ${MAX_RETRIES})...`);
@@ -280,12 +434,11 @@ const initiateSTK = async (
       }
     }
     
-    // Process the error through our error handler to add detailed diagnostics
-    const enhancedError = handleMpesaError(error);
-    
-    // Add additional context specific to this STK push attempt
-    // Make sure we're not trying to use formattedPhone if it wasn't initialized
-    // (in case the error happened before phone formatting)
+    // Throw a more descriptive error for client-side handling
+    const errorMessage = error.response?.data?.errorMessage || error.message || 'Unknown M-Pesa error';
+    const enhancedError = new Error(`M-Pesa STK Push failed: ${errorMessage}`);
+    enhancedError.originalError = error;
+    enhancedError.errorData = error.response?.data;
     enhancedError.context = {
       phoneNumber: phoneNumber, // Use the original phoneNumber to avoid the undefined variable
       amount,
