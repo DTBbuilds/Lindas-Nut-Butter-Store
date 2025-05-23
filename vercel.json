@@ -1,25 +1,39 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server/index.js", "use": "@vercel/node" },
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "build" } }
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "build/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/manifest.json", "dest": "/manifest.json", "headers": { "Cache-Control": "public, max-age=0, must-revalidate", "Access-Control-Allow-Origin": "*" } },
-    { "src": "/config.js", "dest": "/config.js", "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" } },
-    { "src": "/api/(.*)", "dest": "/server/index.js", "headers": { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization" } },
-    { "src": "/socket.io/(.*)", "dest": "/server/index.js" },
-    { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/asset-manifest.json", "dest": "/asset-manifest.json" },
-    { "src": "/images/(.*)", "dest": "/images/$1" },
-    { "src": "/videos/(.*)", "dest": "/videos/$1" },
-    { "src": "/(.*)\\.png", "dest": "/$1.png" },
-    { "src": "/(.*)\\.jpg", "dest": "/$1.jpg" },
-    { "src": "/(.*)\\.svg", "dest": "/$1.svg" },
-    { "src": "/(.*)\\.js", "dest": "/$1.js" },
-    { "src": "/(.*)\\.css", "dest": "/$1.css" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
+      }
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/api/manifest.js"
+    },
+    {
+      "src": "/(favicon\\.ico|robots\\.txt)",
+      "dest": "/build/$1"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/build/static/$1"
+    },
+    {
+      "src": "/static/(.*)\\.css",
+      "dest": "/build/static/$1.css"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/build/index.html"
+    }
   ],
   "env": {
     "NODE_ENV": "production",

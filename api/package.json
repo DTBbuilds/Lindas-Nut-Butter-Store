@@ -1,0 +1,9 @@
+{
+  "name": "lindas-nut-butter-api",
+  "version": "1.0.0",
+  "description": "Serverless API for Linda's Nut Butter Store",
+  "main": "index.js",
+  "dependencies": {
+    "mongoose": "^7.0.0"
+  }
+}
