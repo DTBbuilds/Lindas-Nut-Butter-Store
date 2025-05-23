@@ -28,14 +28,7 @@ import OrderDetails from '../components/orders/OrderDetails';
 import { generateOrderNumber } from '../utils/orderUtils';
 
 // Use the correct API URL based on environment
-const API_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' ? 
-    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
-      'http://localhost:5000' : 
-      `http://${window.location.hostname}:5000` 
-    : 
-    ''
-  );
+import { API_URL } from '../config';
 
 const AccountPage = () => {
   const [loading, setLoading] = useState(true);

@@ -62,9 +62,21 @@ const config = {
     ),
     
     // Callback URLs - these should be absolute URLs in production
-    callbackUrl: process.env.CALLBACK_URL || 'http://localhost:5000/api/mpesa/callback',
-    validationUrl: process.env.VALIDATION_URL || 'http://localhost:5000/api/mpesa/validation',
-    confirmationUrl: process.env.CONFIRMATION_URL || 'http://localhost:5000/api/mpesa/confirmation',
+    callbackUrl: process.env.MPESA_CALLBACK_URL || (
+      process.env.NODE_ENV === 'production'
+        ? `${process.env.PRODUCTION_BASE_URL}/mpesa/callback`
+        : 'http://localhost:5000/api/mpesa/callback'
+    ),
+    validationUrl: process.env.MPESA_VALIDATION_URL || (
+      process.env.NODE_ENV === 'production'
+        ? `${process.env.PRODUCTION_BASE_URL}/mpesa/validation`
+        : 'http://localhost:5000/api/mpesa/validation'
+    ),
+    confirmationUrl: process.env.MPESA_CONFIRMATION_URL || (
+      process.env.NODE_ENV === 'production'
+        ? `${process.env.PRODUCTION_BASE_URL}/mpesa/confirmation`
+        : 'http://localhost:5000/api/mpesa/confirmation'
+    ),
     
     // For initiator credentials (used for B2C, B2B and reversal)
     initiatorName: process.env.MPESA_INITIATOR_NAME || (

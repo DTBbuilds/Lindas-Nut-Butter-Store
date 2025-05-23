@@ -10,8 +10,7 @@ import {
 import axios from 'axios';
 import FeedbackDashboard from '../components/admin/FeedbackDashboard';
 import RealtimeTransactions from '../components/admin/RealtimeTransactions';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_URL } from '../config';
 
 const AdminDashboardPage = () => {
   const [transactions, setTransactions] = useState([]);

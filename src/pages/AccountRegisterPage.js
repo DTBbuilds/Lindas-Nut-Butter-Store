@@ -4,16 +4,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faEnvelope, faPhone, faSpinner } from '@fortawesome/free-solid-svg-icons';
-
-// Use the correct API URL based on environment
-const API_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' ? 
-    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
-      'http://localhost:5000' : 
-      `http://${window.location.hostname}:5000` 
-    : 
-    ''
-  );
+import { API_URL } from '../config';
 
 const AccountRegisterPage = () => {
   const [formData, setFormData] = useState({

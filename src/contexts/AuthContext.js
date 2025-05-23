@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { API_URL } from '../config';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   // Request password reset email
   const requestPasswordReset = async (email) => {
     try {
-      const response = await fetch('http://localhost:5000/api/customers/forgot-password', {
+      const response = await fetch(`${API_URL}/api/customers/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -132,7 +133,7 @@ export const AuthProvider = ({ children }) => {
         await apiService.auth.resetPassword(token, newPassword);
       } else {
         // Direct API call as fallback
-        const response = await fetch(`http://localhost:5000/api/customers/reset-password/${token}`, {
+        const response = await fetch(`${API_URL}/api/customers/reset-password/${token}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

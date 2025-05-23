@@ -20,10 +20,13 @@ const getImageUrl = (item) => {
   if (imagePath.startsWith('http')) {
     return imagePath;
   } else {
+    // Import the API_URL from config
+    const { API_URL } = require('../config');
+    
     // Make sure path starts with a slash
     const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    // Use the backend URL or default to localhost
-    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${normalizedPath}`;
+    // Use the backend URL from our centralized config
+    return `${API_URL}${normalizedPath}`;
   }
 };
 

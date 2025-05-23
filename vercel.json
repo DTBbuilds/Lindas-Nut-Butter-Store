@@ -22,7 +22,8 @@
     "NODE_ENV": "production",
     "MONGO_URI": "mongodb+srv://dtbbuilds:dtbbuilds2025@cluster0.qnwgmty.mongodb.net/lindas-nut-butter?retryWrites=true&w=majority&appName=Cluster0",
     "PORT": "5000",
-    "PRODUCTION_BASE_URL": "https://lindas-nut-butter-ea87pvhld-dtbbuilds-projects.vercel.app/api",
-    "PRODUCTION_FRONTEND_URL": "https://lindas-nut-butter-ea87pvhld-dtbbuilds-projects.vercel.app"
+    "PRODUCTION_BASE_URL": "https://lindas-nut-butter.vercel.app/api",
+    "PRODUCTION_FRONTEND_URL": "https://lindas-nut-butter.vercel.app",
+    "MPESA_CALLBACK_URL": "https://lindas-nut-butter.vercel.app/api/mpesa/callback"
   }
 }
