@@ -11,44 +11,53 @@ const config = require('./config');
 const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 const rateLimiter = require('./middleware/rateLimiter');
+const corsMiddleware = require('./middleware/cors');
+const debugRoutes = require('./debug-routes');
+const { connectToMongoDB } = require('./mongodb-connection');
 
 // Create Express app
 const app = express();
 
 // Apply middleware
-app.use(cors());
+// Apply CORS middleware first - this is crucial for handling preflight requests
+app.use(corsMiddleware);
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(rateLimiter);
 
-// Connect to MongoDB Atlas
-const connectMongoDB = async () => {
-  try {
-    if (mongoose.connection.readyState === 0) {
-      // Connect using connection string and options from config
-      await mongoose.connect(config.mongodb.uri, config.mongodb.options);
-      
-      // Log information about the connection
-      const dbName = mongoose.connection.name;
-      const isProduction = process.env.NODE_ENV === 'production';
-      const connectionType = isProduction ? 'MongoDB Atlas' : 'Local MongoDB';
-      
-      console.log(`Connected to ${connectionType} database: ${dbName}`);
-      console.log(`Running in ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
-    }
-    return true;
-  } catch (err) {
-    console.error('MongoDB connection error:', err.message);
-    console.error(err.stack);
-    return false;
-  }
-};
-
-// Connect to MongoDB immediately
-connectMongoDB();
+// Connect to MongoDB using our enhanced connection module
+// This handles reconnection and better error reporting
+connectToMongoDB().catch(err => {
+  console.error('Failed to connect to MongoDB:', err.message);
+});
 
 // Mount routes
 app.use('/api', routes);
+
+// Add debug routes for deployment diagnostics
+app.use('/api/debug', debugRoutes);
+
+// Add a basic health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    mongodbConnected: mongoose.connection.readyState === 1
+  });
+});
+
+// Explicitly serve manifest.json to fix 401 errors
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  res.sendFile(path.join(__dirname, '../public/manifest.json'));
+});
 
 // Handle production static files
 if (process.env.NODE_ENV === 'production') {

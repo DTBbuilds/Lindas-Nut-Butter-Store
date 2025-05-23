@@ -25,6 +25,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const routes = require('./routes');
 const emailRoutes = require('./routes/emailRoutes');
 const customerRoutes = require('./routes/customerRoutes');
+const debugRoutes = require('./debug-routes');
 // Note: authRoutes already mounted earlier
 
 // Import socket service for real-time updates
@@ -97,10 +98,16 @@ app.use(cookieParser(process.env.COOKIE_SECRET || 'your-secret-key'));
 app.set('trust proxy', 1);
 
 // Mount routes
-app.use('/api/auth', authRoutes);
-app.use('/api/auth', adminAuthRoutes);
 app.use('/api/admin', directAdminRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin-auth', adminAuthRoutes);
+app.use('/api/admin-protected', adminRoutes);
+app.use('/api', routes);
+app.use('/api/email', emailRoutes);
+app.use('/api/customers', customerRoutes);
+
+// Mount debug routes to diagnose deployment issues
+app.use('/api/debug', debugRoutes);
 
 // Serve static files from the public directory with proper options
 app.use(express.static('public', {
