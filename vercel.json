@@ -7,23 +7,26 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/server/index.js" },
     { "src": "/socket.io/(.*)", "dest": "/server/index.js" },
-    { "src": "^/static/(.*)", "dest": "/static/$1" },
-    { "src": "^/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "^/manifest.json", "dest": "/manifest.json" },
-    { "src": "^/asset-manifest.json", "dest": "/asset-manifest.json" },
-    { "src": "^/images/(.*)", "dest": "/images/$1" },
-    { "src": "^/videos/(.*)", "dest": "/videos/$1" },
-    { "src": "^/(.*).png", "dest": "/$1.png" },
-    { "src": "^/(.*).jpg", "dest": "/$1.jpg" },
-    { "src": "^/(.*).svg", "dest": "/$1.svg" },
-    { "src": "^/(.*)", "dest": "/index.html" }
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/manifest.json", "dest": "/manifest.json" },
+    { "src": "/asset-manifest.json", "dest": "/asset-manifest.json" },
+    { "src": "/images/(.*)", "dest": "/images/$1" },
+    { "src": "/videos/(.*)", "dest": "/videos/$1" },
+    { "src": "/(.*)\\.png", "dest": "/$1.png" },
+    { "src": "/(.*)\\.jpg", "dest": "/$1.jpg" },
+    { "src": "/(.*)\\.svg", "dest": "/$1.svg" },
+    { "src": "/(.*)\\.js", "dest": "/$1.js" },
+    { "src": "/(.*)\\.css", "dest": "/$1.css" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "env": {
     "NODE_ENV": "production",
     "MONGO_URI": "mongodb+srv://dtbbuilds:dtbbuilds2025@cluster0.qnwgmty.mongodb.net/lindas-nut-butter?retryWrites=true&w=majority&appName=Cluster0",
     "PORT": "5000",
-    "PRODUCTION_BASE_URL": "https://lindas-nut-butter.vercel.app/api",
-    "PRODUCTION_FRONTEND_URL": "https://lindas-nut-butter.vercel.app",
-    "MPESA_CALLBACK_URL": "https://lindas-nut-butter.vercel.app/api/mpesa/callback"
+    "PRODUCTION_BASE_URL": "https://lindas-nut-butter-hweof7rg4-dtbbuilds-projects.vercel.app/api",
+    "PRODUCTION_FRONTEND_URL": "https://lindas-nut-butter-hweof7rg4-dtbbuilds-projects.vercel.app",
+    "MPESA_CALLBACK_URL": "https://lindas-nut-butter-hweof7rg4-dtbbuilds-projects.vercel.app/api/mpesa/callback",
+    "REACT_APP_API_URL": "https://lindas-nut-butter-hweof7rg4-dtbbuilds-projects.vercel.app"
   }
 }
