@@ -44,11 +44,15 @@ const server = http.createServer(app);
 socketService.initialize(server);
 
 // Middleware
-// Configure CORS with explicit options
+// Import custom CORS middleware
+const corsMiddleware = require('./middleware/cors');
+
+// Apply CORS middleware - allow all origins in production
+app.use(corsMiddleware);
+
+// Also keep the standard cors middleware as a fallback
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL, process.env.BASE_URL].filter(Boolean)
-    : true, // Allow all origins in development
+  origin: '*', // Allow all origins in both production and development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type', 

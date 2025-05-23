@@ -7,7 +7,7 @@
   "routes": [
     { "src": "/manifest.json", "dest": "/manifest.json", "headers": { "Cache-Control": "public, max-age=0, must-revalidate", "Access-Control-Allow-Origin": "*" } },
     { "src": "/config.js", "dest": "/config.js", "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" } },
-    { "src": "/api/(.*)", "dest": "/server/index.js" },
+    { "src": "/api/(.*)", "dest": "/server/index.js", "headers": { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization" } },
     { "src": "/socket.io/(.*)", "dest": "/server/index.js" },
     { "src": "/static/(.*)", "dest": "/static/$1" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },

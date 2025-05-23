@@ -1,7 +1,9 @@
 // Runtime configuration for Linda's Nut Butter Store
 (function() {
-  // Define our production URLs
-  const PRODUCTION_API_URL = 'https://lindas-nut-butter-6jdk8jepi-dtbbuilds-projects.vercel.app';
+  // Get current hostname to avoid CORS issues
+  const currentHostname = window.location.origin;
+  // Define our production URLs - use current hostname to avoid CORS issues
+  const PRODUCTION_API_URL = currentHostname;
   
   // Set environment variables available to the app
   window.ENV = {

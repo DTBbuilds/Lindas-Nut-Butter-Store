@@ -4,8 +4,10 @@
  */
 
 (function() {
-  // Production URL - must match the latest Vercel deployment
-  const PRODUCTION_URL = 'https://lindas-nut-butter-6jdk8jepi-dtbbuilds-projects.vercel.app';
+  // Get current hostname to avoid CORS issues
+  const currentHostname = window.location.origin;
+  // Production URL - use current hostname to avoid CORS issues
+  const PRODUCTION_URL = currentHostname;
   
   // Store original XMLHttpRequest
   const originalXHR = window.XMLHttpRequest;
