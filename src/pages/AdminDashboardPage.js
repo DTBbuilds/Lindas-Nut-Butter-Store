@@ -66,62 +66,114 @@ const AdminDashboardPage = () => {
     setError('');
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await axios.get(`${API_URL}/api/products`, {
-        headers: { Authorization: `Bearer ${token}` }
+      // Use the inventory API endpoint which is specifically for admin access
+      const res = await axios.get(`${API_URL}/api/inventory/products`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 8000, // 8 second timeout
+        params: {
+          limit: 100,
+          page: 1
+        }
       });
-      setProducts(res.data.data.products || []);
+      
+      // Handle different possible response formats
+      let productsData = [];
+      if (res.data && res.data.data && res.data.data.products) {
+        // Format: { data: { products: [...] } }
+        productsData = res.data.data.products;
+      } else if (res.data && res.data.products) {
+        // Format: { products: [...] }
+        productsData = res.data.products;
+      } else if (res.data && Array.isArray(res.data)) {
+        // Format: [...]
+        productsData = res.data;
+      } else if (res.data && res.data.success && res.data.data) {
+        // Format: { success: true, data: { products: [...] } }
+        productsData = Array.isArray(res.data.data) ? res.data.data : res.data.data.products || [];
+      }
+      
+      console.log('Products loaded successfully:', productsData.length);
+      setProducts(productsData);
     } catch (err) {
-      setError('Failed to load products');
+      console.error('Error fetching products:', err);
+      const errorMessage = err.response?.data?.message || 
+        (err.code === 'ECONNABORTED' ? 'Request timed out' : 'Failed to load products');
+      setError(errorMessage);
+      
+      // Provide fallback empty products array to prevent UI errors
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   
   const fetchData = async () => {
-    try {
-      setLoading(true);
+    setLoading(true);
+    setError(null);
+    
+    // Helper function to safely fetch data with better error handling
+    const safelyFetchData = async (url, setter, defaultValue = [], retries = 1) => {
+      try {
+        const response = await axios.get(`${API_URL}${url}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          // Add timeout to prevent long-hanging requests
+          timeout: 12000 // Increased timeout for slower connections
+        });
+        
+        // Check for different response formats
+        if (response.data && response.data.data !== undefined) {
+          setter(response.data.data || defaultValue);
+        } else if (response.data && Array.isArray(response.data)) {
+          setter(response.data);
+        } else if (response.data && response.data.success) {
+          setter(response.data.data || defaultValue);
+        } else {
+          console.warn(`Unexpected data format from ${url}:`, response.data);
+          setter(defaultValue);
+        }
+        return true;
+      } catch (err) {
+        console.error(`Error fetching ${url}:`, err);
+        
+        // Retry logic for transient errors
+        if (retries > 0 && (err.code === 'ECONNABORTED' || err.response?.status >= 500)) {
+          console.log(`Retrying ${url}, ${retries} attempts left`);
+          return await safelyFetchData(url, setter, defaultValue, retries - 1);
+        }
+        
+        setter(defaultValue);
+        return false;
+      }
+    };
+    
+    // Fetch all data in parallel
+    const results = await Promise.allSettled([
+      // Dashboard statistics
+      safelyFetchData('/api/admin/dashboard/stats', setDashboardStats, null),
       
-      // Fetch dashboard statistics
-      const statsResponse = await axios.get(`${API_URL}/api/admin/dashboard/stats`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setDashboardStats(statsResponse.data.data || null);
+      // Transactions
+      safelyFetchData('/api/admin/transactions', setTransactions, []),
       
-      // Fetch transactions
-      const transactionsResponse = await axios.get(`${API_URL}/api/admin/transactions`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setTransactions(transactionsResponse.data.data || []);
+      // Orders
+      safelyFetchData('/api/admin/orders', setOrders, []),
       
-      // Fetch orders
-      const ordersResponse = await axios.get(`${API_URL}/api/admin/orders`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setOrders(ordersResponse.data.data || []);
+      // Monthly sales data
+      safelyFetchData('/api/admin/dashboard/monthly-sales', setMonthlySales, []),
       
-      // Fetch monthly sales data
-      const salesResponse = await axios.get(`${API_URL}/api/admin/dashboard/monthly-sales`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setMonthlySales(salesResponse.data.data || []);
+      // Product rankings
+      safelyFetchData('/api/admin/dashboard/product-rankings', setProductRankings, []),
       
-      // Fetch product rankings
-      const rankingsResponse = await axios.get(`${API_URL}/api/admin/dashboard/product-rankings`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setProductRankings(rankingsResponse.data.data || []);
-      
-      // Fetch recent feedback
-      const feedbackResponse = await axios.get(`${API_URL}/api/admin/dashboard/recent-feedback`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setRecentFeedback(feedbackResponse.data.data || []);
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setError(error.response?.data?.message || 'Failed to fetch data');
-      setLoading(false);
+      // Recent feedback - with 2 retries for this specific endpoint
+      safelyFetchData('/api/admin/dashboard/recent-feedback', setRecentFeedback, [], 2)
+    ]);
+    
+    // Check if all requests failed
+    const allFailed = results.every(result => result.status === 'rejected' || result.value === false);
+    if (allFailed) {
+      setError('Unable to connect to the server. Please check your connection and try again.');
     }
+    
+    setLoading(false);
   };
   
   // Add useEffect hooks
@@ -186,89 +238,89 @@ const AdminDashboardPage = () => {
     };
   }, [activeTab, transactions, loading]);
   
-  const handleRefresh = () => {
-    // Transaction filtering
-    const filterTransactions = () => {
-      setLoading(true);
-      // Call the API with date filters
+  // Export transactions as CSV
+  const exportTransactions = async () => {
+    try {
+      // Get current date for filename
+      const date = new Date().toISOString().split('T')[0];
+      const filename = `transactions_export_${date}.csv`;
+      
+      // Set up query parameters
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
       if (statusFilter) params.append('status', statusFilter);
-      params.append('page', transactionPagination.page);
-      params.append('limit', transactionPagination.limit);
       
-      // Make API request
-      axios.get(`${API_URL}/api/admin/transactions?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      })
-        .then(response => {
-          setTransactions(response.data.data || []);
-          setTransactionPagination(response.data.pagination || { 
-            page: 1, 
-            limit: 10, 
-            total: 0, 
-            pages: 1 
-          });
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error filtering transactions:', error);
-          setError(error.response?.data?.message || 'Failed to filter transactions');
-          setLoading(false);
+      // Fetch CSV data
+      const response = await axios.get(
+        `${API_URL}/api/admin/transactions/export?${params.toString()}`,
+        { 
+          responseType: 'blob',
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        }
+      );
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting transactions:', error);
+      setError('Failed to export transactions');
+    }
+  };
+
+  // Transaction filtering
+  const filterTransactions = () => {
+    setLoading(true);
+    // Call the API with date filters
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (statusFilter) params.append('status', statusFilter);
+    params.append('page', transactionPagination.page);
+    params.append('limit', transactionPagination.limit);
+    
+    // Make API request
+    axios.get(`${API_URL}/api/admin/transactions?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+    })
+      .then(response => {
+        setTransactions(response.data.data || []);
+        setTransactionPagination(response.data.pagination || { 
+          page: 1, 
+          limit: 10, 
+          total: 0, 
+          pages: 1 
         });
-    };
-    
-    // Change transaction page
-    const changeTransactionPage = (newPage) => {
-      if (newPage < 1 || newPage > transactionPagination.pages) return;
-      setTransactionPagination({ ...transactionPagination, page: newPage });
-      // Update and re-fetch
-      setTimeout(filterTransactions, 0);
-    };
-    
-    // View transaction details
-    const viewTransactionDetails = (transaction) => {
-      setCurrentTransaction(transaction);
-      setShowTransactionModal(true);
-    };
-    
-    // Export transactions as CSV
-    const exportTransactions = async () => {
-      try {
-        // Get current date for filename
-        const date = new Date().toISOString().split('T')[0];
-        const filename = `transactions_export_${date}.csv`;
-        
-        // Set up query parameters
-        const params = new URLSearchParams();
-        if (startDate) params.append('startDate', startDate);
-        if (endDate) params.append('endDate', endDate);
-        if (statusFilter) params.append('status', statusFilter);
-        
-        // Fetch CSV data
-        const response = await axios.get(
-          `${API_URL}/api/admin/transactions/export?${params.toString()}`,
-          { 
-            responseType: 'blob',
-            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-          }
-        );
-        
-        // Create download link
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (error) {
-        console.error('Error exporting transactions:', error);
-        setError('Failed to export transactions');
-      }
-    };
-    
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error filtering transactions:', error);
+        setError(error.response?.data?.message || 'Failed to filter transactions');
+        setLoading(false);
+      });
+  };
+  
+  // Change transaction page
+  const changeTransactionPage = (newPage) => {
+    if (newPage < 1 || newPage > transactionPagination.pages) return;
+    setTransactionPagination({ ...transactionPagination, page: newPage });
+    // Update and re-fetch
+    setTimeout(filterTransactions, 0);
+  };
+  
+  // View transaction details
+  const viewTransactionDetails = (transaction) => {
+    setCurrentTransaction(transaction);
+    setShowTransactionModal(true);
+  };
+
+  const handleRefresh = () => {
     filterTransactions();
   };
   
@@ -501,44 +553,76 @@ const AdminDashboardPage = () => {
         </div>
       )}
       
-      {/* Tab Navigation */}
-      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
-        <button 
-          className={`px-4 py-2 ${activeTab === 'dashboard' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          <FontAwesomeIcon icon={faChartLine} className="mr-2" />
-          Dashboard
-        </button>
-        <button 
-          className={`px-4 py-2 ${activeTab === 'transactions' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
-          onClick={() => setActiveTab('transactions')}
-        >
-          <FontAwesomeIcon icon={faMoneyBill} className="mr-2" />
-          Transactions
-        </button>
-        <button 
-          className={`px-4 py-2 ${activeTab === 'orders' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
-          onClick={() => setActiveTab('orders')}
-        >
-          <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
-          Orders
-        </button>
-        <button 
-          className={`px-4 py-2 ${activeTab === 'products' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
-          onClick={() => setActiveTab('products')}
-        >
-          <FontAwesomeIcon icon={faBoxes} className="mr-2" />
-          Products
-        </button>
-        <button 
-          className={`px-4 py-2 ${activeTab === 'feedback' ? 'text-green-600 border-b-2 border-green-600 font-medium' : 'text-gray-600 hover:text-green-600'}`}
-          onClick={() => setActiveTab('feedback')}
-        >
-          <FontAwesomeIcon icon={faComments} className="mr-2" />
-          Feedback
-        </button>
+      {/* Tab Navigation - Improved with sticky position and better visual hierarchy */}
+      <div className="sticky top-0 z-10 bg-white pt-2 pb-0 shadow-sm">
+        <div className="flex border-b border-gray-200 mb-0 overflow-x-auto scrollbar-hide">
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'dashboard' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('dashboard')}
+            title="Overview of store performance"
+          >
+            <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+            Dashboard
+          </button>
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'transactions' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('transactions')}
+            title="View and manage payment transactions"
+          >
+            <FontAwesomeIcon icon={faMoneyBill} className="mr-2" />
+            Transactions
+          </button>
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'orders' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('orders')}
+            title="Manage customer orders"
+          >
+            <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
+            Orders
+          </button>
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'products' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('products')}
+            title="Manage product inventory"
+          >
+            <FontAwesomeIcon icon={faBoxes} className="mr-2" />
+            Products
+          </button>
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'feedback' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('feedback')}
+            title="View customer feedback"
+          >
+            <FontAwesomeIcon icon={faComments} className="mr-2" />
+            Feedback
+          </button>
+        </div>
+        
+        {/* Quick action buttons */}
+        <div className="flex justify-end px-4 py-2 bg-gray-50 border-b border-gray-200">
+          <button 
+            onClick={() => fetchData()}
+            className="text-sm text-gray-600 hover:text-green-600 mr-4 flex items-center"
+            title="Refresh data"
+          >
+            <FontAwesomeIcon icon={faSync} className="mr-1" spin={loading} />
+            Refresh
+          </button>
+          {activeTab === 'transactions' && (
+            <button 
+              onClick={exportTransactions}
+              className="text-sm text-gray-600 hover:text-green-600 flex items-center"
+              title="Export transactions to CSV"
+            >
+              <FontAwesomeIcon icon={faFileDownload} className="mr-1" />
+              Export
+            </button>
+          )}
+        </div>
       </div>
+      
+      {/* Add spacing after the sticky navigation */}
+      <div className="mb-6"></div>
       
       {/* Date Filter */}
       {activeTab === 'transactions' && (

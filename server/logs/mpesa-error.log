@@ -3406,3 +3406,528 @@
   }
 }
 
+[2025-05-23T05:53:52.162Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:53:52.162Z",
+  "message": "Request failed with status code 400",
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2173220",
+    "errorCode": "400.002.02",
+    "errorMessage": "Bad Request - Invalid CallBackURL"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-631372",
+    "transactionDesc": "Payment for Order #LINDA-NUT-631372 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T05:53:53.537Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:53:53.537Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2173221",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-631372",
+    "transactionDesc": "Payment for Order #LINDA-NUT-631372 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T05:53:55.252Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:53:55.252Z",
+  "message": "Request failed with status code 400",
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04954518",
+    "errorCode": "400.002.02",
+    "errorMessage": "Bad Request - Invalid CallBackURL"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-631372",
+    "transactionDesc": "Payment for Order #LINDA-NUT-631372 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T05:53:56.589Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:53:56.589Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04954519",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-631372",
+    "transactionDesc": "Payment for Order #LINDA-NUT-631372 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T05:53:58.017Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:53:58.017Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04954522",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-631372",
+    "transactionDesc": "Payment for Order #LINDA-NUT-631372 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T05:54:00.490Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:00.490Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2173222",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-631372",
+    "transactionDesc": "Payment for Order #LINDA-NUT-631372 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 2
+  }
+}
+
+[2025-05-23T05:54:08.333Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:08.333Z",
+  "message": "Request failed with status code 400",
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04954532",
+    "errorCode": "400.002.02",
+    "errorMessage": "Bad Request - Invalid CallBackURL"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-647993",
+    "transactionDesc": "Payment for Order #LINDA-NUT-647993 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T05:54:09.671Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:09.671Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04954534",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-647993",
+    "transactionDesc": "Payment for Order #LINDA-NUT-647993 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T05:54:11.042Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:11.042Z",
+  "message": "Request failed with status code 400",
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2173242",
+    "errorCode": "400.002.02",
+    "errorMessage": "Bad Request - Invalid CallBackURL"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-647993",
+    "transactionDesc": "Payment for Order #LINDA-NUT-647993 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T05:54:12.380Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:12.380Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2173247",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-647993",
+    "transactionDesc": "Payment for Order #LINDA-NUT-647993 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T05:54:13.711Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:13.711Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04954542",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-647993",
+    "transactionDesc": "Payment for Order #LINDA-NUT-647993 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T05:54:16.048Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T05:54:16.048Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2173253",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-647993",
+    "transactionDesc": "Payment for Order #LINDA-NUT-647993 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 2
+  }
+}
+
+[2025-05-23T06:06:08.831Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T06:06:08.831Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "17f6-47b3-b4fd-ae0574a0242c266826",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-365658",
+    "transactionDesc": "Payment for Order #LINDA-NUT-365658 at Linda's Nut Butter Store",
+    "callbackUrl": "https://a105-105-21-33-138.ngrok-free.app/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T06:06:10.422Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T06:06:10.422Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "b3f4-4853-beb7-b6b6628fe790392764",
+    "errorCode": "500.001.1001",
+    "errorMessage": "Unable to lock subscriber, a transaction is already in process for the current subscriber"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-365658",
+    "transactionDesc": "Payment for Order #LINDA-NUT-365658 at Linda's Nut Butter Store",
+    "callbackUrl": "https://a105-105-21-33-138.ngrok-free.app/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T06:06:15.069Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T06:06:15.069Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "b3f4-4853-beb7-b6b6628fe790392766",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-365658",
+    "transactionDesc": "Payment for Order #LINDA-NUT-365658 at Linda's Nut Butter Store",
+    "callbackUrl": "https://a105-105-21-33-138.ngrok-free.app/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T06:06:17.396Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T06:06:17.396Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "17f6-47b3-b4fd-ae0574a0242c266831",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 19200,
+    "accountReference": "LINDA-NUT-365658",
+    "transactionDesc": "Payment for Order #LINDA-NUT-365658 at Linda's Nut Butter Store",
+    "callbackUrl": "https://a105-105-21-33-138.ngrok-free.app/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T09:03:53.746Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T09:03:53.745Z",
+  "message": "Request failed with status code 400",
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "801f-4ce5-97b8-f81bf214ea04964342",
+    "errorCode": "400.002.02",
+    "errorMessage": "Bad Request - Invalid CallBackURL"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 14950,
+    "accountReference": "LINDA-NUT-032951",
+    "transactionDesc": "Payment for Order #LINDA-NUT-032951 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T09:03:55.169Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T09:03:55.168Z",
+  "message": "Request failed with status code 400",
+  "stack": "AxiosError: Request failed with status code 400\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2182887",
+    "errorCode": "400.002.02",
+    "errorMessage": "Bad Request - Invalid CallBackURL"
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 14950,
+    "accountReference": "LINDA-NUT-032951",
+    "transactionDesc": "Payment for Order #LINDA-NUT-032951 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T09:03:56.524Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T09:03:56.523Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2182888",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 14950,
+    "accountReference": "LINDA-NUT-032951",
+    "transactionDesc": "Payment for Order #LINDA-NUT-032951 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 0
+  }
+}
+
+[2025-05-23T09:03:57.875Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T09:03:57.875Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2182889",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 14950,
+    "accountReference": "LINDA-NUT-032951",
+    "transactionDesc": "Payment for Order #LINDA-NUT-032951 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 1
+  }
+}
+
+[2025-05-23T09:04:00.257Z] {
+  "action": "STK Push Request",
+  "timestamp": "2025-05-23T09:04:00.257Z",
+  "message": "Request failed with status code 500",
+  "stack": "AxiosError: Request failed with status code 500\n    at settle (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:2049:12)\n    at Unzip.handleStreamEnd (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:3166:11)\n    at Unzip.emit (node:events:530:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\node_modules\\axios\\dist\\node\\axios.cjs:4276:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async initiateSTK (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\utils\\darajaApi.js:290:22)\n    at async exports.initiateSTKPush (D:\\Lab 2\\Lindas-Nut-Butter-Store Monday Updates\\Lindas-Nut-Butter-Store-master\\server\\controllers\\mpesaController.js:85:22)",
+  "responseData": {
+    "requestId": "94fd-4d30-a4ee-73894dcc3fe2182890",
+    "errorCode": "500.003.02",
+    "errorMessage": "System is busy. Please try again in few minutes."
+  },
+  "requestData": {
+    "phoneNumber": "254727068107",
+    "amount": 14950,
+    "accountReference": "LINDA-NUT-032951",
+    "transactionDesc": "Payment for Order #LINDA-NUT-032951 at Linda's Nut Butter Store",
+    "callbackUrl": "http://localhost:5000/api/mpesa/callback",
+    "paymentType": "paybill",
+    "businessShortCode": "174379",
+    "paybill": "174379",
+    "till": "321798",
+    "accountNumber": "0725317864",
+    "retryAttempt": 2
+  }
+}
+

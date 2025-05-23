@@ -21,21 +21,51 @@ const FeedbackDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        const response = await feedbackService.getFeedbackStats(dateRange);
-        setStats(response.data);
+        // Fetch statistics with retry logic
+        const fetchStatsWithRetry = async (retries = 2) => {
+          try {
+            const response = await feedbackService.getFeedbackStats(dateRange);
+            return response.data;
+          } catch (error) {
+            if (retries > 0) {
+              console.log(`Retrying stats fetch, ${retries} attempts left`);
+              return await fetchStatsWithRetry(retries - 1);
+            }
+            throw error;
+          }
+        };
         
-        // Also fetch recent feedback
-        const feedbackResponse = await feedbackService.getFeedbackList({
-          page: 1,
-          limit: 10,
-          ...dateRange
-        });
+        // Fetch feedback list with retry logic
+        const fetchFeedbackWithRetry = async (retries = 2) => {
+          try {
+            const response = await feedbackService.getFeedbackList({
+              page: 1,
+              limit: 10,
+              ...dateRange
+            });
+            return response.data.feedback || [];
+          } catch (error) {
+            if (retries > 0) {
+              console.log(`Retrying feedback fetch, ${retries} attempts left`);
+              return await fetchFeedbackWithRetry(retries - 1);
+            }
+            return []; // Return empty array on final failure
+          }
+        };
         
-        setFeedback(feedbackResponse.data.feedback || []);
-        setError(null);
+        // Execute both requests in parallel
+        const [statsData, feedbackData] = await Promise.all([
+          fetchStatsWithRetry(),
+          fetchFeedbackWithRetry()
+        ]);
+        
+        setStats(statsData);
+        setFeedback(feedbackData);
       } catch (error) {
-        console.error('Error fetching feedback stats:', error);
+        console.error('Error fetching feedback data:', error);
         setError('Failed to load feedback data. Please try again later.');
       } finally {
         setLoading(false);

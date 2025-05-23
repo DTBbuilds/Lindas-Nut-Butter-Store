@@ -7,16 +7,13 @@
 const Customer = require('./Customer');
 const Feedback = require('./Feedback');
 const Admin = require('./Admin');
-// Import models from database schemas directory
-const { Order, Transaction, Product, InventoryLog, User } = require('../database/schemas');
+const Order = require('./Order');
+const Transaction = require('./Transaction');
 
 module.exports = {
   Customer,
   Feedback,
   Admin,
   Order,
-  Transaction,
-  Product,
-  InventoryLog,
-  User
+  Transaction
 };

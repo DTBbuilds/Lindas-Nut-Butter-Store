@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './styles/animations.css';
-import { BrowserRouter as Router, Routes, Route, Link, createBrowserRouter, RouterProvider } from 'react-router-dom';
+import './styles/profileAnimations.css';
+import { BrowserRouter as Router, Routes, Route, Link, createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
+import { AuthProvider } from './contexts/AuthContext';
+import { AdminAuthProvider, useAdminAuth } from './contexts/AdminAuthContext';
 // Future flags for React Router v7 compatibility
 import { UNSAFE_enhanceManualRouteObjects } from '@remix-run/router';
 import ProductsPage from './pages/ProductsPage';
@@ -16,7 +19,9 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import AccountLoginPage from './pages/AccountLoginPage';
 import AccountRegisterPage from './pages/AccountRegisterPage';
 import AccountPage from './pages/AccountPage';
-import { Navigate, useLocation } from 'react-router-dom';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import { useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faStore, faInfoCircle, faShoppingCart, faGift, faLeaf, faHeart, faStar, faPhone, faEnvelope, faCopy, faPercent, faStore as faShop, faTrash, faTimes, faLock, faArrowRight, faBars, faSearch, faUser, faShield, faTruck } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faInstagram, faTwitter, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
@@ -742,14 +747,20 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-            {/* Admin routes */}
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin" element={<RequireAdmin><AdminDashboardPage /></RequireAdmin>} />
+            {/* Admin routes - wrapped with AdminAuthProvider */}
+            <Route element={<AdminAuthWrapper />}>
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/admin" element={<RequireAdmin><AdminDashboardPage /></RequireAdmin>} />
+            </Route>
             
-            {/* Customer account routes */}
-            <Route path="/account/login" element={<AccountLoginPage />} />
-            <Route path="/account/register" element={<AccountRegisterPage />} />
-            <Route path="/account" element={<AccountPage />} />
+            {/* Customer account routes - wrapped with AuthProvider */}
+            <Route element={<AuthWrapper />}>
+              <Route path="/account/login" element={<AccountLoginPage />} />
+              <Route path="/account/register" element={<AccountRegisterPage />} />
+              <Route path="/account/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/account/reset-password/:token" element={<ResetPasswordPage />} />
+              <Route path="/account" element={<AccountPage />} />
+            </Route>
           </Routes>
         </main>
         
@@ -835,14 +846,58 @@ function App() {
   );
 }
 
-function RequireAdmin({ children }) {
-  const location = useLocation();
-  const token = localStorage.getItem('adminToken');
-  // Optionally, decode and check expiration here
-  if (!token) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+// Admin authentication wrapper component
+const AdminAuthWrapper = () => {
+  return (
+    <AdminAuthProvider>
+      <Outlet />
+    </AdminAuthProvider>
+  );
+};
+
+// Require admin authentication component
+const RequireAdmin = ({ children }) => {
+  const { admin, loading, checkAdminAuth } = useAdminAuth();
+  const [isChecking, setIsChecking] = useState(true);
+  
+  // Check admin authentication on mount
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      await checkAdminAuth();
+      setIsChecking(false);
+    };
+    
+    verifyAdmin();
+  }, [checkAdminAuth]);
+  
+  // Show loading spinner while checking
+  if (loading || isChecking) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="p-8 bg-white rounded-lg shadow-md text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying admin credentials...</p>
+        </div>
+      </div>
+    );
   }
+  
+  // Redirect to login if not admin
+  if (!admin) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  
+  // Render children if admin
   return children;
-}
+};
+
+// Wrapper component for AuthProvider that includes Outlet for nested routes
+const AuthWrapper = () => {
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
+};
 
 export default App;

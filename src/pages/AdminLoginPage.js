@@ -1,141 +1,133 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
-// Use the correct API URL based on environment
-const API_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' ? 
-    // Try both common development server ports
-    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
-      'http://localhost:5000' : 
-      `http://${window.location.hostname}:5000` 
-    : 
-    ''
-  );
+import { useAdminAuth } from '../contexts/AdminAuthContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState('');
+  const [localLoading, setLocalLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { admin, loading: authLoading, error: authError, loginAdmin } = useAdminAuth();
   
-  // Check if user is already logged in
+  // Redirect if already logged in
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      // Verify token validity by making a request to the server
-      axios.get(`${API_URL}/api/admin/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(response => {
-        if (response.data && response.data.role === 'admin') {
-          // Token is valid and user is admin, redirect to admin dashboard
-          const from = location.state?.from?.pathname || '/admin';
-          navigate(from);
-        }
-      })
-      .catch(() => {
-        // Token is invalid, clear it
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminEmail');
-      });
+    if (admin) {
+      const from = location.state?.from?.pathname || '/admin';
+      navigate(from);
     }
-  }, [navigate, location]);
+  }, [admin, navigate, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setLocalError('');
+    setLocalLoading(true);
     
     try {
-      // Try both server and backend auth endpoints
-      const tryLogin = async (endpoint) => {
-        try {
-          console.log(`Trying login at: ${endpoint}`);
-          const res = await axios({
-            method: 'post',
-            url: endpoint,
-            data: { email, password },
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            // Important for cookies to work
-            withCredentials: true
-          });
-          return { success: true, data: res.data };
-        } catch (err) {
-          return { 
-            success: false, 
-            error: err,
-            status: err.response?.status,
-            message: err.response?.data?.message || 'Login failed'
-          };
-        }
-      };
-      
-      // Try the direct admin login endpoint
-      let result = await tryLogin(`${API_URL}/api/admin/login`);
-      
-      // If that fails, retry with a slight delay (could be a network issue)
-      if (!result.success) {
-        console.log('Admin auth failed, retrying...');
-        // Wait a bit before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        result = await tryLogin(`${API_URL}/api/admin/login`);
+      // Validate input fields
+      if (!email.trim() || !password.trim()) {
+        setLocalError('Please enter both email and password');
+        setLocalLoading(false);
+        return;
       }
-      
-      if (result.success && result.data.token) {
-        // Store token and user info
-        localStorage.setItem('adminToken', result.data.token);
-        localStorage.setItem('adminEmail', result.data.user.email);
-        
+      const success = await loginAdmin(email, password);
+
+      if (success) {
         // Show success message
-        toast.success('Login successful!', { containerId: 'main-toast-container' });
-        
-        // Redirect to admin dashboard or previous location
+        toast.success('Login successful!', {
+          position: 'top-right',
+          autoClose: 3000
+        });
+
+        // Redirect to admin dashboard or previous page
         const from = location.state?.from?.pathname || '/admin';
         navigate(from);
       } else {
-        // Handle login failure
-        console.error('Login failed:', result.message);
-        setError(result.message || 'Invalid credentials');
-        toast.error(result.message || 'Login failed', { containerId: 'main-toast-container' });
+        setLocalError('Login failed. Please check your credentials.');
       }
     } catch (err) {
-      console.error('Login process failed:', err);
-      setError('Login system error. Please try again later.');
-      toast.error('Login system error. Please try again later.', { containerId: 'main-toast-container' });
+      console.error('Login error:', err);
+      setLocalError(err.message || 'Login failed. Please check your credentials.');
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-warm-beige">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-golden-brown mb-6 text-center">Admin Login</h2>
-        {error && <div className="bg-red-100 text-red-800 px-4 py-2 rounded mb-4">{error}</div>}
+        <div className="text-center mb-6">
+          <div className="bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <FontAwesomeIcon icon={faLock} className="text-2xl" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Admin Login</h2>
+          <p className="text-gray-600 text-sm mt-1">Enter your credentials to access the admin dashboard</p>
+        </div>
+        
+        {(localError || authError) && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <p>{localError || authError}</p>
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-1 font-semibold">Email</label>
-            <input type="email" className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-golden-yellow" value={email} onChange={e => setEmail(e.target.value)} required />
+            <label className="block text-gray-700 mb-2 font-medium">Email Address</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FontAwesomeIcon icon={faUser} className="text-gray-400" />
+              </div>
+              <input 
+                type="email" 
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                placeholder="admin@example.com"
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                required 
+              />
+            </div>
           </div>
+          
           <div className="mb-6">
-            <label className="block text-gray-700 mb-1 font-semibold">Password</label>
-            <input type="password" className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-golden-yellow" value={password} onChange={e => setPassword(e.target.value)} required />
+            <label className="block text-gray-700 mb-2 font-medium">Password</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+              </div>
+              <input 
+                type="password" 
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                placeholder="••••••••"
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                required 
+              />
+            </div>
           </div>
-          <button 
-            type="submit" 
-            className="w-full py-3 px-4 bg-rich-brown text-white font-semibold rounded-md hover:bg-soft-green transition-colors text-lg shadow-md"
-            disabled={loading}
-            style={{ cursor: 'pointer', position: 'relative', zIndex: 10 }}
+          
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300"
+            disabled={localLoading || authLoading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {localLoading || authLoading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Authenticating...
+              </span>
+            ) : 'Sign In'}
           </button>
+          
+          <div className="mt-4 text-center text-sm text-gray-600">
+            <p>This area is restricted to authorized administrators only.</p>
+          </div>
         </form>
       </div>
     </div>

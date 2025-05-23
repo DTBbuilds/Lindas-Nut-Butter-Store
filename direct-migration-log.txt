@@ -1,0 +1,68 @@
+Direct Migration Log - 2025-05-23T12:15:08.859Z
+
+Starting direct migration from local MongoDB to MongoDB Atlas...
+Connecting to local MongoDB...
+✅ Connected to local MongoDB
+Found 8 collections in local database:
+- transactions
+- inventorylogs
+- admins
+- products
+- orders
+- feedbacks
+- users
+- customers
+Connecting to MongoDB Atlas...
+✅ Connected to MongoDB Atlas
+
+Migrating collection: transactions
+Found 1 documents in local transactions collection
+Retrieved 1 documents from local transactions collection
+✅ Successfully migrated 1 documents to Atlas transactions collection
+
+Migrating collection: inventorylogs
+Found 0 documents in local inventorylogs collection
+No documents to migrate for inventorylogs
+
+Migrating collection: admins
+Found 0 documents in local admins collection
+No documents to migrate for admins
+
+Migrating collection: products
+Found 18 documents in local products collection
+Retrieved 18 documents from local products collection
+✅ Successfully migrated 18 documents to Atlas products collection
+
+Migrating collection: orders
+Found 0 documents in local orders collection
+No documents to migrate for orders
+
+Migrating collection: feedbacks
+Found 0 documents in local feedbacks collection
+No documents to migrate for feedbacks
+
+Migrating collection: users
+Found 0 documents in local users collection
+No documents to migrate for users
+
+Migrating collection: customers
+Found 2 documents in local customers collection
+Retrieved 2 documents from local customers collection
+✅ Successfully migrated 2 documents to Atlas customers collection
+
+=== Migration Summary ===
+transactions: ✅ Migrated 1/1 documents
+inventorylogs: ✅ Migrated 0/0 documents
+admins: ✅ Migrated 0/0 documents
+products: ✅ Migrated 18/18 documents
+orders: ✅ Migrated 0/0 documents
+feedbacks: ✅ Migrated 0/0 documents
+users: ✅ Migrated 0/0 documents
+customers: ✅ Migrated 2/2 documents
+
+✅ Migration completed successfully!
+Local MongoDB connection closed
+MongoDB Atlas connection closed
+
+Migration process completed
+Migration script execution completed

@@ -6,6 +6,8 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,13 +30,14 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('token');
           setUser(null);
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch (err) {
+        console.error('Auth check failed:', err);
         localStorage.removeItem('token');
         setUser(null);
       }
     }
     setLoading(false);
+    setInitialCheckComplete(true);
   };
 
   const login = (userData, token) => {
@@ -48,6 +51,31 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('rememberMe');
     navigate('/login');
   };
+
+  // Request password reset email
+  const requestPasswordReset = async (email) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/customers/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send password reset email');
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Password reset request failed:', error);
+      throw error;
+    }
+  };
+
+  // Reset password with token - implementation moved to the existing resetPassword function below
 
   const register = async (userData) => {
     setLoading(true);
@@ -99,13 +127,30 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      await apiService.auth.resetPassword(token, newPassword);
+      // Try using apiService if available, otherwise make direct API call
+      if (apiService && apiService.auth && apiService.auth.resetPassword) {
+        await apiService.auth.resetPassword(token, newPassword);
+      } else {
+        // Direct API call as fallback
+        const response = await fetch(`http://localhost:5000/api/customers/reset-password/${token}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: newPassword })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to reset password');
+        }
+      }
+      
       return { success: true };
     } catch (error) {
       console.error('Password reset failed:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to reset password';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      setError(error.message || 'Failed to reset password');
+      throw error;
     } finally {
       setLoading(false);
     }

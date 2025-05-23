@@ -204,7 +204,80 @@ const sendOrderShippedNotification = async (order) => {
   }
 };
 
+/**
+ * Send password reset email
+ * @param {string} email - Customer email address
+ * @param {string} resetToken - Password reset token
+ * @param {string} resetUrl - URL with reset token for the customer to click
+ * @returns {Promise} - Email send result
+ */
+const sendPasswordResetEmail = async (email, resetToken, resetUrl) => {
+  try {
+    if (!email || !resetToken || !resetUrl) {
+      console.error('Cannot send password reset email: Missing required parameters');
+      return false;
+    }
+    
+    const transporter = createTransporter();
+    
+    // Send the email
+    const info = await transporter.sendMail({
+      from: `"Linda's Nut Butter Store" <${process.env.EMAIL_FROM || 'noreply@linda-nut-butter.com'}>`,
+      to: email,
+      subject: 'Password Reset Request',
+      text: `
+Hello,
+
+You are receiving this email because you (or someone else) has requested to reset your password for your Linda's Nut Butter Store account.
+
+Please click on the following link to reset your password:
+${resetUrl}
+
+This link will expire in 1 hour.
+
+If you did not request this, please ignore this email and your password will remain unchanged.
+
+Thank you,
+Linda's Nut Butter Store Team
+      `,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #8B4513;">Linda's Nut Butter Store</h2>
+          </div>
+          
+          <div style="margin-bottom: 30px;">
+            <h3 style="color: #333;">Password Reset Request</h3>
+            <p>Hello,</p>
+            <p>You are receiving this email because you (or someone else) has requested to reset your password for your Linda's Nut Butter Store account.</p>
+            <p>Please click on the button below to reset your password:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #8B4513; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Reset Password</a>
+            </div>
+            
+            <p><strong>This link will expire in 1 hour.</strong></p>
+            <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+          </div>
+          
+          <div style="border-top: 1px solid #e0e0e0; padding-top: 20px; font-size: 12px; color: #777; text-align: center;">
+            <p>This is an automated email. Please do not reply to this message.</p>
+            <p>&copy; ${new Date().getFullYear()} Linda's Nut Butter Store. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    });
+    
+    console.log('Password reset email sent:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return false;
+  }
+};
+
 module.exports = {
   sendPaymentConfirmation,
-  sendOrderShippedNotification
+  sendOrderShippedNotification,
+  sendPasswordResetEmail
 };

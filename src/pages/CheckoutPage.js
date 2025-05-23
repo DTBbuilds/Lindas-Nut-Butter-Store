@@ -419,7 +419,20 @@ const NewCheckoutPage = () => {
       orderPayload.shipping = 300; // Flat shipping fee as defined in backend
       orderPayload.total = subtotal + orderPayload.shipping; // subtotal + shipping (no tax)
       orderPayload.paymentStatus = 'pending';
-      orderPayload.orderStatus = 'pending'; // Use 'pending' to match backend default
+      orderPayload.status = 'PENDING'; // Use standardized status format for order tracking
+      
+      // Add customer ID if available (for order history tracking)
+      const customerToken = localStorage.getItem('customerToken');
+      const customerEmail = localStorage.getItem('customerEmail');
+      const customerId = localStorage.getItem('customerId');
+      
+      if (customerId) {
+        orderPayload.customerId = customerId;
+      }
+      
+      if (customerEmail) {
+        orderPayload.customerEmail = customerEmail;
+      }
       
       // Double-check that orderNumber is set to prevent errors
       if (!orderPayload.orderNumber) {
@@ -435,7 +448,9 @@ const NewCheckoutPage = () => {
       const response = await api.post('/orders', orderPayload);
       
       // Handle successful order
-      if (response && response.orderId) {
+      if (response && response.data && response.data.success) {
+        const orderData = response.data.data;
+        
         // Save a copy of cart items and totals before clearing them
         setOrderItems([...cartItems]);
         setOrderTotals({...cartTotal});
@@ -443,11 +458,20 @@ const NewCheckoutPage = () => {
         // Clear cart
         clearCart();
         
+        // Save order ID to local storage for easy retrieval in account page
+        if (orderData.orderId) {
+          // Store the last 5 order IDs in local storage for quick access
+          const recentOrders = JSON.parse(localStorage.getItem('recentOrders') || '[]');
+          recentOrders.unshift(orderData.orderId);
+          // Keep only the 5 most recent orders
+          localStorage.setItem('recentOrders', JSON.stringify(recentOrders.slice(0, 5)));
+        }
+        
         // Update order info
         setOrderInfo(prev => ({
           ...prev,
-          orderId: response.orderId,
-          orderNumber: orderPayload.orderNumber,
+          orderId: orderData.orderId || response.data.orderId,
+          orderNumber: orderData.referenceNumber || orderPayload.orderNumber,
           orderStatus: 'confirmed',
           orderDate: new Date().toISOString()
         }));

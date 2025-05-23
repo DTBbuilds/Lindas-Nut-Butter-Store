@@ -15,7 +15,17 @@ const config = {
   
   // MongoDB configuration
   mongodb: {
-    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/lindas-nut-butter-store-store-store-store-store'
+    uri: process.env.MONGO_URI || 
+      (process.env.NODE_ENV === 'production'
+        ? 'mongodb+srv://dtbbuilds:dtbbuilds2025@cluster0.qnwgmty.mongodb.net/lindas-nut-butter?retryWrites=true&w=majority&appName=Cluster0'
+        : 'mongodb://localhost:27017/lindas-nut-butter-store-store-store-store-store'),
+    options: {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000,
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 60000
+    }
   },
   
   // M-Pesa API configuration

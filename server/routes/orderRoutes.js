@@ -271,4 +271,56 @@ router.get('/analytics/sales', async (req, res) => {
   }
 });
 
+/**
+ * Get orders for a specific customer
+ * GET /api/orders/customer/:customerId
+ * Query params: page, limit, status
+ */
+router.get('/customer/:customerId', async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const { 
+      page = 1, 
+      limit = 20, 
+      status
+    } = req.query;
+    
+    // Build query
+    const query = { customerId };
+    
+    if (status && status !== 'ALL') {
+      query.status = status;
+    }
+    
+    // Count total matching orders for this customer
+    const total = await Order.countDocuments(query);
+    
+    // Get paginated orders for this customer
+    const orders = await Order.find(query)
+      .sort({ orderDate: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+    
+    return res.status(200).json({
+      success: true,
+      data: {
+        orders,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error getting customer orders:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get customer orders',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

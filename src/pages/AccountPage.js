@@ -10,8 +10,22 @@ import {
   faCreditCard, 
   faHeart, 
   faSignOutAlt,
-  faSpinner
+  faSpinner,
+  faEdit,
+  faEye,
+  faEyeSlash,
+  faLock,
+  faShield,
+  faBell,
+  faBoxOpen,
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
+import ProfileEditForm from '../components/ProfileEditForm';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
+import NotificationPreferences from '../components/NotificationPreferences';
+import OrderList from '../components/orders/OrderList';
+import OrderDetails from '../components/orders/OrderDetails';
+import { generateOrderNumber } from '../utils/orderUtils';
 
 // Use the correct API URL based on environment
 const API_URL = process.env.REACT_APP_API_URL || 
@@ -27,7 +41,56 @@ const AccountPage = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
+  const [editMode, setEditMode] = useState(false);
+  const [showSecuritySection, setShowSecuritySection] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [notificationPreferences, setNotificationPreferences] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [orderError, setOrderError] = useState(null);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [changingPassword, setChangingPassword] = useState(false);
   const navigate = useNavigate();
+
+  // Function to fetch customer orders from the API
+  const fetchCustomerOrders = async (customerId) => {
+    setLoadingOrders(true);
+    setOrderError(null);
+    try {
+      const token = localStorage.getItem('customerToken');
+      const response = await axios.get(`${API_URL}/api/orders/customer/${customerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          limit: 100 // Get up to 100 orders
+        }
+      });
+      
+      if (response.data.success) {
+        setOrders(response.data.data.orders);
+      } else {
+        setOrderError('Failed to load orders');
+        setOrders([]);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrderError('Failed to load orders. Please try again later.');
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('customerToken');
@@ -47,6 +110,11 @@ const AccountPage = () => {
         });
         
         setUserData(response.data);
+        
+        // Fetch orders for this customer
+        if (response.data && response.data._id) {
+          fetchCustomerOrders(response.data._id);
+        }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         toast.error('Session expired. Please log in again.', { containerId: 'main-toast-container' });
@@ -59,20 +127,8 @@ const AccountPage = () => {
       }
     };
     
-    // For now, use placeholder data since API isn't implemented yet
-    setTimeout(() => {
-      setUserData({
-        name: localStorage.getItem('customerName') || 'Customer',
-        email: localStorage.getItem('customerEmail') || 'customer@example.com',
-        orders: [],
-        addresses: [],
-        paymentMethods: []
-      });
-      setLoading(false);
-    }, 1000);
-    
-    // Uncomment when API is ready
-    // fetchUserData();
+    // Always use real API data
+    fetchUserData();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -174,6 +230,19 @@ const AccountPage = () => {
                     Wishlist
                   </button>
                 </li>
+                <li>
+                  <button 
+                    onClick={() => setActiveTab('notifications')}
+                    className={`w-full text-left px-4 py-2 rounded-md flex items-center ${
+                      activeTab === 'notifications' 
+                        ? 'bg-soft-green text-white' 
+                        : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={faBell} className="mr-3" />
+                    Notifications
+                  </button>
+                </li>
                 <li className="border-t border-gray-200 mt-4 pt-4">
                   <button 
                     onClick={handleLogout}
@@ -193,60 +262,266 @@ const AccountPage = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-2xl font-bold mb-6">Profile Information</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={userData?.name}
-                      readOnly
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                    />
+                {editMode ? (
+                  <ProfileEditForm 
+                    userData={userData} 
+                    onCancel={() => setEditMode(false)} 
+                    onUpdate={(updatedData) => {
+                      setUserData(updatedData);
+                      setEditMode(false);
+                    }} 
+                  />
+                ) : (
+                  <div className="animate-fadeIn">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Profile Information</h2>
+                      <button 
+                        onClick={() => setEditMode(true)}
+                        className="flex items-center bg-soft-green hover:bg-rich-brown text-white font-medium py-2 px-4 rounded-md transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 hover-lift"
+                      >
+                        <FontAwesomeIcon icon={faEdit} className="mr-2" />
+                        Edit Profile
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Profile Information Card */}
+                      <div className="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 p-6 profile-card">
+                        <div className="flex items-center mb-6">
+                          <div className="w-20 h-20 bg-soft-green rounded-full flex items-center justify-center mr-4 shadow-md profile-image-container">
+                            {userData?.profileImage ? (
+                              <img 
+                                src={userData.profileImage} 
+                                alt={userData.name} 
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            ) : (
+                              <FontAwesomeIcon icon={faUser} className="text-white text-2xl" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-800">{userData?.name}</h3>
+                            <p className="text-gray-600">{userData?.email}</p>
+                            {userData?.phone && (
+                              <p className="text-gray-500 text-sm mt-1">{userData.phone}</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Account Details</h4>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                              <div className="grid grid-cols-1 gap-3 stagger-item animate-slideIn">
+                                <div>
+                                  <span className="text-xs text-gray-500">Full Name</span>
+                                  <p className="font-medium">{userData?.name}</p>
+                                </div>
+                                <div>
+                                  <span className="text-xs text-gray-500">Email Address</span>
+                                  <p className="font-medium">{userData?.email}</p>
+                                </div>
+                                <div>
+                                  <span className="text-xs text-gray-500">Phone Number</span>
+                                  <p className="font-medium">{userData?.phone || 'Not provided'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {userData?.address && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Default Address</h4>
+                              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                <p className="whitespace-pre-line">{userData.address}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Security Section */}
+                      <div className="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 p-6 profile-card">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-lg font-bold text-gray-800 flex items-center">
+                            <FontAwesomeIcon icon={faShield} className="text-soft-green mr-2" />
+                            Security Settings
+                          </h3>
+                          <button 
+                            onClick={() => setShowSecuritySection(!showSecuritySection)}
+                            className="text-soft-green hover:text-rich-brown transition-colors duration-300"
+                          >
+                            {showSecuritySection ? 'Hide' : 'Show'}
+                          </button>
+                        </div>
+                        
+                        {showSecuritySection ? (
+                          <div className="animate-fadeIn">
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              // Password change logic would go here
+                              toast.info('Password change functionality will be implemented soon!');
+                            }}>
+                              <div className="space-y-4">
+                                {/* Current Password */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="currentPassword">
+                                    Current Password
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type={showPasswords.current ? 'text' : 'password'}
+                                      id="currentPassword"
+                                      value={passwordData.currentPassword}
+                                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-soft-green focus:border-transparent"
+                                      placeholder="Enter current password"
+                                    />
+                                    <button
+                                      type="button"
+                                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                      onClick={() => setShowPasswords({...showPasswords, current: !showPasswords.current})}
+                                    >
+                                      <FontAwesomeIcon 
+                                        icon={showPasswords.current ? faEyeSlash : faEye} 
+                                        className="text-gray-400 hover:text-gray-600" 
+                                      />
+                                    </button>
+                                  </div>
+                                </div>
+                                
+                                {/* New Password */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="newPassword">
+                                    New Password
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type={showPasswords.new ? 'text' : 'password'}
+                                      id="newPassword"
+                                      value={passwordData.newPassword}
+                                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-soft-green focus:border-transparent"
+                                      placeholder="Enter new password"
+                                    />
+                                    <button
+                                      type="button"
+                                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                      onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
+                                    >
+                                      <FontAwesomeIcon 
+                                        icon={showPasswords.new ? faEyeSlash : faEye} 
+                                        className="text-gray-400 hover:text-gray-600" 
+                                      />
+                                    </button>
+                                  </div>
+                                  
+                                  {/* Password Strength Meter */}
+                                  {passwordData.newPassword && (
+                                    <PasswordStrengthMeter password={passwordData.newPassword} />
+                                  )}
+                                </div>
+                                
+                                {/* Confirm Password */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
+                                    Confirm New Password
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type={showPasswords.confirm ? 'text' : 'password'}
+                                      id="confirmPassword"
+                                      value={passwordData.confirmPassword}
+                                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-soft-green focus:border-transparent"
+                                      placeholder="Confirm new password"
+                                    />
+                                    <button
+                                      type="button"
+                                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                      onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
+                                    >
+                                      <FontAwesomeIcon 
+                                        icon={showPasswords.confirm ? faEyeSlash : faEye} 
+                                        className="text-gray-400 hover:text-gray-600" 
+                                      />
+                                    </button>
+                                  </div>
+                                </div>
+                                
+                                <div className="pt-2">
+                                  <button
+                                    type="submit"
+                                    className="w-full bg-soft-green hover:bg-rich-brown text-white font-medium py-2 px-4 rounded-md transition-all duration-300 flex items-center justify-center hover-lift"
+                                    disabled={changingPassword}
+                                  >
+                                    {changingPassword ? (
+                                      <>
+                                        <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+                                        Updating Password...
+                                      </>
+                                    ) : (
+                                      'Change Password'
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            </form>
+                            
+                            <div className="mt-6 pt-4 border-t border-gray-100">
+                              <Link 
+                                to="/account/forgot-password" 
+                                className="text-soft-green hover:text-rich-brown transition-colors duration-300 text-sm"
+                              >
+                                Forgot your password?
+                              </Link>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-6">
+                            <p className="text-gray-600 mb-4">Manage your account password and security settings</p>
+                            <button
+                              onClick={() => setShowSecuritySection(true)}
+                              className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-md transition-all duration-300 hover-lift"
+                            >
+                              Show Security Settings
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={userData?.email}
-                      readOnly
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                    />
-                  </div>
-                  <div className="pt-4">
-                    <button className="bg-soft-green hover:bg-soft-green-dark text-white font-bold py-2 px-4 rounded-md transition duration-300">
-                      Edit Profile
-                    </button>
-                  </div>
-                </div>
+                )}
               </div>
             )}
             
             {activeTab === 'orders' && (
               <div>
                 <h2 className="text-2xl font-bold mb-6">Order History</h2>
-                {userData?.orders?.length > 0 ? (
-                  <div className="space-y-4">
-                    {userData.orders.map(order => (
-                      <div key={order.id} className="border border-gray-200 rounded-md p-4">
-                        <p>Order #{order.id}</p>
-                      </div>
-                    ))}
-                  </div>
+                
+                {selectedOrderId ? (
+                  // Show selected order details
+                  <OrderDetails 
+                    order={orders.find(order => order.id === selectedOrderId)}
+                    onBack={() => setSelectedOrderId(null)}
+                  />
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500 mb-4">You haven't placed any orders yet.</p>
-                    <Link 
-                      to="/shop" 
-                      className="bg-soft-green hover:bg-soft-green-dark text-white font-bold py-2 px-4 rounded-md transition duration-300"
-                    >
-                      Start Shopping
-                    </Link>
-                  </div>
+                  // Show order list
+                  <OrderList 
+                    orders={orders}
+                    isLoading={loadingOrders}
+                    error={orderError}
+                    onViewOrder={(orderId) => setSelectedOrderId(orderId)}
+                  />
                 )}
               </div>
             )}
@@ -287,6 +562,25 @@ const AccountPage = () => {
                     Explore Products
                   </Link>
                 </div>
+              </div>
+            )}
+            
+            {activeTab === 'notifications' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Notification Preferences</h2>
+                {notificationPreferences ? (
+                  <NotificationPreferences 
+                    initialPreferences={notificationPreferences}
+                    onSave={(updatedPreferences) => {
+                      setNotificationPreferences(updatedPreferences);
+                      // In a real app, this would be saved to the backend
+                    }}
+                  />
+                ) : (
+                  <div className="flex justify-center items-center py-8">
+                    <FontAwesomeIcon icon={faSpinner} spin size="2x" className="text-soft-green" />
+                  </div>
+                )}
               </div>
             )}
           </div>

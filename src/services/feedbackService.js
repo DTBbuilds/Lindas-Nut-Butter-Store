@@ -68,6 +68,21 @@ class FeedbackService {
       throw error;
     }
   }
+
+  /**
+   * Get a paginated list of feedback
+   * @param {object} params - Query parameters (page, limit, status, minRating, etc.)
+   * @returns {Promise<object>} Paginated feedback list
+   */
+  async getFeedbackList(params = {}) {
+    try {
+      const response = await api.get('/feedback', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting feedback list:', error);
+      throw error;
+    }
+  }
 }
 
 export default new FeedbackService();

@@ -47,7 +47,7 @@ socketService.initialize(server);
 // Configure CORS with explicit options
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://lindas-nut-butter-store-store-store.com', 'https://www.lindas-nut-butter-store-store-store.com']
+    ? [process.env.FRONTEND_URL, process.env.BASE_URL].filter(Boolean)
     : true, // Allow all origins in development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
@@ -124,6 +124,23 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+// Serve React build files in production mode
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React build folder
+  app.use(express.static(path.join(__dirname, '../build')));
+  
+  // For any request that doesn't match an API route, serve the React app
+  app.get('*', (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    res.sendFile(path.join(__dirname, '../build', 'index.html'));
+  });
+  
+  console.log('🌐 Running in PRODUCTION mode - serving React build files');
+}
+
 // Use routes
 app.use('/api', routes);
 app.use('/api/email', emailRoutes);
@@ -161,12 +178,21 @@ const ngrokHelper = require('./utils/ngrokHelper');
 // Connect to MongoDB
 const connectMongoDB = async () => {
   try {
-    // Modern MongoDB driver no longer needs useNewUrlParser and useUnifiedTopology
-    await mongoose.connect(config.mongodb.uri);
-    console.log('MongoDB connected');
+    // Connect using connection string and options from config
+    await mongoose.connect(config.mongodb.uri, config.mongodb.options);
+    
+    // Log information about the connection
+    const dbName = mongoose.connection.name;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const connectionType = isProduction ? 'MongoDB Atlas' : 'Local MongoDB';
+    
+    console.log(`Connected to ${connectionType} database: ${dbName}`);
+    console.log(`Running in ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
+    
     return true;
   } catch (err) {
-    console.error('MongoDB connection error:', err);
+    console.error('MongoDB connection error:', err.message);
+    console.error(err.stack);
     return false;
   }
 };
@@ -613,16 +639,27 @@ connectMongoDB().then(async connected => {
   }
 
   server.listen(PORT, async () => {
-    const baseUrl = `http://localhost:${PORT}`;
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? process.env.BASE_URL || process.env.PRODUCTION_BASE_URL
+      : `http://localhost:${PORT}`;
     
-    // First try to use ngrok if available
-    const ngrokConfigured = await ngrokHelper.configureNgrokCallbacks();
-    
-    // If ngrok is not available, fall back to localhost (but this won't work for Mpesa callbacks)
-    if (!ngrokConfigured) {
-      console.warn('⚠️ Using localhost for callbacks (M-Pesa payments may not work correctly)');
-      updateCallbackUrls(baseUrl);
-      ngrokHelper.printCallbackHelp();
+    // Only use ngrok in development mode
+    if (process.env.NODE_ENV !== 'production') {
+      // First try to use ngrok if available
+      const ngrokConfigured = await ngrokHelper.configureNgrokCallbacks();
+      
+      // If ngrok is not available, fall back to localhost (but this won't work for Mpesa callbacks)
+      if (!ngrokConfigured) {
+        console.warn('⚠️ Using localhost for callbacks (M-Pesa payments may not work correctly)');
+        updateCallbackUrls(baseUrl);
+        ngrokHelper.printCallbackHelp();
+      }
+    } else {
+      // In production, use the configured callback URLs
+      console.log('🌐 Running in PRODUCTION mode - using configured callback URLs');
+      console.log(`📡 Callback URL: ${process.env.CALLBACK_URL}`);
+      console.log(`📡 Validation URL: ${process.env.VALIDATION_URL}`);
+      console.log(`📡 Confirmation URL: ${process.env.CONFIRMATION_URL}`);
     }
   
   console.log('========================================================');

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const CustomerSchema = new mongoose.Schema({
   name: {
@@ -79,6 +80,38 @@ CustomerSchema.methods.generateToken = function() {
     { customerId: this._id },
     process.env.JWT_SECRET || 'your-secret-key',
     { expiresIn: '7d' }
+  );
+};
+
+// Generate password reset token
+CustomerSchema.methods.generatePasswordResetToken = function() {
+  // Create a random token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  // Hash the token and save to the database
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+    
+  // Set expiration to 1 hour from now
+  this.passwordResetExpires = Date.now() + 3600000; // 1 hour
+  
+  return resetToken;
+};
+
+// Verify password reset token
+CustomerSchema.methods.verifyPasswordResetToken = function(token) {
+  // Hash the provided token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  // Check if token matches and is not expired
+  return (
+    this.passwordResetToken === hashedToken && 
+    this.passwordResetExpires > Date.now()
   );
 };
 

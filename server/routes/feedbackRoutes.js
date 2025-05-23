@@ -43,10 +43,23 @@ router.post('/', async (req, res) => {
       });
     }
     
+    // Check if feedback already exists for this customer email and order
+    const existingFeedback = await Feedback.findOne({
+      orderId,
+      'customer.email': order.customer.email
+    });
+    
+    if (existingFeedback) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already submitted feedback for this order'
+      });
+    }
+    
     // Create feedback document
     const feedback = new Feedback({
       orderId,
-      orderNumber: orderNumber || order.referenceNumber,
+      orderNumber: orderNumber || order.orderNumber,
       customer: order.customer,
       ratings,
       comments,

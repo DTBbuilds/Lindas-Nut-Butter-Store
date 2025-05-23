@@ -4,7 +4,10 @@ const Customer = require('../models/Customer');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const authMiddleware = require('../authMiddleware');
+const emailService = require('../utils/emailService');
+const config = require('../config');
 
 // Middleware to verify customer token
 const verifyCustomerToken = async (req, res, next) => {
@@ -351,6 +354,128 @@ router.post('/address', verifyCustomerToken, [
     res.status(500).json({
       success: false,
       message: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/customers/forgot-password
+// @desc    Request password reset email
+// @access  Public
+router.post('/forgot-password', [
+  body('email').isEmail().withMessage('Please provide a valid email')
+], async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array()
+    });
+  }
+  
+  const { email } = req.body;
+  
+  try {
+    // Find customer by email
+    const customer = await Customer.findOne({ email });
+    
+    // Don't reveal if customer exists or not for security
+    if (!customer) {
+      return res.status(200).json({
+        success: true,
+        message: 'If your email is registered, you will receive a password reset link shortly'
+      });
+    }
+    
+    // Generate reset token
+    const resetToken = customer.generatePasswordResetToken();
+    await customer.save({ validateBeforeSave: false });
+    
+    // Create reset URL
+    const resetUrl = `${req.protocol}://${req.get('host') || config.clientUrl || 'localhost:3000'}/reset-password/${resetToken}`;
+    
+    // Send email
+    await emailService.sendPasswordResetEmail(customer.email, resetToken, resetUrl);
+    
+    res.status(200).json({
+      success: true,
+      message: 'If your email is registered, you will receive a password reset link shortly'
+    });
+  } catch (error) {
+    console.error('Password reset request error:', error);
+    
+    // If there's an error, reset the token fields
+    if (error.customer) {
+      error.customer.passwordResetToken = undefined;
+      error.customer.passwordResetExpires = undefined;
+      await error.customer.save({ validateBeforeSave: false });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Could not send password reset email. Please try again later.'
+    });
+  }
+});
+
+// @route   POST /api/customers/reset-password/:token
+// @desc    Reset password using token
+// @access  Public
+router.post('/reset-password/:token', [
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+], async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array()
+    });
+  }
+  
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+    
+    // Find customer with valid reset token
+    const customer = await Customer.findOne({
+      passwordResetToken: crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex'),
+      passwordResetExpires: { $gt: Date.now() }
+    }).select('+password');
+    
+    if (!customer) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password reset token is invalid or has expired'
+      });
+    }
+    
+    // Update password and clear reset token fields
+    customer.password = password;
+    customer.passwordResetToken = undefined;
+    customer.passwordResetExpires = undefined;
+    await customer.save();
+    
+    // Generate new login token
+    const loginToken = customer.generateToken();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully',
+      token: loginToken
+    });
+  } catch (error) {
+    console.error('Password reset error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Could not reset password. Please try again later.'
     });
   }
 });

@@ -184,7 +184,17 @@ const OrderSchema = new Schema({
 
 // Transaction Schema
 const TransactionSchema = new Schema({
-  orderId: { type: Schema.Types.ObjectId, ref: 'Order' },
+  orderId: { 
+    type: Schema.Types.Mixed, // Changed from ObjectId to Mixed to allow both ObjectId and String
+    ref: 'Order',
+    validate: {
+      validator: function(v) {
+        // Allow either ObjectId or String
+        return v === null || v === undefined || mongoose.Types.ObjectId.isValid(v) || typeof v === 'string';
+      },
+      message: props => `${props.value} is not a valid ObjectId or String`
+    }
+  },
   transactionId: { type: String }, // M-Pesa transaction ID
   merchantRequestId: { type: String }, // For STK push
   requestId: { type: String }, // CheckoutRequestID for STK push

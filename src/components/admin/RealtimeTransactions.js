@@ -17,6 +17,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
  */
 const RealtimeTransactions = ({ onNewTransaction }) => {
   const [polling, setPolling] = useState(false);
+  const [connected, setConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [lastTransactionId, setLastTransactionId] = useState(null);
@@ -29,6 +30,7 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
     // Start polling
     console.log('Setting up transaction polling at interval:', pollingInterval);
     setPolling(true);
+    setConnected(true);
     
     // Initial fetch
     fetchRecentTransactions();
@@ -46,6 +48,7 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
         clearInterval(timerRef.current);
       }
       setPolling(false);
+      setConnected(false);
     };
   }, [notificationsEnabled, pollingInterval]);
   
@@ -59,7 +62,15 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      // Update connection status on successful API call
+      setConnected(true);
+      
       const transactions = response.data.data || [];
+      
+      // If no transactions are returned, don't process further
+      if (!transactions || transactions.length === 0) {
+        return;
+      }
       
       if (transactions.length > 0) {
         // Process new transactions (ones we haven't seen before)
@@ -114,7 +125,15 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching recent transactions:', error);
+      console.error('Error fetching data:', error);
+      setConnected(false);
+      
+      // Don't keep retrying if there's a persistent error
+      // This prevents console spam
+      if (error.response && error.response.status === 500) {
+        // Increase polling interval to reduce server load
+        setPollingInterval(prev => Math.min(prev * 2, 60000)); // Max 1 minute
+      }
     }
   };
   
