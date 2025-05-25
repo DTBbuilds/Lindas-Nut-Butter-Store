@@ -1,10 +1,12 @@
 /**
  * Admin Controller
  * 
- * Provides comprehensive admin functionality for managing the store
+ * Provides comprehensive admin functionality for managing the store,
+ * including customer management, order processing, and analytics
  */
 
-const { Order, Transaction, Product, Feedback } = require('../models');
+// Import model helper to avoid circular dependency issues
+const { getOrder, getTransaction, getProduct, getFeedback, getCustomer } = require('../utils/modelHelper');
 const mongoose = require('mongoose');
 
 // Get admin dashboard summary statistics
@@ -16,6 +18,13 @@ exports.getDashboardStats = async (req, res) => {
     
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    // Get model references using the helper
+    const Order = getOrder();
+    const Transaction = getTransaction();
+    const Product = getProduct();
+    const Feedback = getFeedback();
+    const Customer = getCustomer();
     
     // Get orders count
     const totalOrders = await Order.countDocuments();
@@ -151,9 +160,14 @@ exports.getDashboardStats = async (req, res) => {
 // Get recent orders for admin dashboard
 exports.getRecentOrders = async (req, res) => {
   try {
+    const { limit = 10 } = req.query;
+    
+    // Get Order model using the helper
+    const Order = getOrder();
+
     const orders = await Order.find()
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(limit);
     
     return res.status(200).json({
       success: true,
@@ -172,17 +186,14 @@ exports.getRecentOrders = async (req, res) => {
 // Get recent transactions for admin dashboard
 exports.getRecentTransactions = async (req, res) => {
   try {
-    // Check if Transaction model is available
-    if (!Transaction) {
-      return res.status(200).json({
-        success: true,
-        data: []
-      });
-    }
+    const { limit = 10 } = req.query;
     
+    // Get Transaction model using the helper
+    const Transaction = getTransaction();
+
     const transactions = await Transaction.find()
       .sort({ timestamp: -1 })
-      .limit(10)
+      .limit(limit)
       .populate('orderId', 'referenceNumber customer.name status paymentStatus');
     
     return res.status(200).json({
@@ -202,22 +213,12 @@ exports.getRecentTransactions = async (req, res) => {
 // Get very recent transactions (last 5 minutes) for real-time updates
 exports.getRealtimeTransactions = async (req, res) => {
   try {
-    // Check if Transaction model is available
-    if (!Transaction) {
-      return res.status(200).json({
-        success: true,
-        data: [],
-        meta: {
-          timeWindow: '5 minutes',
-          timestamp: new Date(),
-          message: 'Transaction model not available'
-        }
-      });
-    }
-    
-    // Get transactions from the last 5 minutes
+    // Get very recent transactions
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     
+    // Get Transaction model using the helper
+    const Transaction = getTransaction();
+
     const transactions = await Transaction.find({
       timestamp: { $gte: fiveMinutesAgo }
     })
@@ -252,6 +253,9 @@ exports.getRealtimeTransactions = async (req, res) => {
 exports.getMonthlySalesData = async (req, res) => {
   try {
     const year = req.query.year || new Date().getFullYear();
+    
+    // Get Order model using the helper
+    const Order = getOrder();
     
     const monthlySales = await Order.aggregate([
       {
@@ -313,6 +317,9 @@ exports.getProductSalesRankings = async (req, res) => {
       };
     }
     
+    // Get Order model using the helper
+    const Order = getOrder();
+    
     const productSales = await Order.aggregate([
       { $match: query },
       { $unwind: '$items' },
@@ -345,6 +352,9 @@ exports.getProductSalesRankings = async (req, res) => {
 // Get recent feedback for admin dashboard
 exports.getRecentFeedback = async (req, res) => {
   try {
+    // Get Feedback model using the helper
+    const Feedback = getFeedback();
+    
     // Check if Feedback model is available
     if (!Feedback) {
       console.error('Feedback model not available');

@@ -10,22 +10,25 @@ const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
-const mongoose = require('mongoose');
 const path = require('path');
+
+// Import improved database connection
+const { connectDB, mongoose } = require('./db/connection');
 const { Order, Transaction, Product, InventoryLog, User } = require('./models');
 const inventoryManager = require('./utils/inventoryManager');
 const orderManager = require('./utils/orderManager');
 const config = require('./config');
+const { detectNgrokTunnel } = require('./utils/detectNgrok');
 const authRoutes = require('./routes/authRoutes');
 const adminAuthRoutes = require('./routes/adminAuthRoutes');
 const directAdminRoutes = require('./routes/directAdminRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const customerBatchRoutes = require('./routes/customerBatchRoutes');
 
 // Import routes
 const routes = require('./routes');
 const emailRoutes = require('./routes/emailRoutes');
 const customerRoutes = require('./routes/customerRoutes');
-const debugRoutes = require('./debug-routes');
 // Note: authRoutes already mounted earlier
 
 // Import socket service for real-time updates
@@ -45,33 +48,69 @@ const server = http.createServer(app);
 socketService.initialize(server);
 
 // Middleware
-// Import custom CORS middleware
-const corsMiddleware = require('./middleware/cors');
+// Configure CORS with explicit options
+app.use((req, res, next) => {
+  // Get the origin from the request headers
+  const origin = req.headers.origin;
+  
+  // Always require a specific origin for credentials mode requests
+  if (origin) {
+    // In development, allow any origin that's specified
+    if (process.env.NODE_ENV !== 'production') {
+      res.header('Access-Control-Allow-Origin', origin);
+    } else {
+      // In production, only allow specified origins
+      const allowedOrigins = [process.env.FRONTEND_URL, process.env.BASE_URL].filter(Boolean);
+      if (allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+      }
+    }
+  } else {
+    // For requests without origin (like from Postman or direct API calls)
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 
+    'Content-Type, Authorization, Accept, cache-control, pragma, expires, ' +
+    'if-modified-since, if-none-match, last-modified, etag, content-length, ' +
+    'X-Requested-With, X-CSRF-Token');
+  
+  // Always enable credentials for requests with an origin
+  if (origin) {
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  
+  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Total-Count, ETag');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  
+  next();
+});
 
-// Apply CORS middleware - allow all origins in production
-app.use(corsMiddleware);
-
-// Also keep the standard cors middleware as a fallback
+// Configure cors middleware specifically
 app.use(cors({
-  origin: '*', // Allow all origins in both production and development
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'Accept', 
-    'cache-control', 
-    'pragma', 
-    'expires',
-    'if-modified-since',
-    'if-none-match',
-    'last-modified',
-    'etag',
-    'content-length',
-    'X-Requested-With', 
-    'X-CSRF-Token'
-  ],
-  credentials: true,
-  exposedHeaders: ['Content-Length', 'X-Total-Count', 'ETag']
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // For requests with origin, use the same policy as above
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    } else {
+      const allowedOrigins = [process.env.FRONTEND_URL, process.env.BASE_URL].filter(Boolean);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
 }));
 
 // Log all requests for debugging
@@ -98,16 +137,11 @@ app.use(cookieParser(process.env.COOKIE_SECRET || 'your-secret-key'));
 app.set('trust proxy', 1);
 
 // Mount routes
-app.use('/api/admin', directAdminRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/admin-auth', adminAuthRoutes);
-app.use('/api/admin-protected', adminRoutes);
-app.use('/api', routes);
-app.use('/api/email', emailRoutes);
-app.use('/api/customers', customerRoutes);
-
-// Mount debug routes to diagnose deployment issues
-app.use('/api/debug', debugRoutes);
+app.use('/api/auth', adminAuthRoutes);
+app.use('/api/admin', directAdminRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/admin', customerBatchRoutes);
 
 // Serve static files from the public directory with proper options
 app.use(express.static('public', {
@@ -141,7 +175,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../build')));
   
   // For any request that doesn't match an API route, serve the React app
-  app.get('*', (req, res) => {
+  app.get('*', (req, res, next) => {
     // Skip API routes
     if (req.path.startsWith('/api/')) {
       return next();
@@ -170,6 +204,20 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/feedback', feedbackRoutes);
 
+// Health check endpoint for monitoring
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    serverInfo: {
+      uptime: process.uptime(),
+      memoryUsage: process.memoryUsage(),
+      nodeVersion: process.version
+    }
+  });
+});
+
 // Initialize all product inventory statuses
 const { updateAllInventoryStatuses } = require('./utils/inventoryManager');
 setTimeout(async () => {
@@ -186,27 +234,25 @@ const { updateCallbackUrls } = require('./utils/mpesaHelpers');
 const { renameAllMediaFiles } = require('./utils/fileRenamer');
 const ngrokHelper = require('./utils/ngrokHelper');
 
-// Connect to MongoDB
-const connectMongoDB = async () => {
+// Connect to MongoDB with improved connection handling
+async function connectMongoDB() {
   try {
-    // Connect using connection string and options from config
-    await mongoose.connect(config.mongodb.uri, config.mongodb.options);
+    // Use the improved database connection module
+    await connectDB();
+    console.log('Connected to MongoDB with enhanced connection handling');
     
-    // Log information about the connection
-    const dbName = mongoose.connection.name;
-    const isProduction = process.env.NODE_ENV === 'production';
-    const connectionType = isProduction ? 'MongoDB Atlas' : 'Local MongoDB';
+    // Import the Admin model to ensure it's registered with mongoose
+    const Admin = require('./models/admin.model.js');
     
-    console.log(`Connected to ${connectionType} database: ${dbName}`);
-    console.log(`Running in ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
+    // Create a default admin user if none exists
+    await Admin.createDefaultAdmin();
     
     return true;
   } catch (err) {
-    console.error('MongoDB connection error:', err.message);
-    console.error(err.stack);
+    console.error('MongoDB connection error:', err);
     return false;
   }
-};
+}
 
 // Get OAuth Token from Safaricom
 const getOAuthToken = async () => {
@@ -636,8 +682,44 @@ const testMpesaCredentials = async () => {
 // Start server and connect to MongoDB
 const PORT = config.server.port;
 
-// Connect to MongoDB before starting the server
-connectMongoDB().then(async connected => {
+// Detect Ngrok tunnel and update M-Pesa callback URLs
+const setupNgrokAndStartServer = async () => {
+  try {
+    // Try to detect Ngrok tunnel
+    const ngrokUrl = await detectNgrokTunnel();
+    
+    if (ngrokUrl) {
+      console.log('📱 M-Pesa Callback Configuration with Ngrok:');
+      console.log('-----------------------------------');
+      console.log('Updated callback URLs:');
+      console.log(`  - Callback URL: ${process.env.CALLBACK_URL}`);
+      console.log(`  - Validation URL: ${process.env.VALIDATION_URL}`);
+      console.log(`  - Confirmation URL: ${process.env.CONFIRMATION_URL}`);
+    } else {
+      console.log('⚠️ WARNING: Using localhost for callbacks!');
+      console.log('M-Pesa API requires publicly accessible URLs for callbacks.');
+      console.log('For testing, you should use ngrok to expose your local server.');
+      console.log('');
+      console.log('How to set up ngrok:');
+      console.log('1. Run: npm run tunnel   (or)   npx ngrok http 5000');
+      console.log('2. Restart the server, it will auto-detect the ngrok URL');
+    }
+    
+    // Now connect to MongoDB and start the server
+    const connected = await connectMongoDB();
+    startServer(connected);
+  } catch (error) {
+    console.error('❌ Error during startup:', error);
+    // Connect anyway to allow basic functionality
+    const connected = await connectMongoDB();
+    startServer(connected);
+  }
+};
+
+// Start server with Ngrok detection first
+setupNgrokAndStartServer();
+
+async function startServer(connected) {
   if (!connected) {
     console.error('Failed to connect to MongoDB. Server will start, but some features may not work correctly.');
   }
@@ -654,23 +736,24 @@ connectMongoDB().then(async connected => {
       ? process.env.BASE_URL || process.env.PRODUCTION_BASE_URL
       : `http://localhost:${PORT}`;
     
-    // Only use ngrok in development mode
     if (process.env.NODE_ENV !== 'production') {
-      // First try to use ngrok if available
-      const ngrokConfigured = await ngrokHelper.configureNgrokCallbacks();
-      
-      // If ngrok is not available, fall back to localhost (but this won't work for Mpesa callbacks)
-      if (!ngrokConfigured) {
+      // In development, we've already tried to detect Ngrok during setupNgrokAndStartServer
+      if (!process.env.MPESA_CALLBACK_URL) {
         console.warn('⚠️ Using localhost for callbacks (M-Pesa payments may not work correctly)');
-        updateCallbackUrls(baseUrl);
-        ngrokHelper.printCallbackHelp();
+        // Provide information on callbacks using local URLs
+        console.log('📱 Current M-Pesa Callback Configuration:');
+        console.log('-----------------------------------');
+        console.log('Current callback URLs:');
+        console.log(`  - Callback URL: ${config.mpesa.callbackUrl}`);
+        console.log(`  - Validation URL: ${config.mpesa.validationUrl}`);
+        console.log(`  - Confirmation URL: ${config.mpesa.confirmationUrl}`);
       }
     } else {
       // In production, use the configured callback URLs
       console.log('🌐 Running in PRODUCTION mode - using configured callback URLs');
-      console.log(`📡 Callback URL: ${process.env.CALLBACK_URL}`);
-      console.log(`📡 Validation URL: ${process.env.VALIDATION_URL}`);
-      console.log(`📡 Confirmation URL: ${process.env.CONFIRMATION_URL}`);
+      console.log(`📡 Callback URL: ${process.env.CALLBACK_URL || config.mpesa.callbackUrl}`);
+      console.log(`📡 Validation URL: ${process.env.VALIDATION_URL || config.mpesa.validationUrl}`);
+      console.log(`📡 Confirmation URL: ${process.env.CONFIRMATION_URL || config.mpesa.confirmationUrl}`);
     }
   
   console.log('========================================================');
@@ -702,18 +785,21 @@ connectMongoDB().then(async connected => {
   console.log(`🚫 User rejects: ${config.test.phoneNumbers.reject}`);
   console.log('========================================================');
   console.log('🔍 Server is ready for M-Pesa integration testing!');
-  console.log(`Socket.io service enabled for real-time transaction updates`);
-});
-
-  // Process cleanup
+  console.log('Socket.io service enabled for real-time transaction updates');
+  
+  // Initialize all product inventory statuses after server start
+  inventoryManager.updateAllInventoryStatuses()
+    .then(result => {
+      console.log('Initialized all product inventory statuses:', result);
+    });
+  
+  // Handle graceful shutdown
   process.on('SIGINT', () => {
-    console.log('Shutting down server gracefully...');
-    server.close(() => {
-      console.log('Server closed.');
-      mongoose.connection.close(false, () => {
-        console.log('MongoDB connection closed.');
-        process.exit(0);
-      });
+    console.log('\nReceived SIGINT. Shutting down gracefully...');
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed.');
+      process.exit(0);
     });
   });
-});
+  });
+}

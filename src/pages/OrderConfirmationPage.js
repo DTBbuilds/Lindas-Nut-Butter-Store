@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner, faShoppingBag, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { API_URL } from '../config';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const OrderConfirmationPage = () => {
   const { orderId } = useParams();

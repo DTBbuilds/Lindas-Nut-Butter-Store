@@ -150,49 +150,70 @@ export const CartProvider = ({ children }) => {
 
   // Standardize product IDs for consistent handling
   const normalizeProductId = (product) => {
-    // Debug the incoming product
-    console.log('Normalizing product ID for:', product ? 
-      (product.name || 'unnamed product') : 'undefined product');
-
-    // Handle product IDs consistently by checking all possible formats
-    // 1. If product is an ID string or number itself, return it as string
-    if (typeof product === 'string' || typeof product === 'number') {
-      console.log(`Direct ID conversion: ${String(product)}`);
-      return String(product);
-    }
-
-    // If product is null or undefined, return null
     if (!product) {
-      console.warn('Product is null or undefined');
+      console.log('normalizeProductId: product is null or undefined');
       return null;
     }
-
-    // Priority for numeric ID (matches MongoDB schema)
-    if (product.id !== undefined && product.id !== null) {
-      console.log(`Using numeric ID: ${product.id}`);
-      return String(product.id); // Always convert to string for consistent comparison
-    }
-
-    // Fall back to MongoDB _id if numeric id is not available
-    if (product._id) {
-      console.log(`Using MongoDB _id: ${product._id}`);
-      return String(product._id);
-    }
-
-    // Last resort - check for productId field (already normalized)
-    if (product.productId) {
-      console.log(`Using productId field: ${product.productId}`);
-      return String(product.productId);
-    }
-
-    // Handle nested product structure
-    if (product.product && (typeof product.product === 'string' || typeof product.product === 'number')) {
-      console.log(`Using nested product ID: ${product.product}`);
-      return String(product.product);
+    
+    // Handle case where the entire product is passed vs just the ID
+    if (typeof product === 'string' || typeof product === 'number') {
+      console.log(`normalizeProductId: direct string/number ID: ${String(product)}`);
+      return String(product); // Convert to string for consistent comparison
     }
     
-    console.warn('Product has no valid ID', product);
-    return null;
+    // Debug input product
+    console.log('normalizeProductId input:', {
+      name: product.name,
+      id: product.id,
+      _id: product._id,
+      productId: product.productId,
+      cartItemId: product.cartItemId
+    });
+    
+    // Handle product objects with various ID formats
+    const possibleIds = [
+      product.productId,
+      product._id,
+      product.id,
+      product.numericId,
+      product.cartItemId // Added cartItemId as a possible ID
+    ];
+    
+    // Filter out undefined/null values and convert to string
+    const validIds = possibleIds.filter(id => id !== undefined && id !== null)
+                              .map(id => String(id));
+    
+    console.log('Valid IDs found:', validIds);
+    
+    // For cart items, prioritize cartItemId if available
+    if (product.cartItemId) {
+      console.log('Using cartItemId as primary ID:', product.cartItemId);
+      return String(product.cartItemId);
+    }
+    
+    // For product variants, create a composite ID that includes selected variant info
+    if (product.selectedVariant && validIds.length > 0) {
+      const baseId = validIds[0];
+      const variantId = product.selectedVariant.id || product.selectedVariant._id || product.selectedVariant.size || product.selectedVariant.mass;
+      if (variantId) {
+        const compositeId = `${baseId}_${variantId}`;
+        console.log('Created variant composite ID:', compositeId);
+        return compositeId;
+      }
+    }
+    
+    // Create a composite key for matching that includes product name and size
+    // This helps identify duplicate products even with different IDs
+    if (product.name) {
+      const size = product.size || (product.selectedVariant && product.selectedVariant.size) || ''; 
+      const nameBasedId = validIds.length > 0 ? `${validIds[0]}_${product.name}_${size}` : `${product.name}_${size}`;
+      console.log('Created name-based ID:', nameBasedId);
+      return nameBasedId;
+    }
+    
+    const finalId = validIds.length > 0 ? validIds[0] : product.sku || null;
+    console.log('Final normalized ID:', finalId);
+    return finalId;
   };
 
   // Generate a unique cart item ID to avoid duplicate keys
@@ -202,46 +223,50 @@ export const CartProvider = ({ children }) => {
 
   // Create a standardized cart item structure
   const createCartItem = (product, quantity = 1) => {
-    // Get normalized string ID
-    const productId = normalizeProductId(product);
-    if (!productId) {
-      throw new Error('Cannot add product without ID to cart');
+    if (!product) return null;
+    
+    // Create unique cart item ID
+    const cartItemId = generateUniqueId();
+    
+    // Handle variant price if selected variant exists
+    let price = Number(product.price) || 0;
+    let size = product.size || '370g'; // Default size
+    let sku = product.sku || 'SKU-DEFAULT';
+    
+    if (product.selectedVariant) {
+      price = product.selectedVariant.price || price;
+      size = product.selectedVariant.size || `${product.selectedVariant.mass}g` || size;
+      sku = product.selectedVariant.sku || sku;
     }
-
-    // Important: Ensure we preserve the numeric id which corresponds to the database schema
-    // The backend expects products with numeric IDs
-    let numericId = 0;
     
-    // Try to get numeric ID - first check if product already has numeric id
-    if (product.id !== undefined && product.id !== null) {
-      numericId = Number(product.id);
-    } 
-    // Fall back to converting the string productId to number if possible
-    else if (!isNaN(Number(productId))) {
-      numericId = Number(productId);
-    }
-
-    console.log(`Creating cart item for ${product.name || 'Unknown Product'} with ID: ${productId} (numeric: ${numericId})`);
-    
-    // Generate a unique cart item ID to avoid duplicate keys
-    const uniqueCartItemId = generateUniqueId();
-    
-    // Standardized cart item format - always includes necessary fields
+    // Ensure consistent structure for better deduplication
     return {
-      ...product,                        // Preserve all original product data
-      _id: uniqueCartItemId,             // Unique ID for cart item to prevent duplicate keys
-      id: numericId,                     // Numeric ID matching database schema
-      productId: String(productId),      // Consistent ID field name for lookups as STRING
-      name: product.name || 'Unknown Product',
-      price: Number(product.price) || 0,
-      image: product.image || (product.images && product.images[0]) || '/images/placeholder.png',
-      images: product.images || (product.image ? [product.image] : []),
-      category: product.category || '',
-      sku: product.sku || '',
+      cartItemId,
+      id: product._id || product.id,
+      productId: product._id || product.id, // Alternative ID format
+      name: product.name,
+      description: product.description,
+      price,
+      image: product.image || (product.images && product.images[0]),
+      images: product.images,
+      category: product.category,
+      sku,
+      inStock: product.inStock !== false, // Default to true if not specified
+      stockQuantity: product.stockQuantity || 999, // Default to large value if not specified
       quantity: Number(quantity) || 1,
-      addedAt: new Date().toISOString(), // Track when item was added
-      inStock: product.inStock === false ? false : true, // Explicitly set inStock status
-      stockQuantity: product.stockQuantity || 999    // Track available stock with fallback
+      size, // Standardized size format
+      // Store variant in a consistent format
+      selectedVariant: product.selectedVariant ? {
+        id: product.selectedVariant.id || '',
+        price: product.selectedVariant.price || price,
+        size: product.selectedVariant.size || '',
+        mass: product.selectedVariant.mass || '',
+        sku: product.selectedVariant.sku || ''
+      } : null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      // Add a composite key for better matching
+      productSignature: `${product.name}_${size}`
     };
   };
 
@@ -253,7 +278,15 @@ export const CartProvider = ({ children }) => {
       return false;
     }
 
-    const productId = normalizeProductId(product);
+    // Enhanced duplicate detection with better product identity matching
+    // Create a more reliable product signature that includes name and variant
+    const productSignature = {
+      ...product,
+      // Make sure size is consistently represented
+      size: product.size || (product.selectedVariant && (product.selectedVariant.size || `${product.selectedVariant.mass}g`)) || ''
+    };
+    
+    const productId = normalizeProductId(productSignature);
     if (!productId) {
       toast.error(<CustomToast type="error" title="Error" message="Product has no valid ID. Cannot add to cart." />, { containerId: 'main-toast-container' });
       return false;
@@ -270,26 +303,41 @@ export const CartProvider = ({ children }) => {
         const idForFetch = typeof product.id === 'number' ? product.id : product.productId || product.id;
         const freshProduct = await productService.fetchProductById(idForFetch);
         if (freshProduct) {
-          updatedProduct = freshProduct;
+          updatedProduct = {
+            ...freshProduct,
+            selectedVariant: product.selectedVariant, // Preserve selected variant
+            size: product.size || (product.selectedVariant && (product.selectedVariant.size || `${product.selectedVariant.mass}g`)) || freshProduct.size
+          };
           console.log('Got fresh product data for cart:', freshProduct.name);
         }
       } catch (error) {
         // If fetch fails, continue with the provided product data
         console.warn('Could not fetch fresh product data, using provided product:', error);
       }
-    
-      // Check if product already exists in cart using the normalized ID
-      const existingIndex = cartItems.findIndex(item => {
-        const itemId = normalizeProductId(item);
-        return itemId === productId;
+      
+      // Enhanced duplicate detection - check for similar products
+      const existingItems = cartItems.filter(item => {
+        // Primary match by ID
+        if (normalizeProductId(item) === productId) return true;
+        
+        // Secondary match by name and size/variant
+        if (item.name === product.name) {
+          const itemSize = item.size || '';
+          const productSize = product.size || 
+            (product.selectedVariant && (product.selectedVariant.size || `${product.selectedVariant.mass}g`)) || '';
+          
+          return itemSize === productSize;
+        }
+        
+        return false;
       });
 
       let updatedItems = [...cartItems];
-      let newQuantity;
       
-      if (existingIndex >= 0) {
+      if (existingItems.length > 0) {
         // Update quantity if product already in cart
-        newQuantity = (updatedItems[existingIndex].quantity || 1) + quantity;
+        const existingIndex = cartItems.indexOf(existingItems[0]);
+        const newQuantity = (updatedItems[existingIndex].quantity || 1) + quantity;
         
         // Update the existing item with fresh product data if available
         updatedItems[existingIndex] = {
@@ -303,6 +351,15 @@ export const CartProvider = ({ children }) => {
           quantity: newQuantity,
           updatedAt: new Date().toISOString() // Track updates
         };
+        
+        // Remove any other duplicate items that match this product
+        if (existingItems.length > 1) {
+          // Get all indices except the first one we just updated
+          const duplicateIndices = existingItems.slice(1).map(item => cartItems.indexOf(item));
+          
+          // Filter out the duplicate items
+          updatedItems = updatedItems.filter((_, index) => !duplicateIndices.includes(index));
+        }
       } else {
         // Add new item to cart with fresh data
         const cartItem = createCartItem(updatedProduct, quantity);
@@ -326,58 +383,135 @@ export const CartProvider = ({ children }) => {
   };
 
   // Remove item from cart with enhanced feedback
-  const removeFromCart = (productId) => {
-    const normalizedId = typeof productId === 'object' ? normalizeProductId(productId) : productId;
-    
-    // Find the item first to get its name for the notification
-    const itemToRemove = cartItems.find(item => {
-      const itemId = normalizeProductId(item);
-      return itemId === normalizedId;
-    });
-    
-    setCartItems(prevItems => 
-      prevItems.filter(item => normalizeProductId(item) !== normalizedId)
-    );
-    
-    if (itemToRemove) {
-      toast.info(<CustomToast type="info" title="Removed" message={`${itemToRemove.name} removed from cart.`} />, { containerId: 'main-toast-container' });
-    } else {
-      toast.info(<CustomToast type="info" title="Removed" message="Item removed from cart." />, { containerId: 'main-toast-container' });
+  const removeFromCart = (productOrId) => {
+    try {
+      console.log('RemoveFromCart called with:', productOrId);
+      
+      // Handle different parameter types
+      const normalizedId = typeof productOrId === 'object' 
+        ? normalizeProductId(productOrId) 
+        : normalizeProductId({ id: productOrId });
+      
+      console.log('Normalized ID for removal:', normalizedId);
+      
+      // Find the item to display in toast
+      const item = cartItems.find(item => {
+        const itemId = normalizeProductId(item);
+        const matches = itemId === normalizedId;
+        console.log(`Comparing item ${item.name} for removal:`, { itemId, normalizedId, matches });
+        return matches;
+      });
+      
+      if (item) {
+        console.log('Found item to remove:', item.name);
+      } else {
+        console.log('No matching item found for removal');
+      }
+      
+      // Remove from cart
+      setCartItems(prev => {
+        const newItems = prev.filter(item => normalizeProductId(item) !== normalizedId);
+        console.log('Items removed:', prev.length - newItems.length);
+        return newItems;
+      });
+      
+      // Show success toast if item was found
+      if (item) {
+        toast.success(<CustomToast type="success" title="Removed from Cart" message={`${item.name} removed from your cart`} />, { containerId: 'main-toast-container' });
+      }
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+      toast.error(<CustomToast type="error" title="Error" message="Failed to remove item from cart" />, { containerId: 'main-toast-container' });
     }
   };
 
   // Update item quantity with inventory checks
   const updateQuantity = (productId, quantity) => {
-    const normalizedId = typeof productId === 'object' ? normalizeProductId(productId) : productId;
+    // Normalize the quantity value
+    const newQuantity = Math.max(1, Number(quantity) || 1);
     
-    // Handle removal if quantity is zero or less
-    if (quantity <= 0) {
-      removeFromCart(normalizedId);
-      return;
+    console.log('CartContext: updateQuantity called with:', { productId, quantity });
+    
+    // Check if we have a string ID or an object
+    if (typeof productId === 'object') {
+      console.log('Product is an object:', productId);
+    } else {
+      console.log('Product ID is:', productId);
     }
     
-    // Find the item to update using consistent ID handling
-    const itemToUpdate = cartItems.find(item => {
-      const itemId = normalizeProductId(item);
-      return itemId === normalizedId;
-    });
-    
-    if (itemToUpdate) {
-      // Allow any quantity (no stock limit)
-      // if (itemToUpdate.stockQuantity !== undefined && quantity > itemToUpdate.stockQuantity) {
-      //   toast.warning(<CustomToast type="warning" title="Stock Limit" message={`Only ${itemToUpdate.stockQuantity} units available.`} />, { containerId: 'main-toast-container' });
-      //   quantity = itemToUpdate.stockQuantity;
-      // }
+    setCartItems(prev => {
+      console.log('Current cart items:', prev);
       
-      // Update the item
-      setCartItems(prevItems => 
-        prevItems.map(item => 
-          normalizeProductId(item) === normalizedId 
-            ? { ...item, quantity, updatedAt: new Date().toISOString() } 
-            : item
-        )
-      );
-    }
+      // Debug all item IDs in cart for comparison
+      prev.forEach((item, index) => {
+        const itemId = normalizeProductId(item);
+        console.log(`Cart item ${index}:`, { 
+          name: item.name,
+          normalizedId: itemId,
+          rawIds: {
+            id: item.id,
+            _id: item._id,
+            productId: item.productId,
+            cartItemId: item.cartItemId
+          }
+        });
+      });
+      
+      const normalizedProductId = typeof productId === 'object' ? normalizeProductId(productId) : productId;
+      console.log('Normalized product ID to find:', normalizedProductId);
+      
+      const updatedItems = prev.map(item => {
+        const itemId = normalizeProductId(item);
+        
+        // Debug the comparison
+        console.log(`Comparing item ${item.name}:`, { 
+          itemId, 
+          normalizedProductId, 
+          matches: itemId === normalizedProductId 
+        });
+        
+        if (itemId === normalizedProductId) {
+          console.log('MATCH FOUND! Updating quantity for:', item.name);
+          
+          // Check if new quantity is within stock limits
+          if (item.stockQuantity && newQuantity > item.stockQuantity) {
+            // Don't update beyond stock limit
+            toast.warning(<CustomToast type="warning" title="Limited Stock" message={`Only ${item.stockQuantity} units available`} />, { containerId: 'main-toast-container' });
+            return {
+              ...item,
+              quantity: item.stockQuantity
+            };
+          }
+          
+          // Provide haptic feedback on mobile devices
+          if (navigator.vibrate) {
+            navigator.vibrate(10); // Gentle vibration
+          }
+          
+          // Show toast feedback for quantity updates
+          if (newQuantity > (item.quantity || 1)) {
+            toast.info(<CustomToast type="info" title="Quantity Updated" message={`${item.name}: ${item.quantity} → ${newQuantity}`} />, 
+              { containerId: 'main-toast-container', autoClose: 1500 });
+          }
+          
+          const updatedItem = {
+            ...item,
+            quantity: newQuantity,
+            updatedAt: new Date().toISOString()
+          };
+          
+          console.log('Updated item:', updatedItem);
+          return updatedItem;
+        }
+        return item;
+      });
+      
+      // Check if any items were actually updated
+      const itemWasUpdated = JSON.stringify(prev) !== JSON.stringify(updatedItems);
+      console.log('Was any item updated?', itemWasUpdated);
+      
+      return updatedItems;
+    });
   };
 
   // Clear entire cart

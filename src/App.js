@@ -14,6 +14,8 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 // Admin pages
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminCustomersPage from './pages/AdminCustomersPage';
+import AdminCustomerDetailPage from './pages/AdminCustomerDetailPage';
 
 // Customer account pages
 import AccountLoginPage from './pages/AccountLoginPage';
@@ -745,16 +747,18 @@ function App() {
             />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             {/* Admin routes - wrapped with AdminAuthProvider */}
             <Route element={<AdminAuthWrapper />}>
               <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/admin" element={<RequireAdmin><AdminDashboardPage /></RequireAdmin>} />
+              <Route path="/admin/customers" element={<RequireAdmin><AdminCustomersPage /></RequireAdmin>} />
+              <Route path="/admin/customers/:customerId" element={<RequireAdmin><AdminCustomerDetailPage /></RequireAdmin>} />
             </Route>
             
             {/* Customer account routes - wrapped with AuthProvider */}
             <Route element={<AuthWrapper />}>
+              <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/account/login" element={<AccountLoginPage />} />
               <Route path="/account/register" element={<AccountRegisterPage />} />
               <Route path="/account/forgot-password" element={<ForgotPasswordPage />} />

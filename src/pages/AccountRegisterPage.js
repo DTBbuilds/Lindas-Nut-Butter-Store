@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faEnvelope, faPhone, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { API_URL } from '../config';
+import { useAuth } from '../contexts/AuthContext';
+
+// Use the correct API URL based on environment
+const API_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' ? 
+    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+      'http://localhost:5000' : 
+      `http://${window.location.hostname}:5000` 
+    : 
+    ''
+  );
 
 const AccountRegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +27,25 @@ const AccountRegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isAuthenticated } = useAuth();
+  
+  // Check for redirect parameter in URL query
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTo = searchParams.get('redirect');
+  
+  // If user is already authenticated, redirect appropriately
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (redirectTo === 'checkout') {
+        navigate('/checkout');
+      } else if (redirectTo) {
+        navigate(redirectTo);
+      } else {
+        navigate('/account');
+      }
+    }
+  }, [isAuthenticated, navigate, redirectTo]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,16 +89,55 @@ const AccountRegisterPage = () => {
       });
       
       if (response.data && response.data.success) {
-        // Show success message
-        toast.success('Registration successful! Please log in.', { containerId: 'main-toast-container' });
+        // Store registration data temporarily to display in the login form
+        localStorage.setItem('registeredEmail', formData.email);
+        localStorage.setItem('justRegistered', 'true');
         
-        // Redirect to login page
-        navigate('/account/login');
+        // Save user registration data for profile completion
+        localStorage.setItem('userRegistrationData', JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          registrationTime: new Date().toISOString()
+        }));
+        
+        // Always show success message
+        toast.success('Registration successful! Please log in with your new account.', { 
+          containerId: 'main-toast-container',
+          autoClose: 4000 // Give users time to read the message
+        });
+        
+        // Always redirect to login page with appropriate redirect parameter
+        // This creates a more consistent user experience
+        const loginRedirect = redirectTo ? `/account/login?redirect=${redirectTo}` : '/account/login';
+        
+        // Use a short timeout to allow the toast to be visible before redirecting
+        setTimeout(() => {
+          navigate(loginRedirect);
+        }, 800);
       }
     } catch (err) {
-      console.error('Registration failed:', err);
-      setError(err.response?.data?.message || 'Registration failed');
-      toast.error(err.response?.data?.message || 'Registration failed', { containerId: 'main-toast-container' });
+      // Enhanced error logging to provide better error information
+      const errorDetails = {
+        status: err.response?.status,
+        message: err.response?.data?.message,
+        data: err.response?.data,
+        error: err.message
+      };
+      console.error('Registration failed:', errorDetails);
+      
+      // Set more specific error messages
+      let errorMessage = 'Registration failed';
+      if (err.response?.status === 400 && err.response?.data?.message === 'Customer already exists') {
+        errorMessage = 'An account with this email already exists. Please log in or use a different email.';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message === 'Network Error') {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage, { containerId: 'main-toast-container' });
     } finally {
       setLoading(false);
     }

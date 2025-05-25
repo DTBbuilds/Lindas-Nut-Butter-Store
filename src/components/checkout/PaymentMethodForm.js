@@ -70,15 +70,52 @@ const PaymentMethodForm = ({
       
       console.log('Initiating M-PESA payment with data:', mpesaPaymentData);
       
+      // Make the API request
       const response = await paymentService.initiateMpesaPayment(mpesaPaymentData);
-      setMpesaCheckoutId(response.CheckoutRequestID); // Note capital C - matching backend response format
+      console.log('Full M-PESA API response:', response);
       
+      // Extract checkout request ID from response (handle different possible formats)
+      // Look at the entire response object, it could be nested in data or directly in response
+      let checkoutRequestID;
+      
+      if (response?.data?.CheckoutRequestID) {
+        checkoutRequestID = response.data.CheckoutRequestID;
+      } else if (response?.CheckoutRequestID) {
+        checkoutRequestID = response.CheckoutRequestID;
+      } else if (response?.data?.checkoutRequestID) {
+        checkoutRequestID = response.data.checkoutRequestID;
+      } else if (response?.checkoutRequestID) {
+        checkoutRequestID = response.checkoutRequestID;
+      } else if (typeof response === 'string') {
+        // Try to parse the response if it's a string
+        try {
+          const parsedResponse = JSON.parse(response);
+          checkoutRequestID = parsedResponse.CheckoutRequestID || parsedResponse.checkoutRequestID;
+        } catch (e) {
+          console.error('Failed to parse response string:', e);
+        }
+      }
+      
+      // Log the extracted checkout request ID for debugging
+      console.log('Extracted M-PESA checkout request ID:', checkoutRequestID);
+      
+      // Store the ID for later use
+      setMpesaCheckoutId(checkoutRequestID);
+      
+      // Show notification to user
       toast.info('M-PESA payment initiated. Please check your phone for the payment prompt and enter your PIN.', {
-        autoClose: 10000
+        autoClose: 15000
       });
       
-      // Start checking payment status after 10 seconds
-      setTimeout(() => checkPaymentStatus(response.checkoutRequestID), 10000);
+      // Start checking payment status after a delay
+      // Only schedule the check if we have a valid checkout request ID
+      if (checkoutRequestID) {
+        console.log('Scheduling payment status check in 10 seconds...');
+        setTimeout(() => checkPaymentStatus(checkoutRequestID), 10000);
+      } else {
+        console.error('No checkout request ID found in response - cannot schedule status check');
+        toast.error('Could not verify payment status. If you complete the payment, please contact customer support with your M-PESA transaction ID.');
+      }
       
       return response;
     } catch (error) {
@@ -90,10 +127,22 @@ const PaymentMethodForm = ({
   
   // Check M-PESA payment status
   const checkPaymentStatus = async (checkoutRequestID) => {
+    // Validate checkout request ID
     if (!checkoutRequestID) {
       console.error('No checkout request ID provided for status check');
-      return;
+      // Try to use the one from state as a fallback
+      if (mpesaCheckoutId) {
+        console.log('Using checkout request ID from state as fallback:', mpesaCheckoutId);
+        checkoutRequestID = mpesaCheckoutId;
+      } else {
+        console.error('No checkout request ID available in state either');
+        toast.error('Could not verify payment status. If you complete the payment, please contact customer support with your M-PESA transaction ID.');
+        return;
+      }
     }
+    
+    // Log that we're checking payment status
+    console.log('Checking M-PESA payment status for checkout request ID:', checkoutRequestID);
     
     try {
       const statusResponse = await paymentService.checkMpesaPaymentStatus(checkoutRequestID);

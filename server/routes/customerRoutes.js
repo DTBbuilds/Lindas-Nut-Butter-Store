@@ -50,6 +50,80 @@ const verifyCustomerToken = async (req, res, next) => {
   }
 };
 
+// @route   POST /api/customers/login
+// @desc    Login a customer and return token
+// @access  Public
+router.post('/login', [
+  body('email').isEmail().withMessage('Please provide a valid email'),
+  body('password').notEmpty().withMessage('Password is required')
+], async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array()
+    });
+  }
+  
+  const { email, password } = req.body;
+  
+  try {
+    // Find customer by email and explicitly include password
+    const customer = await Customer.findOne({ email }).select('+password');
+    
+    if (!customer) {
+      console.log(`Login attempt: Customer with email ${email} not found`);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+    
+    console.log(`Customer found: ${customer.name}, checking password...`);
+    
+    // Check password using the method from the schema
+    const isMatch = await customer.comparePassword(password);
+    
+    if (!isMatch) {
+      console.log(`Login attempt: Invalid password for ${email}`);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+    
+    console.log(`Login successful for ${email}`);
+  
+    
+    // Create JWT token
+    const token = jwt.sign(
+      { customerId: customer._id },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+    
+    // Return success with token and customer info
+    res.json({
+      success: true,
+      token,
+      customer: {
+        id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        phoneNumber: customer.phoneNumber
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login'
+    });
+  }
+});
+
 // @route   POST /api/customers/register
 // @desc    Register a new customer
 // @access  Public
@@ -114,68 +188,21 @@ router.post('/register', [
   }
 });
 
-// @route   POST /api/customers/login
-// @desc    Login customer
-// @access  Public
-router.post('/login', [
-  body('email').isEmail().withMessage('Please provide a valid email'),
-  body('password').notEmpty().withMessage('Password is required')
-], async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      message: 'Validation failed',
-      errors: errors.array()
-    });
-  }
-  
-  const { email, password } = req.body;
-  
+// @route   GET /api/customers/profile
+// @desc    Get customer profile
+// @access  Private
+router.get('/profile', verifyCustomerToken, async (req, res) => {
   try {
-    // Find customer by email and include password for comparison
-    const customer = await Customer.findOne({ email }).select('+password');
-    
-    if (!customer) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
-    
-    // Compare passwords
-    const isMatch = await customer.comparePassword(password);
-    
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
-    
-    // Generate token
-    const token = customer.generateToken();
-    
-    // Remove password from response
-    const customerData = {
-      _id: customer._id,
-      name: customer.name,
-      email: customer.email,
-      phoneNumber: customer.phoneNumber
-    };
-    
-    res.status(200).json({
+    // Return the customer profile data
+    res.json({
       success: true,
-      token,
-      name: customer.name,
-      email: customer.email
+      customer: req.customer
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Profile fetch error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: 'Server error when fetching profile'
     });
   }
 });

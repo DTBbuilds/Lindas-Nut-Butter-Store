@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faLock, faUser, faArrowLeft, faStore, faUserFriends } from '@fortawesome/free-solid-svg-icons';
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState('');
@@ -17,48 +17,78 @@ const AdminLoginPage = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (admin) {
+      console.log('Admin is already logged in, redirecting to dashboard...');
       const from = location.state?.from?.pathname || '/admin';
-      navigate(from);
+      // Use direct window.location for more reliable navigation
+      window.location.href = from;
     }
-  }, [admin, navigate, location]);
+  }, [admin, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError('');
     setLocalLoading(true);
     
+    console.log('=== ADMIN LOGIN ATTEMPT (CLIENT) ===');
+    console.log('Email:', email);
+    console.log('Password length:', password?.length || 0);
+    
     try {
       // Validate input fields
       if (!email.trim() || !password.trim()) {
+        console.log('Validation failed: Missing email or password');
         setLocalError('Please enter both email and password');
         setLocalLoading(false);
         return;
       }
+      
+      // Get API URL for login
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      console.log('Using API URL:', API_URL);
+      
+      // Try using the context login method
+      console.log('Attempting login with AdminAuthContext');
       const success = await loginAdmin(email, password);
-
+      
       if (success) {
+        console.log('Login successful via context!');
         // Show success message
-        toast.success('Login successful!', {
+        toast.success('Login successful! Redirecting to dashboard...', {
           position: 'top-right',
-          autoClose: 3000
+          autoClose: 2000
         });
-
-        // Redirect to admin dashboard or previous page
-        const from = location.state?.from?.pathname || '/admin';
-        navigate(from);
+        
+        // Force direct browser navigation after short delay to ensure state updates
+        setTimeout(() => {
+          console.log('Redirecting to admin dashboard using direct navigation...');
+          // Force clear URL parameters and navigate to admin dashboard
+          window.location.href = '/admin';
+        }, 1500);
       } else {
-        setLocalError('Login failed. Please check your credentials.');
+        console.error('Login failed');
+        setLocalError(authError || 'Login failed. Please check your credentials.');
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      setLocalError(err.message || 'Login failed. Please check your credentials.');
+    } catch (error) {
+      console.error('Error during admin login:', error);
+      setLocalError('An unexpected error occurred. Please try again.');
     } finally {
       setLocalLoading(false);
-    }
+    }    
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      {/* Back to Store button in top-left corner */}
+      <div className="absolute top-4 left-4">
+        <a 
+          href="/" 
+          className="flex items-center text-green-600 hover:text-green-700 transition-colors duration-300"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+          <span>Back to Store</span>
+        </a>
+      </div>
+      
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <div className="text-center mb-6">
           <div className="bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -127,6 +157,25 @@ const AdminLoginPage = () => {
           
           <div className="mt-4 text-center text-sm text-gray-600">
             <p>This area is restricted to authorized administrators only.</p>
+          </div>
+          
+          {/* Link options at the bottom */}
+          <div className="mt-6 text-center flex flex-col space-y-3">
+            <a 
+              href="/account/login" 
+              className="inline-flex items-center justify-center text-white bg-soft-green hover:bg-soft-green-dark py-2 px-4 rounded-md transition-colors duration-300"
+            >
+              <FontAwesomeIcon icon={faUserFriends} className="mr-2" />
+              <span>Go to Customer Login</span>
+            </a>
+            
+            <a 
+              href="/" 
+              className="inline-flex items-center text-green-600 hover:text-green-700 transition-colors duration-300"
+            >
+              <FontAwesomeIcon icon={faStore} className="mr-2" />
+              <span>Return to Linda's Nut Butter Store</span>
+            </a>
           </div>
         </form>
       </div>

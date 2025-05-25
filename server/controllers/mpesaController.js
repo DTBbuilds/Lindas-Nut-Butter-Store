@@ -17,7 +17,18 @@ const MPESA_BASE_URL = config.mpesa.baseUrl;
 const PAYBILL_NUMBER = config.mpesa.paybillNumber;
 const TILL_NUMBER = config.mpesa.tillNumber;
 const ACCOUNT_NUMBER = config.mpesa.accountNumber;
+
+// Always use the public URL for callbacks to ensure they're accessible from Safaricom
 const CALLBACK_URL = config.mpesa.callbackUrl;
+const VALIDATION_URL = config.mpesa.validationUrl;
+const CONFIRMATION_URL = config.mpesa.confirmationUrl;
+
+// Log the callback URLs being used
+console.log('M-PESA Callback URLs:', {
+  callback: CALLBACK_URL,
+  validation: VALIDATION_URL,
+  confirmation: CONFIRMATION_URL
+});
 
 // Add test endpoint for checking API connectivity
 exports.testConnection = async (req, res) => {
@@ -70,9 +81,9 @@ exports.initiateSTKPush = async (req, res) => {
     console.log(`Initiating STK Push for ${phoneNumber} for amount ${amount}`);
     
     // Use the new Daraja API client for better handling
-    // Always use the latest callback URL from config (which may have been updated by ngrok)
-    const callbackUrl = config.mpesa.callbackUrl;
-    console.log(`Using callback URL: ${callbackUrl}`);
+    // Always use the public URL for callbacks to ensure they're accessible from Safaricom
+    const callbackUrl = CALLBACK_URL;
+    console.log(`Using callback URL: ${callbackUrl} (from ngrok)`);
     
     console.log('Making STK push request with params:', {
       phoneNumber,

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { useCart } from '../contexts/CartContext';
 import productService from '../services/productService';
 import FilterSidebar from '../components/FilterSidebar';
 import MobileBottomNav from '../components/MobileBottomNav';
 import { toast } from 'react-toastify';
 
+import '../styles/animations.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faShoppingCart, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faShoppingCart, faFilter, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 function ProductsPage() {
   const { addToCart, cartItems } = useCart();
@@ -21,31 +23,68 @@ function ProductsPage() {
     categories: [],
     priceRange: { min: 0, max: 3000 },
     features: [],
-    sort: 'price-low'
+    sort: 'random' // Default to random sort to showcase the randomization feature
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  // Add state for simulating a loading effect even when data loads quickly
+  const [isSimulatedLoading, setIsSimulatedLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
   // Fetch products from backend on mount using our ProductService
   useEffect(() => {
+    // Start loading animations
+    setIsLoading(true);
+    setIsSimulatedLoading(true);
+    setLoadingProgress(0);
+    
+    // Create loading progress animation
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        const newProgress = prev + (100 - prev) * 0.1;
+        return Math.min(newProgress, 90); // Cap at 90% until actual loading completes
+      });
+    }, 200);
+    
     const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Use our standardized product service
+      try {        
+        // Use our standardized product service with randomization
+        // This will randomize products each time the app starts
+        // The seed changes daily for a fresh experience every day
         const processedProducts = await productService.fetchProducts({
-          limit: 100,  // Increase limit to get more products
-          sort: 'name' // Ensure consistent ordering
+          limit: 100,    // Increase limit to get more products
+          randomize: true // Enable product randomization
         });
         
         if (processedProducts && processedProducts.length > 0) {
-          console.log('Products fetched successfully:', processedProducts.length);
+          console.log('Products fetched and randomized successfully:', processedProducts.length);
           setProducts(processedProducts);
-          setFilteredProducts(processedProducts);
+          
+          // Apply initial randomized sorting based on the filter setting
+          if (filters.sort) {
+            const sortedProducts = sortProducts(processedProducts, filters.sort);
+            setFilteredProducts(sortedProducts);
+          } else {
+            setFilteredProducts(processedProducts);
+          }
+          
+          // Complete loading progress animation
+          setLoadingProgress(100);
+          
+          // Add a minimum display time for skeleton loaders to avoid flickering
+          // This ensures the animation plays even if data loads too quickly
+          setTimeout(() => {
+            setIsLoading(false);
+            // Delay the simulated loading a bit more for a smoother transition
+            setTimeout(() => setIsSimulatedLoading(false), 300);
+          }, 800);
         } else {
           console.warn('No products found or empty response');
           toast.info('No products available at the moment', { containerId: 'main-toast-container' });
           setProducts([]);
           setFilteredProducts([]);
+          setIsLoading(false);
+          setIsSimulatedLoading(false);
         }
       } catch (err) {
         console.error('Failed to fetch products:', err);
@@ -61,8 +100,11 @@ function ProductsPage() {
         
         setProducts([]);
         setFilteredProducts([]);
-      } finally {
         setIsLoading(false);
+        setIsSimulatedLoading(false);
+      } finally {
+        // Clear the progress interval
+        clearInterval(progressInterval);
       }
     };
 
@@ -72,12 +114,28 @@ function ProductsPage() {
   // Get unique categories from products
   const categories = [...new Set(products.map(product => product.category))];
 
-  // Filter and sort products based on filters
-  // (Removed local cart sync logic; cartItems now comes from context)
-
+  // Helper function to sort products
+  const sortProducts = (productsList, sortType) => {
+    const sorted = [...productsList];
+    
+    switch (sortType) {
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'name-asc':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      case 'name-desc':
+        return sorted.sort((a, b) => b.name.localeCompare(a.name));
+      case 'random':
+        // We already randomize on initial load, but we can re-randomize here
+        return productService.randomizeProducts(sorted, true);
+      default:
+        return sorted;
+    }
+  };
 
   // Memoize filtered products
-  // (No change needed here)
   useEffect(() => {
     const filterProducts = () => {
       let result = [...products];
@@ -105,23 +163,9 @@ function ProductsPage() {
           product.features && filters.features.some(feature => product.features.includes(feature))
         );
       }
-      // Sort products
-      switch (filters.sort) {
-        case 'price-low':
-          result.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          result.sort((a, b) => b.price - a.price);
-          break;
-        case 'rating':
-          result.sort((a, b) => b.rating - a.rating);
-          break;
-        case 'newest':
-          result.sort((a, b) => b.id - a.id);
-          break;
-        default:
-          break;
-      }
+      
+      // Sort the filtered products
+      result = sortProducts(result, filters.sort);
       return result;
     };
     
@@ -315,6 +359,7 @@ function ProductsPage() {
                 <option value="price-high">Price: High to Low</option>
                 <option value="name-asc">Name: A to Z</option>
                 <option value="name-desc">Name: Z to A</option>
+                <option value="random">Shuffle Randomly</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -324,9 +369,28 @@ function ProductsPage() {
             </div>
           </div>
           
-          {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-lg">Loading products...</p>
+          {(isLoading || isSimulatedLoading) ? (
+            <div>
+              {/* Fancy loading indicator with progress */}
+              <div className="mb-8 flex flex-col items-center">
+                <div className="relative w-full max-w-md h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-soft-green transition-all duration-300 ease-out"
+                    style={{ width: `${loadingProgress}%` }}
+                  ></div>
+                </div>
+                <div className="flex items-center justify-center text-soft-green">
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
+                  <p className="text-sm font-medium">Loading Linda's delicious products</p>
+                </div>
+              </div>
+              
+              {/* Skeleton loader grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {[...Array(9)].map((_, index) => (
+                  <ProductCardSkeleton key={`skeleton-${index}`} index={index} />
+                ))}
+              </div>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
@@ -344,14 +408,18 @@ function ProductsPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredProducts.map(product => (
-                <ProductCard 
-                  key={product._id || product.id}
-                  product={product}
-                  addToCart={addToCart}
-                  isMobile={window.innerWidth < 640}
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 px-1">
+              {filteredProducts.map((product, index) => (
+                <div 
+                  key={product._id || product.id} 
+                  className={`staggered-fade-in stagger-delay-${index % 16} transform transition-all duration-300 hover:z-10`}
+                >
+                  <ProductCard 
+                    product={product}
+                    addToCart={addToCart}
+                    isMobile={window.innerWidth < 640}
+                  />
+                </div>
               ))}
             </div>
           )}

@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faTrash, faTimes, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faTrash, faTimes, faPlus, faMinus, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { formatKES } from '../../utils/currencyUtils';
 
 /**
  * Cart summary component with item details and totals
  */
-const CartSummary = ({ cartItems, cartTotal, onContinue, onUpdateQuantity, onRemoveItem }) => {
+const CartSummary = ({ cartItems, cartTotal, onNextStep, updateQuantity, removeFromCart, isAuthenticated }) => {
   if (!cartItems || cartItems.length === 0) {
     return (
       <div className="text-center py-8">
@@ -63,39 +63,17 @@ const CartSummary = ({ cartItems, cartTotal, onContinue, onUpdateQuantity, onRem
               {formatKES(item.price)}
             </div>
             
-            {/* Quantity */}
+            {/* Quantity - Enhanced with animations and better mobile support */}
             <div className="col-span-2 flex items-center justify-center">
               <span className="sm:hidden inline-block mr-2 font-medium">Quantity:</span>
-              <div className="flex items-center">
-                <button
-                  onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-l-md hover:bg-gray-200 transition-colors"
-                >
-                  <FontAwesomeIcon icon={faMinus} className="text-gray-600" />
-                </button>
-                <input
-                  type="text"
-                  id={`quantity-${item.id}`}
-                  name={`quantity-${item.id}`}
-                  value={item.quantity}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    if (!isNaN(value) && value > 0) {
-                      onUpdateQuantity(item.id, value);
-                    }
-                  }}
-                  className="w-10 h-8 text-center border-t border-b focus:outline-none"
-                />
-                <button
-                  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-r-md hover:bg-gray-200 transition-colors"
-                >
-                  <FontAwesomeIcon icon={faPlus} className="text-gray-600" />
-                </button>
-              </div>
+              <QuantityControls 
+                item={item} 
+                updateQuantity={updateQuantity} 
+                removeFromCart={removeFromCart} 
+              />
             </div>
             
-            {/* Total + Remove button */}
+            {/* Total + Remove button - Enhanced with animations */}
             <div className="col-span-2 flex items-center justify-between">
               <div>
                 <span className="sm:hidden inline-block mr-2 font-medium">Total:</span>
@@ -104,8 +82,16 @@ const CartSummary = ({ cartItems, cartTotal, onContinue, onUpdateQuantity, onRem
                 </span>
               </div>
               <button
-                onClick={() => onRemoveItem(item.id)}
-                className="ml-4 text-red-500 hover:text-red-700 transition-colors"
+                onClick={() => {
+                  // Add button press animation
+                  const btn = document.activeElement;
+                  btn.classList.add('button-press');
+                  setTimeout(() => btn.classList.remove('button-press'), 150);
+                  
+                  if (navigator.vibrate) navigator.vibrate(15);
+                  removeFromCart(item); // Cart context can handle the full item object
+                }}
+                className="ml-4 text-red-500 hover:text-red-700 transition-colors p-2 rounded-full hover:bg-red-50 active:scale-95 transform duration-150"
                 aria-label="Remove item"
               >
                 <FontAwesomeIcon icon={faTrash} />
@@ -141,12 +127,113 @@ const CartSummary = ({ cartItems, cartTotal, onContinue, onUpdateQuantity, onRem
         </div>
         
         <button
-          onClick={onContinue}
+          onClick={onNextStep}
           className="w-full py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors"
         >
           Continue to Customer Information
         </button>
       </div>
+    </div>
+  );
+};
+
+/**
+ * QuantityControls Component
+ * Reusable component for quantity adjustment with animations
+ */
+const QuantityControls = ({ item, updateQuantity, removeFromCart }) => {
+  const [animateQuantity, setAnimateQuantity] = useState('');
+  const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
+  
+  // Reset animation after it completes
+  useEffect(() => {
+    if (animateQuantity) {
+      const timer = setTimeout(() => setAnimateQuantity(''), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [animateQuantity]);
+  
+  // Reset confirmation when quantity changes
+  useEffect(() => {
+    setShowRemoveConfirmation(false);
+  }, [item.quantity]);
+  
+  if (showRemoveConfirmation) {
+    return (
+      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-2 py-1 whitespace-nowrap">
+        <span className="text-xs text-red-700">Remove?</span>
+        <button
+          onClick={() => {
+            removeFromCart(item); // Cart context can handle the full item object
+            if (navigator.vibrate) navigator.vibrate(15);
+          }}
+          className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 active:scale-95 transform duration-150"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => setShowRemoveConfirmation(false)}
+          className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs hover:bg-gray-300 active:scale-95 transform duration-150"
+        >
+          No
+        </button>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="flex items-center shadow-sm rounded-lg overflow-hidden">
+      <button
+        onClick={() => {
+          // Add button press animation
+          const btn = document.activeElement;
+          btn.classList.add('button-press');
+          setTimeout(() => btn.classList.remove('button-press'), 150);
+          
+          // Animate quantity change
+          setAnimateQuantity('decrease');
+          
+          if (navigator.vibrate) navigator.vibrate(10);
+          
+          if (item.quantity <= 1) {
+            // Show removal confirmation instead of immediately removing
+            setShowRemoveConfirmation(true);
+          } else {
+            // Pass the ID and new quantity as expected by the updateQuantity function
+            updateQuantity(item.id || item._id, (item.quantity || 1) - 1);
+          }
+        }}
+        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-l-md hover:bg-gray-200 active:bg-gray-300 transition-colors active:scale-95 transform duration-150"
+        aria-label="Decrease quantity"
+      >
+        <FontAwesomeIcon icon={faMinus} />
+      </button>
+      <div 
+        className={`w-10 h-9 flex items-center justify-center text-center bg-white border-t border-b font-medium ${animateQuantity ? `quantity-change-${animateQuantity}` : ''}`}
+      >
+        {item.quantity || 1}
+      </div>
+      <button
+        onClick={() => {
+          // Add button press animation
+          const btn = document.activeElement;
+          btn.classList.add('button-press');
+          setTimeout(() => btn.classList.remove('button-press'), 150);
+          
+          // Animate quantity change
+          setAnimateQuantity('increase');
+          
+          if (navigator.vibrate) navigator.vibrate(10);
+          
+          // Pass the ID and new quantity as expected by the updateQuantity function
+          updateQuantity(item.id || item._id, (item.quantity || 1) + 1);
+        }}
+        className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-r-md hover:bg-gray-200 active:bg-gray-300 transition-colors active:scale-95 transform duration-150"
+        aria-label="Increase quantity"
+        disabled={item.stockQuantity && item.quantity >= item.stockQuantity}
+      >
+        <FontAwesomeIcon icon={faPlus} />
+      </button>
     </div>
   );
 };

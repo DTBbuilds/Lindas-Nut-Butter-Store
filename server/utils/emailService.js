@@ -276,8 +276,98 @@ Linda's Nut Butter Store Team
   }
 };
 
+/**
+ * Send a generic email
+ * @param {Object} options - Email options
+ * @param {string} options.to - Recipient email
+ * @param {string} options.subject - Email subject
+ * @param {string} options.text - Plain text email body
+ * @param {string} options.html - HTML email body (optional)
+ * @returns {Promise} - Email send result
+ */
+const sendEmail = async (options) => {
+  try {
+    if (!options.to || !options.subject || !options.text) {
+      console.error('Cannot send email: Missing required fields');
+      return false;
+    }
+    
+    const transporter = createTransporter();
+    
+    // Send the email
+    const info = await transporter.sendMail({
+      from: `"Linda's Nut Butter Store" <${process.env.EMAIL_FROM || 'noreply@linda-nut-butter.com'}>`,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html || options.text.replace(/\n/g, '<br>')
+    });
+    
+    console.log(`Email sent to ${options.to}: ${info.messageId}`);
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return false;
+  }
+};
+
+/**
+ * Send batch emails (for marketing or announcements)
+ * @param {Array} emails - Array of email addresses
+ * @param {string} subject - Email subject
+ * @param {string} text - Plain text email body
+ * @param {string} html - HTML email body (optional)
+ * @returns {Promise} - Results of batch email operation
+ */
+const sendBatchEmails = async (emails, subject, text, html) => {
+  if (!emails || !emails.length || !subject || !text) {
+    console.error('Cannot send batch emails: Missing required fields');
+    return { success: false, sent: 0, total: 0 };
+  }
+  
+  const results = [];
+  const batchSize = 10; // Process in batches to avoid overwhelming the mail server
+  
+  // Process emails in batches
+  for (let i = 0; i < emails.length; i += batchSize) {
+    const batch = emails.slice(i, i + batchSize);
+    
+    // Send emails in this batch concurrently
+    const batchPromises = batch.map(email => {
+      return sendEmail({
+        to: email,
+        subject,
+        text,
+        html
+      });
+    });
+    
+    // Wait for this batch to complete
+    const batchResults = await Promise.allSettled(batchPromises);
+    results.push(...batchResults);
+    
+    // Add a small delay between batches to prevent rate limiting
+    if (i + batchSize < emails.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  // Count successful sends
+  const successful = results.filter(result => 
+    result.status === 'fulfilled' && result.value === true
+  ).length;
+  
+  return { 
+    success: successful > 0,
+    sent: successful,
+    total: emails.length
+  };
+};
+
 module.exports = {
   sendPaymentConfirmation,
   sendOrderShippedNotification,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendEmail,
+  sendBatchEmails
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { API_URL } from '../config';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +11,23 @@ const LoginPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isAuthenticated } = useAuth();
+  
+  // Check for redirect parameter in URL query
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTo = searchParams.get('redirect');
+  
+  // If user is already authenticated, redirect appropriately
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (redirectTo === 'checkout') {
+        navigate('/checkout');
+      } else if (redirectTo) {
+        navigate(redirectTo);
+      }
+    }
+  }, [isAuthenticated, navigate, redirectTo]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -25,7 +42,7 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,12 +56,26 @@ const LoginPage = () => {
       const data = await response.json();
       
       if (response.ok) {
+        // Store token in localStorage
         localStorage.setItem('token', data.token);
         if (formData.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
+        
+        // Set user data in auth context
+        login(data.user, data.token);
+        
+        // Display success message
         toast.success('Login successful!', { containerId: 'main-toast-container' });
-        navigate('/');
+        
+        // Redirect based on the redirect parameter
+        if (redirectTo === 'checkout') {
+          navigate('/checkout');
+        } else if (redirectTo) {
+          navigate(redirectTo);
+        } else {
+          navigate('/');
+        }
       } else {
         toast.error(data.message || 'Login failed', { containerId: 'main-toast-container' });
       }

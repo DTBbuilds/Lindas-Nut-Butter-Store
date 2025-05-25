@@ -14,7 +14,15 @@ import {
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-import { API_URL } from '../config';
+// Use the correct API URL based on environment
+const API_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' ? 
+    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+      'http://localhost:5000' : 
+      `http://${window.location.hostname}:5000` 
+    : 
+    ''
+  );
 
 const ProfileEditForm = ({ userData, onCancel, onUpdate }) => {
   const [formData, setFormData] = useState({

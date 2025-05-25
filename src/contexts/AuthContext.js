@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { API_URL } from '../config';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
@@ -19,7 +18,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const response = await fetch(`${API_URL}/api/auth/me`, {
+        const response = await fetch('http://localhost:5000/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -56,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   // Request password reset email
   const requestPasswordReset = async (email) => {
     try {
-      const response = await fetch(`${API_URL}/api/customers/forgot-password`, {
+      const response = await fetch('http://localhost:5000/api/customers/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -83,19 +82,23 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      const response = await apiService.auth.register(userData);
+      // Direct API call to the backend registration endpoint
+      const response = await fetch('http://localhost:5000/api/customers/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
       
-      if (response.token) {
-        saveAuthToken(response.token);
-        setUserData(response.user || { email: userData.email });
-        
-        // Redirect to home after successful registration
-        navigate('/', { replace: true });
-        
-        return { success: true };
-      } else {
-        throw new Error('No token received after registration');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
       }
+      
+      // For our implementation, we're just returning success and not logging in automatically
+      return { success: true, message: data.message || 'Registration successful' };
     } catch (error) {
       console.error('Registration failed:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
@@ -111,8 +114,22 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      await apiService.auth.forgotPassword(email);
-      return { success: true };
+      // Direct API call to forgot password endpoint
+      const response = await fetch('http://localhost:5000/api/customers/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to process forgot password request');
+      }
+      
+      return { success: true, message: data.message || 'Password reset instructions sent to your email' };
     } catch (error) {
       console.error('Forgot password request failed:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to process forgot password request';
@@ -128,30 +145,31 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      // Try using apiService if available, otherwise make direct API call
-      if (apiService && apiService.auth && apiService.auth.resetPassword) {
-        await apiService.auth.resetPassword(token, newPassword);
-      } else {
-        // Direct API call as fallback
-        const response = await fetch(`${API_URL}/api/customers/reset-password/${token}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ password: newPassword })
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to reset password');
-        }
+      // Direct API call to reset password
+      const response = await fetch(`http://localhost:5000/api/customers/reset-password/${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: newPassword })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to reset password');
       }
       
-      return { success: true };
+      // If response includes a token, save it for automatic login
+      if (data.token) {
+        saveAuthToken(data.token);
+      }
+      
+      return { success: true, message: data.message || 'Password reset successful' };
     } catch (error) {
       console.error('Password reset failed:', error);
       setError(error.message || 'Failed to reset password');
-      throw error;
+      return { success: false, error: error.message || 'Failed to reset password' };
     } finally {
       setLoading(false);
     }
@@ -162,8 +180,32 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      const updatedUser = await apiService.auth.updateProfile(userData);
+      // Get the auth token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to update your profile');
+      }
+      
+      // Direct API call to update profile
+      const response = await fetch('http://localhost:5000/api/customers/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile');
+      }
+      
+      // Update the user state with the returned data
+      const updatedUser = data.customer || data.user;
       setUser(updatedUser);
+      
       return { success: true, user: updatedUser };
     } catch (error) {
       console.error('Profile update failed:', error);

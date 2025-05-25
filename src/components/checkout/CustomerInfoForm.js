@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faEnvelope, faPhone, faArrowLeft, faArrowRight, faLocationDot, faBuilding } from '@fortawesome/free-solid-svg-icons';
 
@@ -16,6 +16,17 @@ const CustomerInfoForm = ({ initialValues, onSubmit, onBack, onChange }) => {
     apartment: '',
     city: 'Nairobi'
   });
+  
+  // Update form data when initialValues change
+  useEffect(() => {
+    if (initialValues) {
+      setFormData(prevData => ({
+        ...prevData,
+        ...initialValues
+      }));
+      console.log('Customer info form initialized with values:', initialValues);
+    }
+  }, [initialValues]);
   
   const [errors, setErrors] = useState({});
   

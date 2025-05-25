@@ -107,7 +107,7 @@ const generateStkPassword = (businessShortCode) => {
   // Format date as YYYYMMDDHHmmss (14 characters) as required by Safaricom
   // IMPORTANT: Use Safaricom's required format - exactly 14 digits, no timezone conversion
   const now = new Date();
-  const year = now.getFullYear();
+  const year = now.getFullYear().toString();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   const hours = String(now.getHours()).padStart(2, '0');
@@ -116,6 +116,9 @@ const generateStkPassword = (businessShortCode) => {
   
   // Combine to create the timestamp in the format YYYYMMDDHHmmss
   const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
+  
+  // Debug log to verify correct timestamp format
+  console.log(`Generated timestamp for STK Push: ${timestamp} (length: ${timestamp.length})`);
   
   // Ensure the timestamp is exactly 14 characters
   if (timestamp.length !== 14) {
@@ -154,9 +157,42 @@ const formatPhoneNumber = (phoneNumber) => {
   // Convert to string if it's not already
   let formattedPhone = phoneNumber.toString().trim();
   
-  // Log the original input for debugging
-  console.log(`Formatting phone number: original input = "${phoneNumber}"`);
+  console.log(`\n=== PHONE NUMBER FORMATTING ===`);
+  console.log(`Raw input: "${phoneNumber}"`);
   
+  // Check if this is one of the test numbers from config
+  const testNumbers = {
+    success: config.test.phoneNumbers.success,
+    insufficient: config.test.phoneNumbers.insufficient,
+    timeout: config.test.phoneNumbers.timeout,
+    reject: config.test.phoneNumbers.reject
+  };
+  
+  // Check if the input directly matches a test number
+  for (const [type, number] of Object.entries(testNumbers)) {
+    if (phoneNumber.toString() === number) {
+      console.log(`✅ Matched exact test number (${type}): ${number}`);
+      // Simply return the test number as configured - no need to reformat it
+      return number;
+    }
+  }
+  
+  // Also check if any partial test numbers are included
+  const testNumberBase = '708374';
+  if (phoneNumber.toString().includes(testNumberBase)) {
+    // This likely contains a test number pattern
+    const testNumberPattern = new RegExp(`(${testNumberBase}\\d{3})`);
+    const match = phoneNumber.toString().match(testNumberPattern);
+    
+    if (match) {
+      const extractedNumber = match[1];
+      const formattedTestNumber = `254${extractedNumber}`;
+      console.log(`✅ Extracted test number pattern: ${extractedNumber} -> ${formattedTestNumber}`);
+      return formattedTestNumber;
+    }
+  }
+  
+  // Regular phone number formatting continues
   // Remove any non-digit characters
   formattedPhone = formattedPhone.replace(/\D/g, '');
   console.log(`After removing non-digits: "${formattedPhone}"`);
@@ -183,45 +219,18 @@ const formatPhoneNumber = (phoneNumber) => {
     formattedPhone = formattedPhone.substring(0, 12);
     console.log(`Truncated long number to: ${formattedPhone}`);
   } else {
-    // For Safaricom sandbox testing numbers, ensure they're in the proper format
-    // The sandbox test numbers should be exactly 12 digits starting with 254
-    if (formattedPhone.length === 12 && !formattedPhone.startsWith('254')) {
-      console.warn(`Potentially invalid phone number format: ${formattedPhone}`);
-      // Since this might be a test number, we'll proceed but with a warning
-    } else if (formattedPhone.length === 10 && !formattedPhone.startsWith('254')) {
-      // Likely a full local number without country code (e.g., 0722XXXXXX)
-      formattedPhone = `254${formattedPhone.substring(1)}`;
-      console.log(`Converted 10-digit local number: ${formattedPhone}`);
-    } else {
-      // Last resort - assume it's a local number and prefix with 254
-      console.warn(`Using phone number as-is with 254 prefix: ${formattedPhone}`);
-      // For sandbox testing, accept numbers like 708374149 (the standard test numbers)
-      formattedPhone = `254${formattedPhone}`;
-    }
+    // Assume it's a local number without country code
+    formattedPhone = `254${formattedPhone}`;
+    console.log(`Added country code: ${formattedPhone}`);
   }
   
-  // Final validation - must be exactly 12 digits for Kenya numbers starting with 254
+  // Final validation - ensure it follows the pattern 254XXXXXXXXX
   if (!/^254\d{9}$/.test(formattedPhone)) {
-    console.warn(`⚠️ Final phone number ${formattedPhone} may not be in the correct format for M-Pesa. Expected: 254XXXXXXXXX`);
-    
-    // For sandbox testing, we'll allow the standard test numbers
-    // If it's not a valid format but looks like a Safaricom test number, fix it
-    if (formattedPhone.includes('708374149') || 
-        formattedPhone.includes('708374150') || 
-        formattedPhone.includes('708374151') || 
-        formattedPhone.includes('708374152')) {
-      
-      // Extract the test number and reformat it correctly
-      const testNumberMatch = formattedPhone.match(/(708374\d{3})/);
-      if (testNumberMatch) {
-        formattedPhone = `254${testNumberMatch[1]}`;
-        console.log(`✅ Detected Safaricom test number, reformatted to: ${formattedPhone}`);
-      }
-    }
+    console.warn(`⚠️ Warning: Final phone number ${formattedPhone} is not in the expected format 254XXXXXXXXX`);
   }
   
   console.log(`Final formatted phone number: ${formattedPhone}`);
-  console.log(`Phone number formatted: ${phoneNumber} → ${formattedPhone}`);
+  console.log(`=== END FORMATTING ===\n`);
   return formattedPhone;
 };
 
@@ -254,6 +263,15 @@ const initiateSTK = async (
     const token = await getAccessToken();
     
     // Format phone number
+    console.log('\n🔍 PHONE NUMBER DEBUG INFO:');
+    console.log('Original phone number:', phoneNumber);
+    console.log('Is test number for success?', phoneNumber === config.test.phoneNumbers.success || phoneNumber.includes('708374149'));
+    console.log('Is test number for insufficient?', phoneNumber === config.test.phoneNumbers.insufficient || phoneNumber.includes('708374150'));
+    console.log('Is test number for timeout?', phoneNumber === config.test.phoneNumbers.timeout || phoneNumber.includes('708374151'));
+    console.log('Is test number for reject?', phoneNumber === config.test.phoneNumbers.reject || phoneNumber.includes('708374152'));
+    console.log('Config test numbers:', config.test.phoneNumbers);
+    console.log('🔍 END DEBUG INFO\n');
+    
     const formattedPhone = formatPhoneNumber(phoneNumber);
     
     // Generate password and timestamp with the correct businessShortCode
@@ -321,7 +339,7 @@ const initiateSTK = async (
       transactionDesc,
       callbackUrl,
       paymentType,
-      businessShortCode,
+      businessShortCode: paymentType === 'till' ? config.mpesa.tillNumber : config.mpesa.paybillNumber,
       paybill: config.mpesa.paybillNumber,
       till: config.mpesa.tillNumber,
       accountNumber: config.mpesa.accountNumber,
@@ -445,7 +463,7 @@ const initiateSTK = async (
       accountReference,
       callbackUrl,
       paymentType,
-      businessShortCode,
+      businessShortCode: paymentType === 'till' ? config.mpesa.tillNumber : config.mpesa.paybillNumber,
       retryCount
     };
     
@@ -561,6 +579,15 @@ const simulateC2B = async (
     const token = await getAccessToken();
     
     // Format phone number
+    console.log('\n🔍 PHONE NUMBER DEBUG INFO:');
+    console.log('Original phone number:', phoneNumber);
+    console.log('Is test number for success?', phoneNumber === config.test.phoneNumbers.success || phoneNumber.includes('708374149'));
+    console.log('Is test number for insufficient?', phoneNumber === config.test.phoneNumbers.insufficient || phoneNumber.includes('708374150'));
+    console.log('Is test number for timeout?', phoneNumber === config.test.phoneNumbers.timeout || phoneNumber.includes('708374151'));
+    console.log('Is test number for reject?', phoneNumber === config.test.phoneNumbers.reject || phoneNumber.includes('708374152'));
+    console.log('Config test numbers:', config.test.phoneNumbers);
+    console.log('🔍 END DEBUG INFO\n');
+    
     const formattedPhone = formatPhoneNumber(phoneNumber);
     
     // Prepare C2B simulation payload

@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { getAuthToken, isTokenExpired } from './authUtils';
-import { API_URL } from '../config';
 
 // Create a custom axios instance with default config
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -38,7 +37,7 @@ api.interceptors.response.use(
       try {
         // Try to refresh the token
         const response = await axios.post(
-          `${API_URL}/api/auth/refresh-token`,
+          `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );

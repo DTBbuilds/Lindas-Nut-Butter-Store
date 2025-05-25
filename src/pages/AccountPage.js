@@ -28,7 +28,14 @@ import OrderDetails from '../components/orders/OrderDetails';
 import { generateOrderNumber } from '../utils/orderUtils';
 
 // Use the correct API URL based on environment
-import { API_URL } from '../config';
+const API_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' ? 
+    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+      'http://localhost:5000' : 
+      `http://${window.location.hostname}:5000` 
+    : 
+    ''
+  );
 
 const AccountPage = () => {
   const [loading, setLoading] = useState(true);
@@ -102,11 +109,53 @@ const AccountPage = () => {
           }
         });
         
-        setUserData(response.data);
+        // Get user registration data if available to enhance profile
+        const savedRegistrationData = localStorage.getItem('userRegistrationData');
+        let enhancedUserData = response.data;
+        
+        if (savedRegistrationData) {
+          const parsedRegData = JSON.parse(savedRegistrationData);
+          
+          // Merge registration data with fetched user data, preferring API data when both exist
+          enhancedUserData = {
+            ...enhancedUserData,
+            // Only use registration data for fields that are empty/missing in the API response
+            name: enhancedUserData.name || parsedRegData.name,
+            phoneNumber: enhancedUserData.phoneNumber || parsedRegData.phoneNumber,
+            // Keep any other fields that might be useful
+            registrationTime: parsedRegData.registrationTime
+          };
+          
+          // If we enhanced the user data with registration info, update the profile
+          if (!enhancedUserData.name && parsedRegData.name || 
+              !enhancedUserData.phoneNumber && parsedRegData.phoneNumber) {
+            try {
+              // Save the enhanced data to the server
+              await axios.put(`${API_URL}/api/customers/profile`, {
+                name: enhancedUserData.name,
+                phoneNumber: enhancedUserData.phoneNumber
+              }, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              
+              toast.success('Your profile has been automatically updated with your registration information', {
+                containerId: 'main-toast-container',
+                autoClose: 4000
+              });
+            } catch (profileErr) {
+              console.error('Failed to sync profile with registration data:', profileErr);
+            }
+          }
+          
+          // Clean up after using registration data
+          localStorage.removeItem('userRegistrationData');
+        }
+        
+        setUserData(enhancedUserData);
         
         // Fetch orders for this customer
-        if (response.data && response.data._id) {
-          fetchCustomerOrders(response.data._id);
+        if (enhancedUserData && enhancedUserData._id) {
+          fetchCustomerOrders(enhancedUserData._id);
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
@@ -114,6 +163,7 @@ const AccountPage = () => {
         localStorage.removeItem('customerToken');
         localStorage.removeItem('customerEmail');
         localStorage.removeItem('customerName');
+        localStorage.removeItem('userRegistrationData'); // Clean up registration data too
         navigate('/account/login');
       } finally {
         setLoading(false);
@@ -142,7 +192,15 @@ const AccountPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">My Account</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">My Account</h1>
+        
+        {/* Back to Shop Button */}
+        <Link to="/" className="bg-soft-green hover:bg-soft-green-dark text-white font-bold py-2 px-4 rounded-md transition duration-300 flex items-center">
+          <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
+          Back to Shop
+        </Link>
+      </div>
       
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}

@@ -1,16 +1,19 @@
 /**
  * Product Routes
  * 
- * API endpoints for product management with inventory status
+ * API endpoints for product management with inventory status and file uploads
  */
 
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const path = require('path');
+const fs = require('fs');
 const { Product } = require('../models');
 const inventoryManager = require('../utils/inventoryManager');
 const { authMiddleware, adminMiddleware } = require('../authMiddleware');
 const rateLimit = require('express-rate-limit');
+const { processProductImages } = require('../services/fileUploadService');
 
 // Rate limiting configuration
 const apiLimiter = rateLimit({
@@ -466,10 +469,10 @@ router.get('/stats/inventory', async (req, res) => {
 });
 
 /**
- * Create a new product with initial inventory
+ * Create a new product with initial inventory and image uploads
  * POST /api/products
  */
-router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
+router.post('/', authMiddleware, adminMiddleware, processProductImages, async (req, res) => {
   try {
     const {
       name,
@@ -478,9 +481,11 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
       category,
       stockQuantity = 20,
       lowStockThreshold = 5,
-      sku,
-      images = []
+      sku
     } = req.body;
+    
+    // Get uploaded image paths from the file upload middleware
+    const images = req.uploadedImages || [];
     
     // Validate required fields
     if (!name || !description || !price || !category || !sku) {
@@ -496,6 +501,16 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
     });
     
     if (existingProduct) {
+      // Clean up uploaded images if product creation fails
+      if (images.length > 0) {
+        images.forEach(imagePath => {
+          const fullPath = path.join(__dirname, '../public', imagePath);
+          fs.unlink(fullPath, err => {
+            if (err) console.error(`Failed to delete image: ${fullPath}`, err);
+          });
+        });
+      }
+      
       return res.status(400).json({
         success: false,
         message: `Product with same ${existingProduct.name === name ? 'name' : 'SKU'} already exists`
@@ -543,6 +558,17 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating product:', error);
+    
+    // Clean up uploaded images if product creation fails
+    if (req.uploadedImages && req.uploadedImages.length > 0) {
+      req.uploadedImages.forEach(imagePath => {
+        const fullPath = path.join(__dirname, '../public', imagePath);
+        fs.unlink(fullPath, err => {
+          if (err) console.error(`Failed to delete image: ${fullPath}`, err);
+        });
+      });
+    }
+    
     return res.status(500).json({
       success: false,
       message: 'Failed to create product',
@@ -552,20 +578,185 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 /**
- * Delete a product by ID
+ * Delete a product by ID and its associated images
  * DELETE /api/products/:id
  */
 router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findByIdAndDelete(id);
+    
+    // First get the product to find its images
+    const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
-    return res.status(200).json({ success: true, message: 'Product deleted successfully' });
+    
+    // Delete any associated images
+    if (product.images && product.images.length > 0) {
+      product.images.forEach(imagePath => {
+        try {
+          const fullPath = path.join(__dirname, '../public', imagePath);
+          if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+            console.log(`Deleted product image: ${fullPath}`);
+          }
+        } catch (err) {
+          console.error(`Failed to delete image: ${imagePath}`, err);
+          // Continue with deletion even if image deletion fails
+        }
+      });
+    }
+    
+    // Now delete the product
+    await Product.findByIdAndDelete(id);
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Product deleted successfully' 
+    });
   } catch (error) {
     console.error('Error deleting product:', error);
-    return res.status(500).json({ success: false, message: 'Failed to delete product', error: error.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete product', 
+      error: error.message 
+    });
+  }
+});
+
+/**
+ * Upload product images - separate endpoint for adding images to existing products
+ * POST /api/products/:id/images
+ */
+router.post('/:id/images', authMiddleware, adminMiddleware, processProductImages, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if the product exists
+    const product = await Product.findById(id);
+    if (!product) {
+      // Clean up uploaded images if product doesn't exist
+      if (req.uploadedImages && req.uploadedImages.length > 0) {
+        req.uploadedImages.forEach(imagePath => {
+          const fullPath = path.join(__dirname, '../public', imagePath);
+          fs.unlink(fullPath, err => {
+            if (err) console.error(`Failed to delete image: ${fullPath}`, err);
+          });
+        });
+      }
+      
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+    
+    // If no images were uploaded, return an error
+    if (!req.uploadedImages || req.uploadedImages.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No images uploaded'
+      });
+    }
+    
+    // Add new images to the product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { $push: { images: { $each: req.uploadedImages } } },
+      { new: true } // Return the updated document
+    );
+    
+    return res.status(200).json({
+      success: true,
+      message: `${req.uploadedImages.length} image(s) added successfully`,
+      data: updatedProduct
+    });
+  } catch (error) {
+    console.error('Error uploading product images:', error);
+    
+    // Clean up uploaded images if there's an error
+    if (req.uploadedImages && req.uploadedImages.length > 0) {
+      req.uploadedImages.forEach(imagePath => {
+        const fullPath = path.join(__dirname, '../public', imagePath);
+        fs.unlink(fullPath, err => {
+          if (err) console.error(`Failed to delete image: ${fullPath}`, err);
+        });
+      });
+    }
+    
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to upload product images',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Delete a specific image from a product
+ * DELETE /api/products/:id/images/:imageIndex
+ */
+router.delete('/:id/images/:imageIndex', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id, imageIndex } = req.params;
+    const index = parseInt(imageIndex);
+    
+    // Validate the index
+    if (isNaN(index) || index < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid image index'
+      });
+    }
+    
+    // Find the product
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+    
+    // Check if the image exists
+    if (!product.images || !product.images[index]) {
+      return res.status(404).json({
+        success: false,
+        message: 'Image not found'
+      });
+    }
+    
+    // Get the image path
+    const imagePath = product.images[index];
+    
+    // Remove the image from the array
+    product.images.splice(index, 1);
+    await product.save();
+    
+    // Delete the image file
+    try {
+      const fullPath = path.join(__dirname, '../public', imagePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+        console.log(`Deleted product image: ${fullPath}`);
+      }
+    } catch (err) {
+      console.error(`Failed to delete image file: ${imagePath}`, err);
+      // Continue even if file deletion fails
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Image deleted successfully',
+      data: product
+    });
+  } catch (error) {
+    console.error('Error deleting product image:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete product image',
+      error: error.message
+    });
   }
 });
 

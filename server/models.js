@@ -49,8 +49,8 @@ const ProductSchema = new Schema({
   },
   sku: { 
     type: String,
-    required: true,
-    index: true 
+    required: true
+    // index removed to avoid duplicate with unique index defined below
   },
   isActive: { 
     type: Boolean, 
@@ -175,7 +175,7 @@ const OrderSchema = new Schema({
     default: 'MPESA'
   },
   transactionId: { type: String },
-  referenceNumber: { type: String, required: true, index: true }, // Used in the M-Pesa API as BillRefNumber
+  referenceNumber: { type: String, required: true }, // Used in the M-Pesa API as BillRefNumber
   notes: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -240,7 +240,7 @@ TransactionSchema.index({ orderId: 1 });
 TransactionSchema.index({ phoneNumber: 1 });
 TransactionSchema.index({ timestamp: -1 });
 
-ProductSchema.index({ name: 1 });
+// name index already defined in schema
 ProductSchema.index({ category: 1 });
 ProductSchema.index({ sku: 1 }, { unique: true });
 ProductSchema.index({ stockQuantity: 1 });
@@ -337,7 +337,7 @@ UserSchema.virtual('isLocked').get(function() {
 });
 
 // Indexes
-UserSchema.index({ email: 1 }, { unique: true });
+// email index already created by 'unique: true' in the schema definition
 UserSchema.index({ emailVerificationToken: 1 });
 UserSchema.index({ passwordResetToken: 1 });
 

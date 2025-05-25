@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faShoppingCart, faTrash, faTimes, faArrowRight, faMinus, faPlus, faChevronLeft,
@@ -20,13 +20,10 @@ const getImageUrl = (item) => {
   if (imagePath.startsWith('http')) {
     return imagePath;
   } else {
-    // Import the API_URL from config
-    const { API_URL } = require('../config');
-    
     // Make sure path starts with a slash
     const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    // Use the backend URL from our centralized config
-    return `${API_URL}${normalizedPath}`;
+    // Use the backend URL or default to localhost
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${normalizedPath}`;
   }
 };
 
@@ -52,11 +49,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const { subtotal, shipping, tax, discount, total } = cartTotals;
   
   const drawerRef = useRef(null);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const [swipeDistance, setSwipeDistance] = useState(0);
-  const [showSwipeHint, setShowSwipeHint] = useState(false);
   
   // State for recommendations
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -66,18 +58,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const [discountInput, setDiscountInput] = useState('');
   const [applyingDiscount, setApplyingDiscount] = useState(false);
   
-  // Show swipe hint if no interactions yet
-  useEffect(() => {
-    if (isOpen && cartItems.length > 0) {
-      const hasSwipedBefore = localStorage.getItem('hasSwipedCartItem');
-      if (!hasSwipedBefore) {
-        const timer = setTimeout(() => setShowSwipeHint(true), 2000);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      setShowSwipeHint(false);
-    }
-  }, [isOpen, cartItems.length]);
+  // The swipe hint has been removed
   
   // Load related product recommendations when cart is opened
   useEffect(() => {
@@ -98,113 +79,24 @@ const CartDrawer = ({ isOpen, onClose }) => {
     }
   }, [isOpen, cartItems, getRelatedProducts]);
   
-  // Close swipe hint if user interacts
-  const dismissSwipeHint = () => {
-    setShowSwipeHint(false);
-    localStorage.setItem('hasSwipedCartItem', 'true');
-  };
-
-  // Handle touch events for closing drawer
+  // Handle touch events for closing drawer - simplified
   const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    // Touch functionality removed
   };
 
   const onTouchMove = (e) => {
-    if (!touchStart) return;
-    const currentTouch = e.targetTouches[0].clientX;
-    const distance = currentTouch - touchStart;
-    
-    // Only allow right swipes to close
-    if (distance > 0) {
-      setIsSwiping(true);
-      setSwipeDistance(distance);
-    }
+    // Touch functionality removed
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !isSwiping) return;
-    
-    // If swiped more than 100px, close the drawer
-    if (swipeDistance > 100) {
-      onClose();
-      // Vibrate if supported
-      if (navigator.vibrate) navigator.vibrate(20);
-    }
-    
-    // Reset values
-    setTouchStart(null);
-    setIsSwiping(false);
-    setSwipeDistance(0);
+    // Touch functionality removed
   };
-  
-  // Improved item swipe logic with better accessibility
-  const onItemTouchStart = (e, itemId) => {
-    e.stopPropagation();
-    const item = e.currentTarget;
-    item.dataset.touchStartX = e.touches[0].clientX;
-    item.dataset.itemId = itemId;
-  };
-  
-  const onItemTouchMove = (e) => {
-    e.stopPropagation();
-    const item = e.currentTarget;
-    const startX = parseInt(item.dataset.touchStartX, 10);
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - startX;
-    
-    // Allow left swipe to reveal delete button with smoother limits
-    if (diff < 0) {
-      // Limit the maximum swipe distance with resistance
-      const resistance = 0.5;
-      const maxSwipe = -80;
-      let swipeAmount;
-      
-      if (diff > maxSwipe) {
-        swipeAmount = diff; // Normal swipe within limits
-      } else {
-        // Add resistance beyond the limit
-        swipeAmount = maxSwipe + ((diff - maxSwipe) * resistance);
-      }
-      
-      item.style.transform = `translateX(${swipeAmount}px)`;
-      item.style.transition = 'none';
-    }
-  };
-  
-  const onItemTouchEnd = (e) => {
-    e.stopPropagation();
-    const item = e.currentTarget;
-    const startX = parseInt(item.dataset.touchStartX, 10);
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - startX;
-    
-    // More forgiving threshold for swipe (40px instead of 50px)
-    if (diff < -40) {
-      // Swiped far enough to show delete action
-      item.style.transform = 'translateX(-80px)';
-      item.style.transition = 'transform 0.3s ease';
-      // Mark user as having swiped an item
-      localStorage.setItem('hasSwipedCartItem', 'true');
-      setShowSwipeHint(false);
-      // Gentler haptic feedback
-      if (navigator.vibrate) navigator.vibrate(10);
-    } else {
-      // Reset position with smooth animation
-      item.style.transform = 'translateX(0)';
-      item.style.transition = 'transform 0.3s ease';
-    }
-  };
-  
-  // Reset item positions when clicking outside
+
+  // Reset positions - no longer needed but kept as a stub to avoid breaking function calls
   const resetItemPositions = () => {
-    const items = document.querySelectorAll('.cart-item');
-    items.forEach(item => {
-      item.style.transform = 'translateX(0)';
-      item.style.transition = 'transform 0.3s ease';
-    });
+    // Swipe reset functionality removed
   };
-  
+
   // Handle discount code application
   const handleApplyDiscount = () => {
     if (!discountInput.trim()) {
@@ -257,14 +149,10 @@ const CartDrawer = ({ isOpen, onClose }) => {
         />
       )}
       
-      {/* Drawer with gesture support */}
+      {/* Drawer */}
       <div 
         ref={drawerRef}
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-warm-beige shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} ${isSwiping ? 'transition-none' : ''} overflow-hidden`}
-        style={{ transform: isSwiping ? `translateX(${swipeDistance}px)` : '' }}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-warm-beige shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-hidden`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -371,41 +259,15 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     <li 
                       key={`cart-item-${index}-${item._id || item.id}`} 
                       className="py-4 px-4 flex relative cart-item overflow-hidden"
-                      onTouchStart={(e) => onItemTouchStart(e, item._id || item.id)}
-                      onTouchMove={onItemTouchMove}
-                      onTouchEnd={onItemTouchEnd}
                     >
-                      {/* Delete button (hidden until swiped) with improved accessibility */}
-                      <div className="absolute inset-y-0 right-0 w-20 bg-red-500 text-white flex items-center justify-center transform translate-x-full">
-                        <button
-                          onClick={() => removeFromCart(item.productId || item._id || item.id)}
-                          className="w-full h-full flex items-center justify-center"
-                          aria-label="Remove item"
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                      </div>
-                      
-                      {/* Visible delete button for better accessibility */}
+                      {/* Delete button with consistent visibility on both desktop and mobile */}
                       <button 
                         onClick={() => removeFromCart(item.productId || item._id || item.id)}
-                        className="absolute top-0 right-0 p-2 text-gray-400 hover:text-red-500 transition-colors md:block hidden"
+                        className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors z-10 bg-white bg-opacity-80 rounded-full shadow-sm"
                         aria-label="Remove item"
                       >
                         <FontAwesomeIcon icon={faTrash} size="sm" />
                       </button>
-
-                      {/* Item swipe hint */}
-                      {showSwipeHint && cartItems.length > 0 && cartItems[0]._id === item._id && (
-                        <div className="absolute inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-10 text-white"
-                          onClick={dismissSwipeHint}>
-                          <div className="text-center p-3">
-                            <FontAwesomeIcon icon={faHandPointUp} className="text-white text-2xl transform rotate-90 mb-2" />
-                            <p className="text-sm">Swipe left to remove</p>
-                            <p className="text-xs mt-1 opacity-70">Tap to dismiss</p>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Product image with improved error handling */}
                       <div className="w-20 h-20 bg-white rounded-md border overflow-hidden flex-shrink-0 relative">
@@ -442,23 +304,55 @@ const CartDrawer = ({ isOpen, onClose }) => {
                             <p className="text-sm font-medium text-gray-900">{formatKES(item.price)}</p>
                           </div>
                         </div>
-                        
-                        {/* Improved Quantity Controls with better feedback */}
+                                                {/* Enhanced Quantity Controls with better feedback and usability */}
                         <div className="flex items-center justify-between mt-2 relative">
-                          <div className="flex items-center border rounded-lg overflow-hidden shadow-sm">
+                          <div className="flex items-center border rounded-lg overflow-hidden shadow-md">
                             <button 
                               onClick={() => {
+                                // Add button press animation
+                                const btn = document.activeElement;
+                                btn.classList.add('button-press');
+                                setTimeout(() => btn.classList.remove('button-press'), 150);
+                                
+                                // Add animation to quantity display
+                                const quantityDisplay = document.getElementById(`quantity-display-${item.cartItemId || index}`);
+                                if (quantityDisplay) {
+                                  quantityDisplay.classList.add('quantity-change-decrease');
+                                  setTimeout(() => quantityDisplay.classList.remove('quantity-change-decrease'), 300);
+                                }
+                                
                                 if (navigator.vibrate) navigator.vibrate(10);
-                                updateQuantity(item.productId || item._id || item.id, Math.max((item.quantity || 1) - 1, 1));
+                                if (item.quantity <= 1) {
+                                  // Show confirmation before removing last item
+                                  if (window.confirm(`Remove ${item.name} from your cart?`)) {
+                                    // Pass the entire item object to ensure correct identification
+                                    removeFromCart(item);
+                                  }
+                                } else {
+                                  // Pass the entire item object instead of just the ID
+                                  updateQuantity(item, (item.quantity || 1) - 1);
+                                }
                               }}
-                              className="px-3 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none transition-colors"
+                              className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300 focus:outline-none transition-colors active:scale-95 transform duration-150"
                               aria-label="Decrease quantity"
                             >
-                              <FontAwesomeIcon icon={faMinus} size="xs" />
+                              <FontAwesomeIcon icon={faMinus} />
                             </button>
-                            <span className="px-3 py-1 text-gray-700 bg-white font-medium">{item.quantity || 1}</span>
+                            <div id={`quantity-display-${item.cartItemId || index}`} className="px-4 py-2 text-gray-800 bg-white font-medium min-w-[40px] text-center">{item.quantity || 1}</div>
                             <button 
                               onClick={() => {
+                                // Add button press animation
+                                const btn = document.activeElement;
+                                btn.classList.add('button-press');
+                                setTimeout(() => btn.classList.remove('button-press'), 150);
+                                
+                                // Add animation to quantity display
+                                const quantityDisplay = document.getElementById(`quantity-display-${item.cartItemId || index}`);
+                                if (quantityDisplay) {
+                                  quantityDisplay.classList.add('quantity-change-increase');
+                                  setTimeout(() => quantityDisplay.classList.remove('quantity-change-increase'), 300);
+                                }
+                                
                                 if (navigator.vibrate) navigator.vibrate(10);
                                 // Check stock limit but still allow adding more
                                 const newQuantity = (item.quantity || 1) + 1;
@@ -468,19 +362,20 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                   toast.info(`Limited stock available (${item.stockQuantity})`);
                                 }
                                 
-                                updateQuantity(item.productId || item._id || item.id, newQuantity);
+                                // Pass the entire item object to ensure correct identification
+                                updateQuantity(item, newQuantity);
                               }}
-                              className={`px-3 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300 focus:outline-none transition-colors ${item.stockQuantity && item.quantity >= item.stockQuantity ? 'bg-yellow-50 text-yellow-600' : ''}`}
+                              className={`px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300 focus:outline-none transition-colors active:scale-95 transform duration-150 ${item.stockQuantity && item.quantity >= item.stockQuantity ? 'bg-yellow-50 text-yellow-600' : ''}`}
                               aria-label="Increase quantity"
                               disabled={item.stockQuantity && item.quantity >= item.stockQuantity}
                             >
-                              <FontAwesomeIcon icon={faPlus} size="xs" />
+                              <FontAwesomeIcon icon={faPlus} />
                             </button>
                           </div>
                           
                           {/* Stock quantity indicator */}
                           {item.stockQuantity && item.quantity >= item.stockQuantity && (
-                            <div className="absolute right-0 -bottom-4 text-xs text-amber-600">
+                            <div className="absolute right-0 -bottom-4 text-xs text-amber-600 font-medium">
                               Max quantity reached
                             </div>
                           )}
@@ -513,13 +408,15 @@ const CartDrawer = ({ isOpen, onClose }) => {
                             <button 
                               onClick={() => {
                                 addToCart(product);
+                                // Provide haptic feedback
+                                if (navigator.vibrate) navigator.vibrate([15, 30, 15]);
                                 // Remove from recommendations to avoid confusion
                                 setRelatedProducts(prev => prev.filter(p => p._id !== product._id));
                               }}
-                              className="bg-rich-brown text-white p-1.5 rounded-full hover:bg-soft-green transition-colors"
+                              className="bg-rich-brown text-white p-2 rounded-full hover:bg-soft-green transition-colors transform hover:scale-105 active:scale-95 duration-150 shadow-sm"
                               aria-label="Add to cart"
                             >
-                              <FontAwesomeIcon icon={faPlus} className="text-xs" />
+                              <FontAwesomeIcon icon={faPlus} />
                             </button>
                           </div>
                         </div>
@@ -591,31 +488,19 @@ const CartDrawer = ({ isOpen, onClose }) => {
             
             {/* Order summary */}
             <div className="space-y-2 mb-4">
-              <div className="flex justify-between text-sm text-gray-600">
-                <p>Subtotal</p>
-                <p>{formatKES(subtotal)}</p>
-              </div>
-              
-              {shipping > 0 && (
-                <div className="flex justify-between text-sm text-gray-600">
-                  <p>Shipping</p>
-                  <p>{formatKES(shipping)}</p>
+              {/* Use an array to map through summary items with proper keys */}
+              {[
+                { id: 'subtotal', label: 'Subtotal', value: formatKES(subtotal), show: true, className: 'text-gray-600' },
+                { id: 'shipping', label: 'Shipping', value: formatKES(shipping), show: shipping > 0, className: 'text-gray-600' },
+                { id: 'tax', label: 'Tax (16% VAT)', value: formatKES(tax), show: tax > 0, className: 'text-gray-600' },
+                { id: 'discount', label: 'Discount', value: `-${formatKES(discount)}`, show: discount > 0, className: 'text-green-600' }
+              ].filter(item => item.show)
+               .map(item => (
+                <div key={item.id} className={`flex justify-between text-sm ${item.className}`}>
+                  <p>{item.label}</p>
+                  <p>{item.value}</p>
                 </div>
-              )}
-              
-              {tax > 0 && (
-                <div className="flex justify-between text-sm text-gray-600">
-                  <p>Tax (16% VAT)</p>
-                  <p>{formatKES(tax)}</p>
-                </div>
-              )}
-              
-              {discount > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <p>Discount</p>
-                  <p>-{formatKES(discount)}</p>
-                </div>
-              )}
+              ))}
               
               <div className="h-px bg-gray-200 my-1"></div>
               

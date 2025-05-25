@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api';
 import productService from '../services/productService';
 
@@ -11,13 +12,19 @@ import CartSummary from '../components/checkout/CartSummary';
 import CustomerInfoForm from '../components/checkout/CustomerInfoForm';
 import PaymentMethodForm from '../components/checkout/PaymentMethodForm';
 import OrderConfirmation from '../components/checkout/OrderConfirmation';
+import LoginStep from '../components/checkout/LoginStep';
 import LoadingOverlay from '../components/common/LoadingOverlay';
 
 // Utils
 import { generateOrderNumber } from '../utils/orderUtils';
 
 // Constants
-const STEPS = ['Cart Review', 'Customer Info', 'Payment', 'Confirmation'];
+// Keep two separate arrays - one with login step and one without
+const STEPS_WITH_LOGIN = ['Cart Review', 'Login', 'Customer Info', 'Payment', 'Confirmation'];
+const STEPS_WITHOUT_LOGIN = ['Cart Review', 'Customer Info', 'Payment', 'Confirmation'];
+
+// Default to steps with login, will be updated based on auth status
+const STEPS = STEPS_WITH_LOGIN;
 
 const NewCheckoutPage = () => {
   // Navigation and state management
@@ -28,6 +35,12 @@ const NewCheckoutPage = () => {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  
+  // Authentication context
+  const { user, isAuthenticated } = useAuth();
+  
+  // Use different step arrays based on authentication status
+  const [checkoutSteps, setCheckoutSteps] = useState(STEPS_WITH_LOGIN);
   
   // Cart state from context
   const { 
@@ -72,6 +85,58 @@ const NewCheckoutPage = () => {
       return () => clearTimeout(timer);
     }
   }, [cartItems, navigate, activeStep]);
+  
+  // Update checkout steps and pre-populate customer info when auth status changes
+  useEffect(() => {
+    // If user is authenticated, use steps without login
+    if (isAuthenticated) {
+      setCheckoutSteps(STEPS_WITHOUT_LOGIN);
+      console.log('User is authenticated, using checkout flow without login step');
+      
+      // If currently on login step, skip to customer info
+      if (activeStep === 1 && checkoutSteps === STEPS_WITH_LOGIN) {
+        setActiveStep(1); // In the steps without login, index 1 is Customer Info
+      }
+      
+      // Try to get customer info from session storage first (from recent login/registration)
+      const savedInfo = sessionStorage.getItem('checkoutCustomerInfo');
+      if (savedInfo) {
+        try {
+          const parsedInfo = JSON.parse(savedInfo);
+          setCustomerInfo({
+            ...customerInfo,
+            ...parsedInfo
+          });
+          console.log('Pre-populated customer info from session storage');
+        } catch (e) {
+          console.error('Failed to parse customer info from session storage:', e);
+          // Fall back to user profile data
+          populateFromUserProfile();
+        }
+      } else {
+        // If no session data, use user profile
+        populateFromUserProfile();
+      }
+    } else {
+      setCheckoutSteps(STEPS_WITH_LOGIN);
+      console.log('User is not authenticated, using checkout flow with login step');
+    }
+  }, [isAuthenticated, user, activeStep]);
+  
+  // Helper function to populate customer info from user profile
+  const populateFromUserProfile = () => {
+    if (user && user.name) {
+      setCustomerInfo({
+        name: user.name || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        address: user.address || '',
+        apartment: user.apartment || '',
+        city: user.city || 'Nairobi'
+      });
+      console.log('Pre-populated customer info from user profile');
+    }
+  };
 
   // Enhanced product fetching and validation using ProductService
   const fetchProducts = useCallback(async () => {
@@ -245,15 +310,63 @@ const NewCheckoutPage = () => {
 
   // Step navigation functions
   const goToNextStep = () => {
-    if (activeStep < STEPS.length - 1) {
+    // If using steps with login and user is not authenticated and at cart review
+    if (checkoutSteps === STEPS_WITH_LOGIN && activeStep === 0 && !isAuthenticated) {
+      // Go to login step
+      setActiveStep(1);
+      return;
+    }
+    
+    // Normal navigation based on current checkout steps
+    if (activeStep < checkoutSteps.length - 1) {
       setActiveStep(prev => prev + 1);
     }
   };
 
   const goToPreviousStep = () => {
+    // Normal navigation based on current checkout steps
     if (activeStep > 0) {
       setActiveStep(prev => prev - 1);
     }
+  };
+  
+  // Handle successful login during checkout
+  const handleLoginSuccess = (userData) => {
+    // Update checkout steps to the version without login
+    setCheckoutSteps(STEPS_WITHOUT_LOGIN);
+    
+    // Update customer info with user data if provided
+    if (userData) {
+      setCustomerInfo({
+        ...customerInfo,
+        ...userData
+      });
+      console.log('Pre-populated customer info from login/registration:', userData);
+    } else {
+      // Try to get data from session storage as a fallback
+      const savedInfo = sessionStorage.getItem('checkoutCustomerInfo');
+      if (savedInfo) {
+        try {
+          const parsedInfo = JSON.parse(savedInfo);
+          setCustomerInfo({
+            ...customerInfo,
+            ...parsedInfo
+          });
+          console.log('Pre-populated customer info from session storage');
+        } catch (e) {
+          console.error('Failed to parse customer info from session storage:', e);
+        }
+      }
+    }
+    
+    // Go to customer info step (which is index 1 in the steps without login)
+    setActiveStep(1);
+    
+    // Show success message
+    toast.success('Successfully logged in! Please complete your delivery information.', { 
+      containerId: 'main-toast-container',
+      autoClose: 3000
+    });
   };
 
   const handleCustomerInfoSubmit = (data) => {
@@ -287,6 +400,13 @@ const NewCheckoutPage = () => {
 
   // Handle final order submission with payment method
   const handlePaymentMethodSubmit = async (paymentData) => {
+    // Ensure user is logged in before processing order
+    if (!isAuthenticated) {
+      toast.error('You must be logged in to complete your order', { containerId: 'main-toast-container' });
+      setActiveStep(1); // Go to login step
+      return;
+    }
+    
     setIsLoading(true);
     setLoadingMessage('Processing your order...');
     
@@ -421,17 +541,28 @@ const NewCheckoutPage = () => {
       orderPayload.paymentStatus = 'pending';
       orderPayload.status = 'PENDING'; // Use standardized status format for order tracking
       
-      // Add customer ID if available (for order history tracking)
-      const customerToken = localStorage.getItem('customerToken');
-      const customerEmail = localStorage.getItem('customerEmail');
-      const customerId = localStorage.getItem('customerId');
-      
-      if (customerId) {
-        orderPayload.customerId = customerId;
-      }
-      
-      if (customerEmail) {
-        orderPayload.customerEmail = customerEmail;
+      // Add customer ID and other user data from authenticated user
+      if (user && user._id) {
+        orderPayload.customerId = user._id;
+        orderPayload.customerEmail = user.email;
+        
+        // Add additional user metadata if available
+        if (user.customerProfile) {
+          orderPayload.customerProfile = user.customerProfile;
+        }
+      } else {
+        // Fallback to localStorage if user object is incomplete
+        const customerToken = localStorage.getItem('customerToken');
+        const customerEmail = localStorage.getItem('customerEmail');
+        const customerId = localStorage.getItem('customerId');
+        
+        if (customerId) {
+          orderPayload.customerId = customerId;
+        }
+        
+        if (customerEmail) {
+          orderPayload.customerEmail = customerEmail;
+        }
       }
       
       // Double-check that orderNumber is set to prevent errors
@@ -509,54 +640,6 @@ const NewCheckoutPage = () => {
     // Reset checkout steps for next order
     setActiveStep(0);
   };
-
-  // Render step content
-  const renderStepContent = () => {
-    switch (activeStep) {
-      case 0:
-        return (
-          <CartSummary 
-            cartItems={cartItems} 
-            onUpdateQuantity={updateQuantity}
-            onRemoveItem={removeFromCart}
-            onContinue={goToNextStep}
-            cartTotal={cartTotal} 
-          />
-        );
-      case 1:
-        return (
-          <CustomerInfoForm 
-            initialValues={customerInfo}
-            onSubmit={handleCustomerInfoSubmit}
-            onBack={goToPreviousStep}
-            onChange={handleCustomerInfoChange}
-          />
-        );
-      case 2:
-        return (
-          <PaymentMethodForm 
-            onSubmit={handlePaymentMethodSubmit}
-            onBack={goToPreviousStep}
-            loading={isLoading}
-            orderTotal={cartTotal.total || cartTotal.subtotal}
-            customerPhone={customerInfo.phoneNumber}
-          />
-        );
-      case 3:
-        return (
-          <OrderConfirmation 
-            orderInfo={orderInfo}
-            customerInfo={customerInfo}
-            paymentInfo={{ paymentMethod: 'MPESA', paymentStatus: 'PAID' }}
-            cartItems={orderItems.length > 0 ? orderItems : cartItems}
-            cartTotal={orderTotals || cartTotal}
-            onContinueShopping={handleContinueShopping}
-          />
-        );
-      default:
-        return <div>Invalid step</div>;
-    }
-  };
   
   // Render loading state if needed
   if (isLoading && !loadingMessage) {
@@ -586,14 +669,64 @@ const NewCheckoutPage = () => {
       
       {/* Stepper */}
       <CheckoutStepper 
-        steps={STEPS} 
+        steps={checkoutSteps} 
         activeStep={activeStep} 
+        setActiveStep={setActiveStep} 
         className="mb-8"
       />
       
-      {/* Step Content */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        {renderStepContent()}
+      {/* Step content */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        {checkoutSteps[activeStep] === 'Cart Review' && (
+          <CartSummary
+            cartItems={cartItems}
+            cartTotal={cartTotal}
+            removeFromCart={removeFromCart}
+            updateQuantity={updateQuantity}
+            onNextStep={goToNextStep}
+            isAuthenticated={isAuthenticated}
+          />
+        )}
+        
+        {checkoutSteps[activeStep] === 'Login' && (
+          <LoginStep 
+            onBack={goToPreviousStep}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+        
+        {checkoutSteps[activeStep] === 'Customer Info' && (
+          <CustomerInfoForm
+            initialValues={customerInfo} // Use initialValues to ensure form is populated
+            customerInfo={customerInfo}
+            onChange={handleCustomerInfoChange}
+            onSubmit={handleCustomerInfoSubmit}
+            onBack={goToPreviousStep}
+          />
+        )}
+        
+        {checkoutSteps[activeStep] === 'Payment' && (
+          <PaymentMethodForm
+            onBack={goToPreviousStep}
+            onSubmit={handlePaymentMethodSubmit}
+            orderTotal={cartTotal.total + orderInfo.shippingFee}
+            customerInfo={customerInfo}
+          />
+        )}
+        
+        {checkoutSteps[activeStep] === 'Confirmation' && (
+          <OrderConfirmation
+            orderId={orderInfo.orderId}
+            orderNumber={orderInfo.orderNumber}
+            orderDate={orderInfo.orderDate}
+            estimatedDelivery={orderInfo.estimatedDeliveryDate}
+            items={orderItems.length > 0 ? orderItems : cartItems}
+            totals={orderTotals || cartTotal}
+            shippingFee={orderInfo.shippingFee}
+            customerInfo={customerInfo}
+            onContinueShopping={handleContinueShopping}
+          />
+        )}
       </div>
       
       {/* Loading overlay */}

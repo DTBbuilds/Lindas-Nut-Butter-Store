@@ -8,6 +8,8 @@ const config = {
     baseUrl: process.env.NODE_ENV === 'production' 
       ? process.env.PRODUCTION_BASE_URL 
       : 'http://localhost:5000',
+    // Public URL for callbacks (using ngrok in development)
+    publicUrl: process.env.PUBLIC_URL || 'https://2e15-41-90-64-164.ngrok-free.app',
     frontendUrl: process.env.NODE_ENV === 'production'
       ? process.env.PRODUCTION_FRONTEND_URL
       : 'http://localhost:3000'
@@ -15,17 +17,7 @@ const config = {
   
   // MongoDB configuration
   mongodb: {
-    uri: process.env.MONGO_URI || 
-      (process.env.NODE_ENV === 'production'
-        ? 'mongodb+srv://dtbbuilds:dtbbuilds2025@cluster0.qnwgmty.mongodb.net/lindas-nut-butter?retryWrites=true&w=majority&appName=Cluster0'
-        : 'mongodb://localhost:27017/lindas-nut-butter-store-store-store-store-store'),
-    options: {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000,
-      connectTimeoutMS: 30000,
-      socketTimeoutMS: 60000
-    }
+    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/lindas-nut-butter-store-store-store-store-store'
   },
   
   // M-Pesa API configuration
@@ -61,22 +53,10 @@ const config = {
       process.env.NODE_ENV === 'production' ? '' : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919' // Sandbox default
     ),
     
-    // Callback URLs - these should be absolute URLs in production
-    callbackUrl: process.env.MPESA_CALLBACK_URL || (
-      process.env.NODE_ENV === 'production'
-        ? `${process.env.PRODUCTION_BASE_URL}/mpesa/callback`
-        : 'http://localhost:5000/api/mpesa/callback'
-    ),
-    validationUrl: process.env.MPESA_VALIDATION_URL || (
-      process.env.NODE_ENV === 'production'
-        ? `${process.env.PRODUCTION_BASE_URL}/mpesa/validation`
-        : 'http://localhost:5000/api/mpesa/validation'
-    ),
-    confirmationUrl: process.env.MPESA_CONFIRMATION_URL || (
-      process.env.NODE_ENV === 'production'
-        ? `${process.env.PRODUCTION_BASE_URL}/mpesa/confirmation`
-        : 'http://localhost:5000/api/mpesa/confirmation'
-    ),
+    // Callback URLs - using ngrok for development to make them publicly accessible
+    callbackUrl: process.env.CALLBACK_URL || 'https://2e15-41-90-64-164.ngrok-free.app/api/mpesa/callback',
+    validationUrl: process.env.VALIDATION_URL || 'https://2e15-41-90-64-164.ngrok-free.app/api/mpesa/validation',
+    confirmationUrl: process.env.CONFIRMATION_URL || 'https://2e15-41-90-64-164.ngrok-free.app/api/mpesa/confirmation',
     
     // For initiator credentials (used for B2C, B2B and reversal)
     initiatorName: process.env.MPESA_INITIATOR_NAME || (
@@ -89,6 +69,16 @@ const config = {
   
   // Test configuration for sandbox testing
   // Email configuration
+  // Authentication configuration
+  jwt: {
+    // SECURITY CRITICAL: Only use strong secrets in production
+    secret: process.env.JWT_SECRET || 'linda-nut-butter-store-secure-jwt-secret-key-2025',
+    adminSecret: process.env.ADMIN_JWT_SECRET || 'linda-nut-butter-store-admin-secure-jwt-secret-key-2025',
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',     // Token validity for regular users
+    adminExpiresIn: process.env.ADMIN_JWT_EXPIRES_IN || '1d', // Token validity for admins
+    refreshExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN || '30d' // Refresh token validity
+  },
+  
   email: {
     host: process.env.EMAIL_HOST || 'smtp.gmail.com', // Using Gmail SMTP server
     port: process.env.EMAIL_PORT || 465, // Use 465 for secure connection

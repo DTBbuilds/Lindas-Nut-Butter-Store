@@ -5,7 +5,9 @@ import {
   faBell, faBellSlash, faMoneyBill, faSync
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { API_URL } from '../../config';
+
+// Use direct API URL definition instead of importing from config
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 /**
  * RealtimeTransactions Component

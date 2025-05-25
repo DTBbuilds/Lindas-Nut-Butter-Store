@@ -5,12 +5,16 @@ import {
   faShoppingBag, faFileDownload, faSync, faCalendarAlt,
   faComments, faChartBar, faUsers, faBoxes, faShoppingCart,
   faChartLine, faTag, faExclamationTriangle, faPercent, faStar,
-  faBell, faBellSlash, faSearch
+  faBell, faBellSlash, faSearch, faUserPlus, faUserMinus, faUserCog,
+  faIdCard, faArrowRight, faUserShield, faAddressBook, faUserFriends
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import FeedbackDashboard from '../components/admin/FeedbackDashboard';
 import RealtimeTransactions from '../components/admin/RealtimeTransactions';
-import { API_URL } from '../config';
+import CustomerManagementWidget from '../components/admin/CustomerManagementWidget';
+import DashboardCustomersWidget from '../components/admin/DashboardCustomersWidget';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const AdminDashboardPage = () => {
   const [transactions, setTransactions] = useState([]);
@@ -19,6 +23,13 @@ const AdminDashboardPage = () => {
   const [monthlySales, setMonthlySales] = useState([]);
   const [productRankings, setProductRankings] = useState([]);
   const [recentFeedback, setRecentFeedback] = useState([]);
+  const [customerStats, setCustomerStats] = useState({
+    totalCustomers: 0,
+    newCustomers: 0,
+    newCustomersPercentage: 0,
+    topCustomers: []
+  });
+  const [recentCustomers, setRecentCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastRealTimeTransaction, setLastRealTimeTransaction] = useState(null);
@@ -163,7 +174,35 @@ const AdminDashboardPage = () => {
       safelyFetchData('/api/admin/dashboard/product-rankings', setProductRankings, []),
       
       // Recent feedback - with 2 retries for this specific endpoint
-      safelyFetchData('/api/admin/dashboard/recent-feedback', setRecentFeedback, [], 2)
+      safelyFetchData('/api/admin/dashboard/recent-feedback', setRecentFeedback, [], 2),
+      
+      // Customer statistics
+      safelyFetchData('/api/admin/customers/stats', (data) => {
+        if (data && data.stats) {
+          setCustomerStats(data.stats);
+        } else {
+          setCustomerStats({
+            totalCustomers: 0,
+            newCustomers: 0,
+            newCustomersPercentage: 0,
+            topCustomers: []
+          });
+        }
+      }, {
+        totalCustomers: 0,
+        newCustomers: 0,
+        newCustomersPercentage: 0,
+        topCustomers: []
+      }),
+      
+      // Recent customers
+      safelyFetchData('/api/admin/customers?limit=5&sortField=createdAt&sortOrder=desc', (data) => {
+        if (data && data.customers) {
+          setRecentCustomers(data.customers);
+        } else {
+          setRecentCustomers([]);
+        }
+      }, [])
     ]);
     
     // Check if all requests failed
@@ -566,10 +605,26 @@ const AdminDashboardPage = () => {
           <button 
             className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'transactions' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
             onClick={() => setActiveTab('transactions')}
-            title="View and manage payment transactions"
+            title="View and manage transactions"
           >
             <FontAwesomeIcon icon={faMoneyBill} className="mr-2" />
             Transactions
+          </button>
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'customers' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('customers')}
+            title="View and manage customers"
+          >
+            <FontAwesomeIcon icon={faUserFriends} className="mr-2" />
+            Customers
+          </button>
+          <button 
+            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'products' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
+            onClick={() => setActiveTab('products')}
+            title="Manage your product inventory"
+          >
+            <FontAwesomeIcon icon={faBoxes} className="mr-2" />
+            Products
           </button>
           <button 
             className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'orders' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
@@ -578,14 +633,6 @@ const AdminDashboardPage = () => {
           >
             <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
             Orders
-          </button>
-          <button 
-            className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'products' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
-            onClick={() => setActiveTab('products')}
-            title="Manage product inventory"
-          >
-            <FontAwesomeIcon icon={faBoxes} className="mr-2" />
-            Products
           </button>
           <button 
             className={`px-6 py-3 text-base font-medium transition-all duration-200 ${activeTab === 'feedback' ? 'text-green-600 border-b-2 border-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600 hover:bg-green-50'}`}
@@ -834,6 +881,9 @@ const AdminDashboardPage = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Customer Management Section */}
+              <CustomerManagementWidget customerStats={customerStats} recentCustomers={recentCustomers} />
               
               {/* Top Products & Recent Feedback */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1209,7 +1259,262 @@ const AdminDashboardPage = () => {
           <FeedbackDashboard />
         </div>
       )}
-
+      
+      {/* Customers Tab */}
+      {activeTab === 'customers' && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-800">Customer Management</h2>
+            <a 
+              href="/admin/customers" 
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
+            >
+              View All Customers
+            </a>
+          </div>
+          
+          {/* Customer Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 shadow-sm">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Total Customers</h3>
+                  <p className="text-2xl font-bold text-gray-800">{customerStats.totalCustomers}</p>
+                </div>
+                <div className="bg-indigo-100 p-2 rounded-full">
+                  <FontAwesomeIcon icon={faUsers} className="text-indigo-600" />
+                </div>
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                <span>Active accounts</span>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 shadow-sm">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">New Customers (30 days)</h3>
+                  <p className="text-2xl font-bold text-gray-800">{customerStats.newCustomers}</p>
+                </div>
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <FontAwesomeIcon icon={faUserPlus} className="text-blue-600" />
+                </div>
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                <span>{customerStats.newCustomersPercentage}% growth</span>
+              </div>
+            </div>
+            
+            <div className="bg-green-50 p-4 rounded-lg border border-green-100 shadow-sm">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Top Customer</h3>
+                  <p className="text-xl font-bold text-gray-800 truncate max-w-[180px]">
+                    {customerStats.topCustomers && customerStats.topCustomers.length > 0 ? 
+                      customerStats.topCustomers[0]?.customerDetails?.[0]?.name || 'N/A' : 
+                      'N/A'}
+                  </p>
+                </div>
+                <div className="bg-green-100 p-2 rounded-full">
+                  <FontAwesomeIcon icon={faUserShield} className="text-green-600" />
+                </div>
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                <span>Most valuable customer</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick Action Buttons */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Quick Actions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <a 
+                href="/admin/customers" 
+                className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200"
+              >
+                <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full mr-4">
+                  <FontAwesomeIcon icon={faUsers} size="lg" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-800">View All Customers</h4>
+                  <p className="text-sm text-gray-500">Browse and manage all customer accounts</p>
+                </div>
+              </a>
+              
+              <a 
+                href="/admin/customers?filter=new" 
+                className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200"
+              >
+                <div className="p-3 bg-blue-100 text-blue-600 rounded-full mr-4">
+                  <FontAwesomeIcon icon={faUserPlus} size="lg" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-800">New Customers</h4>
+                  <p className="text-sm text-gray-500">View recently registered customers</p>
+                </div>
+              </a>
+              
+              <a 
+                href="/admin/reports/customers" 
+                className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200"
+              >
+                <div className="p-3 bg-green-100 text-green-600 rounded-full mr-4">
+                  <FontAwesomeIcon icon={faChartBar} size="lg" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-800">Customer Analytics</h4>
+                  <p className="text-sm text-gray-500">View detailed customer metrics and reports</p>
+                </div>
+              </a>
+            </div>
+          </div>
+          
+          {/* Recent Customers */}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Recent Customers</h3>
+              <span className="text-sm text-gray-500">Last 10 registrations</span>
+            </div>
+            
+            {recentCustomers && recentCustomers.length > 0 ? (
+              <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {recentCustomers.map((customer) => (
+                      <tr key={customer._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                              <FontAwesomeIcon icon={faUser} />
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.phoneNumber || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(customer.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <a 
+                            href={`/admin/customers/${customer._id}`} 
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            View Details
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-gray-500 mb-2">No recent customers found</div>
+                <a 
+                  href="/admin/customers" 
+                  className="text-indigo-600 hover:text-indigo-800 font-medium"
+                >
+                  View All Customers
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Customers Tab */}
+      {activeTab === 'customers' && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Management</h2>
+          
+          <div className="mb-8">
+            <DashboardCustomersWidget />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Statistics</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Customers:</span>
+                  <span className="text-lg font-semibold text-gray-800">{customerStats.totalCustomers}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">New Customers (30 days):</span>
+                  <div className="flex items-center">
+                    <span className="text-lg font-semibold text-gray-800">{customerStats.newCustomers}</span>
+                    {customerStats.newCustomersPercentage > 0 && (
+                      <span className="ml-2 text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+                        +{customerStats.newCustomersPercentage}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="md:col-span-2 bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Customers</h3>
+              {customerStats.topCustomers && customerStats.topCustomers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {customerStats.topCustomers.map((customer) => (
+                        <tr key={customer._id || customer.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <FontAwesomeIcon icon={faUser} className="text-green-600" />
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                                <div className="text-sm text-gray-500">{customer.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.totalOrders}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                            {new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(customer.totalSpent)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href={`/admin/customers/${customer._id || customer.id}`} className="text-green-600 hover:text-green-900">
+                              View Details
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">No customer data available</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Products Tab */}
       {activeTab === 'products' && (
         <div className="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">

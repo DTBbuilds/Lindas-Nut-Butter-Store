@@ -3,24 +3,11 @@
  * Contains constants and configuration for the frontend
  */
 
-// Helper function to determine if running in production environment
-const isProduction = process.env.NODE_ENV === 'production';
-
-// Default API URL based on environment
-const defaultApiUrl = isProduction
-  ? 'https://lindas-nut-butter.vercel.app'
-  : 'http://localhost:5000';
-
-// Default Base URL based on environment
-const defaultBaseUrl = isProduction
-  ? 'https://lindas-nut-butter.vercel.app'
-  : 'http://localhost:3000';
-
 // API URL - adjust based on environment
-export const API_URL = process.env.REACT_APP_API_URL || defaultApiUrl;
+export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Base URL for the app
-export const BASE_URL = process.env.REACT_APP_BASE_URL || defaultBaseUrl;
+export const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
 
 // Configuration for services
 export const SERVICES = {

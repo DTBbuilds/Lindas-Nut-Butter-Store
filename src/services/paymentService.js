@@ -1,4 +1,5 @@
 import { api } from '../utils/api';
+import config from '../config/apiConfig';
 
 /**
  * Payment processing service for Linda's Nut Butter Store
@@ -47,13 +48,42 @@ class PaymentService {
         throw new Error('Invalid payment amount. Minimum amount is 1 KES.');
       }
       
-      // Make API request to initiate M-PESA payment
-      const response = await api.post('/mpesa/stkpush', {
-        phoneNumber: normalizedPhone,
-        amount: roundedAmount,
-        orderId: paymentReference, // Use the determined reference value
-        description
-      });
+      // Try multiple approaches to make the M-PESA API request more resilient
+      let response;
+      
+      try {
+        // First try the direct fetch approach
+        console.log('Attempting M-PESA payment with direct fetch...');
+        const fetchResponse = await fetch('http://localhost:5000/api/mpesa/stkpush', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            phoneNumber: normalizedPhone,
+            amount: roundedAmount,
+            orderId: paymentReference,
+            description
+          })
+        });
+        
+        if (!fetchResponse.ok) {
+          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+        }
+        
+        response = await fetchResponse.json();
+        console.log('Direct fetch successful:', response);
+      } catch (fetchError) {
+        console.warn('Direct fetch failed, trying API utility as fallback...', fetchError);
+        
+        // Fallback to API utility if direct fetch fails
+        response = await api.post('/mpesa/stkpush', {
+          phoneNumber: normalizedPhone,
+          amount: roundedAmount,
+          orderId: paymentReference,
+          description
+        });
+      }
       
       console.log('M-PESA STK push initiated:', response);
       
@@ -78,7 +108,34 @@ class PaymentService {
    */
   async checkMpesaPaymentStatus(checkoutRequestID) {
     try {
-      const response = await api.get(`/mpesa/query`, { checkoutRequestID });
+      // Try multiple approaches to make the M-PESA API request more resilient
+      let response;
+      
+      try {
+        // First try the direct fetch approach
+        console.log('Attempting to check M-PESA status with direct fetch...');
+        const url = `http://localhost:5000/api/mpesa/query?checkoutRequestID=${encodeURIComponent(checkoutRequestID)}`;
+        const fetchResponse = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!fetchResponse.ok) {
+          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+        }
+        
+        response = await fetchResponse.json();
+        console.log('Direct fetch for status check successful:', response);
+      } catch (fetchError) {
+        console.warn('Direct fetch failed for status check, trying API utility as fallback...', fetchError);
+        
+        // Fallback to API utility if direct fetch fails
+        response = await api.get('/mpesa/query', { 
+          params: { checkoutRequestID }
+        });
+      }
       
       console.log('M-PESA payment status:', response);
       
@@ -103,7 +160,31 @@ class PaymentService {
    */
   async updateOrderWithPayment(orderId, paymentDetails) {
     try {
-      const response = await api.patch(`/orders/${orderId}/payment`, paymentDetails);
+      let response;
+      
+      try {
+        // First try the direct fetch approach
+        console.log('Attempting to update order payment with direct fetch...');
+        const fetchResponse = await fetch(`http://localhost:5000/api/orders/${orderId}/payment`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentDetails)
+        });
+        
+        if (!fetchResponse.ok) {
+          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+        }
+        
+        response = await fetchResponse.json();
+        console.log('Direct fetch for order update successful:', response);
+      } catch (fetchError) {
+        console.warn('Direct fetch failed for order update, trying API utility as fallback...', fetchError);
+        
+        // Fallback to API utility if direct fetch fails
+        response = await api.patch(`/orders/${orderId}/payment`, paymentDetails);
+      }
       
       console.log('Order payment updated:', response);
       

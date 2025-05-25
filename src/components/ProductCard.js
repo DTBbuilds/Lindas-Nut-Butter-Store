@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faStarHalfAlt, faCartPlus, faHeart, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faStarHalfAlt, faCartPlus, faHeart, faEye, faCheck, faShoppingBag, faLeaf, faGlobeAfrica, faSeedling, faCarrot, faAlignLeft, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { faStar as farStar } from '@fortawesome/free-regular-svg-icons';
 import { formatKES } from '../utils/currencyUtils';
 import { useCart } from '../contexts/CartContext';
 import fixImagePath from '../utils/imagePathFixer';
+import '../styles/animations.css';
 
 const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
   // Ensure product has all required fields with defaults
@@ -24,8 +25,50 @@ const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
     rating: propProduct?.rating || 4.5,
     reviews: propProduct?.reviews || 0,
     size: propProduct?.size || '370g',
+    features: propProduct?.features || [],
+    isOrganic: propProduct?.isOrganic || propProduct?.organic || false,
+    isVegan: propProduct?.isVegan || propProduct?.vegan || false,
+    isGlutenFree: propProduct?.isGlutenFree || propProduct?.glutenFree || false,
+    isLocallySourced: propProduct?.isLocallySourced || propProduct?.locallySourced || true,
     ...propProduct // Spread any additional product properties
   };
+  
+  // Extract key features based on product description and category
+  const extractedFeatures = [];
+  
+  // Add organic feature if product is organic
+  if (product.isOrganic || product.category?.toLowerCase().includes('organic') || 
+      product.name?.toLowerCase().includes('organic')) {
+    extractedFeatures.push({ icon: faLeaf, text: 'Organic', color: 'text-green-600' });
+  }
+  
+  // Add locally sourced feature
+  if (product.isLocallySourced || product.name?.toLowerCase().includes('local')) {
+    extractedFeatures.push({ icon: faGlobeAfrica, text: 'Locally Sourced', color: 'text-amber-600' });
+  }
+  
+  // Add vegan feature if applicable
+  if (product.isVegan || product.category?.toLowerCase().includes('vegan') || 
+      product.name?.toLowerCase().includes('vegan')) {
+    extractedFeatures.push({ icon: faSeedling, text: 'Vegan', color: 'text-green-500' });
+  }
+  
+  // Add gluten-free feature if applicable
+  if (product.isGlutenFree || product.category?.toLowerCase().includes('gluten-free') || 
+      product.name?.toLowerCase().includes('gluten-free') || 
+      product.name?.toLowerCase().includes('gluten free')) {
+    extractedFeatures.push({ icon: faCarrot, text: 'Gluten Free', color: 'text-orange-600' });
+  }
+  
+  // Add any additional features from the product data
+  if (Array.isArray(product.features) && product.features.length > 0) {
+    product.features.forEach(feature => {
+      // Avoid duplicates
+      if (!extractedFeatures.find(f => f.text.toLowerCase() === feature.toLowerCase())) {
+        extractedFeatures.push({ icon: faCircle, text: feature, color: 'text-soft-green' });
+      }
+    });
+  }
   
   const [isHovered, setIsHovered] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
@@ -33,8 +76,23 @@ const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
   const [expandedView, setExpandedView] = useState(false);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [touchStartY, setTouchStartY] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [showFlyAnimation, setShowFlyAnimation] = useState(false);
   const cardRef = useRef(null);
+  const addButtonRef = useRef(null);
   const { setCartAnimation } = useCart();
+  
+  // Reset add to cart success state after a few seconds
+  useEffect(() => {
+    let timeout;
+    if (addedToCart) {
+      timeout = setTimeout(() => {
+        setAddedToCart(false);
+      }, 2000);
+    }
+    return () => clearTimeout(timeout);
+  }, [addedToCart]);
   
   // Use selected variant price or original price if no variant is selected
   const originalPrice = selectedVariant ? 
@@ -98,6 +156,9 @@ const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
   };
 
   const handleAddToCart = () => {
+    // Don't allow adding again if we're in the process of adding
+    if (isAddingToCart) return;
+    
     // Create a product copy with the selected variant information
     const productToAdd = {
       ...product,
@@ -114,11 +175,28 @@ const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
       navigator.vibrate(50);
     }
     
-    // Trigger add to cart animation
-    setCartAnimation(true);
+    // Show adding animation
+    setIsAddingToCart(true);
     
-    // Call the addToCart function
-    addToCart(productToAdd);
+    // After a brief delay, show the fly animation
+    setTimeout(() => {
+      setShowFlyAnimation(true);
+      
+      // After the fly animation starts, trigger the cart animation
+      setTimeout(() => {
+        setCartAnimation(true);
+        
+        // Call the addToCart function
+        addToCart(productToAdd);
+        
+        // Reset animations and show success state
+        setTimeout(() => {
+          setShowFlyAnimation(false);
+          setIsAddingToCart(false);
+          setAddedToCart(true);
+        }, 600); // Match the animation duration
+      }, 200);
+    }, 300);
   };
 
   // Handle missing or invalid product data
@@ -265,26 +343,102 @@ const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
             )}
           </div>
           
-          {/* Mobile-optimized add to cart button */}
+          {/* Mobile-optimized add to cart button with animation states */}
           {isMobile && product.inventoryStatus !== 'OUT_OF_STOCK' && (
-            <button
-              className="bg-soft-green text-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm hover:bg-rich-brown transition-colors active:scale-95"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart();
-              }}
-              aria-label="Add to cart"
-            >
-              <FontAwesomeIcon icon={faCartPlus} className="text-sm" />
-            </button>
+            <div className="relative">
+              {/* Fly to cart animation element */}
+              {showFlyAnimation && (
+                <div className="absolute top-0 right-0 z-10">
+                  <div className="w-8 h-8 bg-soft-green text-white rounded-full flex items-center justify-center animate-[flyToCart_0.8s_ease-in-out_forwards]">
+                    <FontAwesomeIcon icon={faShoppingBag} className="text-sm" />
+                  </div>
+                </div>
+              )}
+              
+              <button
+                ref={addButtonRef}
+                className={`relative overflow-hidden text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md
+                  ${addedToCart ? 'bg-green-500' : isAddingToCart ? 'bg-soft-green/80' : 'bg-soft-green'} 
+                  ${isAddingToCart ? 'animate-[addToCartBounce_0.6s_ease-in-out]' : ''}
+                  transition-colors duration-300 active:scale-95`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCart();
+                }}
+                disabled={isAddingToCart || addedToCart}
+                aria-label="Add to cart"
+              >
+                {addedToCart ? (
+                  <FontAwesomeIcon icon={faCheck} className="text-sm" />
+                ) : (
+                  <FontAwesomeIcon icon={faCartPlus} className="text-sm" />
+                )}
+                
+                {/* Add ripple effect */}
+                {isAddingToCart && (
+                  <span className="absolute w-full h-full top-0 left-0 bg-white/30 animate-ping rounded-full"></span>
+                )}
+              </button>
+            </div>
           )}
         </div>
         
-        {/* Description - conditionally expanded on mobile */}
-        <div className="mt-2">
-          <p className={`text-xs sm:text-sm text-gray-600 ${expandedView ? '' : 'line-clamp-2'} transition-all duration-300`}>
-            {product.description}
-          </p>
+        {/* Description with bullet points - conditionally expanded on mobile */}
+        {/* Product Feature Highlights */}
+        <div className="mt-2 mb-3">
+          {extractedFeatures.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {extractedFeatures.map((feature, index) => (
+                <div 
+                  key={index} 
+                  className="inline-flex items-center bg-gray-50 px-2 py-1 rounded-md text-xs border border-gray-100"
+                >
+                  <FontAwesomeIcon icon={feature.icon} className={`${feature.color} mr-1 text-xs`} />
+                  <span className="text-gray-700">{feature.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Check if description contains bullet points already */}
+          {product.description && product.description.includes('•') ? (
+            <div className={`text-xs sm:text-sm text-gray-600 transition-all duration-300 ${expandedView ? '' : 'max-h-12 overflow-hidden'}`}>
+              {product.description.split('•').filter(item => item.trim()).map((point, index) => (
+                <div key={index} className="flex items-start mb-1">
+                  <span className="text-soft-green mr-1 mt-0.5">•</span>
+                  <span>{point.trim()}</span>
+                </div>
+              ))}
+            </div>
+          ) : product.description && product.description.includes('-') && product.description.split('-').length > 2 ? (
+            <div className={`text-xs sm:text-sm text-gray-600 transition-all duration-300 ${expandedView ? '' : 'max-h-12 overflow-hidden'}`}>
+              {product.description.split('-').filter(item => item.trim()).map((point, index) => (
+                <div key={index} className="flex items-start mb-1">
+                  <span className="text-soft-green mr-1 mt-0.5">•</span>
+                  <span>{point.trim()}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={`text-xs sm:text-sm text-gray-600 ${expandedView ? '' : 'line-clamp-2'} transition-all duration-300`}>
+              {/* If no bullet points or dashes, create key points from sentences */}
+              {product.description && product.description.split('.').length > 1 ? (
+                <div className={`${expandedView ? '' : 'max-h-12 overflow-hidden'}`}>
+                  {product.description.split('.').filter(item => item.trim()).map((point, index) => (
+                    <div key={index} className="flex items-start mb-1">
+                      <span className="text-soft-green mr-1 mt-0.5">•</span>
+                      <span>{point.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>
+                  {product.description}
+                </p>
+              )}
+            </div>
+          )}
+          
           {product.description && product.description.length > 80 && (
             <button 
               className="text-xs text-soft-green mt-1 font-medium focus:outline-none active:scale-95 transition-transform"
@@ -298,18 +452,47 @@ const ProductCard = ({ product: propProduct, addToCart, isMobile = false }) => {
           )}
         </div>
         
-        {/* Desktop add to cart button */}
+        {/* Desktop add to cart button with animation states */}
         {!isMobile && product.inventoryStatus !== 'OUT_OF_STOCK' && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddToCart();
-            }}
-            className="w-full mt-3 py-2 bg-soft-green text-white rounded-md hover:bg-rich-brown transition-colors active:scale-98 flex items-center justify-center space-x-2"
-          >
-            <FontAwesomeIcon icon={faCartPlus} />
-            <span>Add to Cart</span>
-          </button>
+          <div className="relative mt-3">
+            {/* Fly to cart animation element */}
+            {showFlyAnimation && (
+              <div className="absolute top-0 right-1/4 z-10">
+                <div className="w-10 h-10 bg-soft-green text-white rounded-full flex items-center justify-center animate-[flyToCart_0.8s_ease-in-out_forwards]">
+                  <FontAwesomeIcon icon={faShoppingBag} className="text-sm" />
+                </div>
+              </div>
+            )}
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart();
+              }}
+              disabled={isAddingToCart || addedToCart}
+              className={`w-full relative overflow-hidden py-3 text-white rounded-md flex items-center justify-center space-x-2 shadow-md
+                ${addedToCart ? 'bg-green-500' : isAddingToCart ? 'bg-soft-green/80' : 'bg-soft-green'} 
+                ${isAddingToCart ? 'animate-[addToCartBounce_0.6s_ease-in-out]' : ''}
+                transition-all duration-300 hover:shadow-lg active:scale-98`}
+            >
+              {addedToCart ? (
+                <>
+                  <FontAwesomeIcon icon={faCheck} />
+                  <span>Added to Cart</span>
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faCartPlus} />
+                  <span>Add to Cart</span>
+                </>
+              )}
+              
+              {/* Add ripple effect */}
+              {isAddingToCart && (
+                <span className="absolute w-full h-full top-0 left-0 bg-white/20 animate-ping"></span>
+              )}
+            </button>
+          </div>
         )}
       </div>
     </div>

@@ -78,9 +78,6 @@ const imagePathMappings = {
   '/images/plain-cashew.jpg': '/images/cashew-butter.jpg'
 };
 
-// Import the API_URL from our centralized config
-import { API_URL } from '../config';
-
 /**
  * Utility function to fix image paths
  * Handles both relative and absolute paths with fallbacks
@@ -107,18 +104,18 @@ export const fixImagePath = (path) => {
   if (imagePathMappings[normalizedPath]) {
     const fixedPath = imagePathMappings[normalizedPath];
     console.log(`Fixing image path: ${normalizedPath} → ${fixedPath}`);
-    return `${API_URL}${fixedPath}`;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${fixedPath}`;
   }
   
   // Check for paths with spaces and fix them
   if (normalizedPath.includes(' ')) {
     const fixedPath = normalizedPath.replace(/ /g, '-');
     console.log(`Fixing image path with spaces: ${normalizedPath} → ${fixedPath}`);
-    return `${API_URL}${fixedPath}`;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${fixedPath}`;
   }
   
   // Return the normalized path with the API URL
-  return `${API_URL}${normalizedPath}`;
+  return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${normalizedPath}`;
 };
 
 /**

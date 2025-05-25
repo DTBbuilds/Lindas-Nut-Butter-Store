@@ -1,18 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock, faSpinner, faUserShield } from '@fortawesome/free-solid-svg-icons';
-import { API_URL } from '../config';
+import { faUser, faLock, faSpinner, faUserShield, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+
+// Use the correct API URL based on environment
+const API_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' ? 
+    window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+      'http://localhost:5000' : 
+      `http://${window.location.hostname}:5000` 
+    : 
+    ''
+  );
 
 const AccountLoginPage = () => {
-  const [email, setEmail] = useState('');
+  // Pre-fill email if user just registered
+  const [email, setEmail] = useState(() => {
+    return localStorage.getItem('registeredEmail') || '';
+  });
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Check if user just registered and set up the auto-fill
+  useEffect(() => {
+    const justReg = localStorage.getItem('justRegistered') === 'true';
+    if (justReg) {
+      setJustRegistered(true);
+      // Remove the flag after a short delay to prevent it persisting on refresh
+      setTimeout(() => {
+        localStorage.removeItem('justRegistered');
+      }, 5000);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,6 +62,14 @@ const AccountLoginPage = () => {
         localStorage.setItem('customerEmail', email);
         localStorage.setItem('customerName', response.data.name || '');
         
+        // Get user registration data if available
+        const registrationData = localStorage.getItem('userRegistrationData');
+        if (registrationData) {
+          // We'll keep this for the profile page to use
+          // But we'll remove it after the user has viewed their profile
+          localStorage.setItem('userRegistrationData', registrationData);
+        }
+        
         // Show success message
         toast.success('Login successful!', { containerId: 'main-toast-container' });
         
@@ -56,6 +89,12 @@ const AccountLoginPage = () => {
   return (
     <div className="max-w-md mx-auto my-12 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Customer Login</h1>
+      
+      {justRegistered && (
+        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+          Your account has been created successfully! Please login with your credentials.
+        </div>
+      )}
       
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
@@ -133,6 +172,18 @@ const AccountLoginPage = () => {
             Create Account
           </Link>
         </p>
+      </div>
+      
+      {/* Admin Access Section */}
+      {/* Back to Shop Button */}
+      <div className="mt-6 border-t border-gray-200 pt-4 text-center">
+        <Link 
+          to="/" 
+          className="inline-flex items-center px-4 py-2 bg-soft-green hover:bg-soft-green-dark text-white rounded-md transition duration-300"
+        >
+          <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
+          Back to Shop
+        </Link>
       </div>
       
       {/* Admin Access Section */}

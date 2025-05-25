@@ -16,7 +16,7 @@ import { formatKES } from '../../utils/currencyUtils';
  * Order List Component
  * Displays a list of orders with filtering and search capabilities
  */
-const OrderList = ({ orders, isLoading, error, onViewOrder }) => {
+const OrderList = ({ orders, isLoading = false, error = null, onViewOrder }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -302,9 +302,5 @@ OrderList.propTypes = {
   onViewOrder: PropTypes.func.isRequired
 };
 
-OrderList.defaultProps = {
-  isLoading: false,
-  error: null
-};
 
 export default OrderList;

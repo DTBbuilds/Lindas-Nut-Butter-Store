@@ -3,6 +3,45 @@ import { API_BASE_URL } from '../config/api';
 import { fixImagePath } from '../utils/imagePathFixer';
 
 /**
+ * Generate a seed based on the current date
+ * This ensures randomization is consistent within a single day
+ * but changes daily for a fresh experience
+ * @returns {number} A numeric seed
+ */
+const generateDailySeed = () => {
+  const now = new Date();
+  // Use year, month, and day to create a daily seed
+  return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+};
+
+/**
+ * Shuffle an array using a seeded random number generator
+ * Fisher-Yates algorithm with seeded randomization
+ * @param {Array} array - The array to shuffle
+ * @param {number} [seed] - Optional seed for the random number generator
+ * @returns {Array} A new shuffled array
+ */
+const seededShuffle = (array, seed = generateDailySeed()) => {
+  // Create a copy to avoid mutating the original
+  const result = [...array];
+  let currentSeed = seed;
+  
+  // Simple seeded random function
+  const seededRandom = () => {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    return currentSeed / 233280;
+  };
+
+  // Fisher-Yates shuffle with seeded random
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  
+  return result;
+};
+
+/**
  * Standardized product fetching service
  * Handles consistent processing of product data from the API
  */
@@ -19,7 +58,9 @@ class ProductService {
         sort: 'name'
       };
       
-      const queryParams = { ...defaultParams, ...params };
+      // Extract randomize flag and remove it from params to avoid API issues
+      const { randomize, randomizeSeed, ...restParams } = params;
+      const queryParams = { ...defaultParams, ...restParams };
       
       const response = await axios.get(`${API_BASE_URL}/products`, {
         params: queryParams,
@@ -31,7 +72,14 @@ class ProductService {
         (response.data.data?.products || response.data.products || []);
       
       // Process and standardize all products
-      return this.standardizeProducts(productsData);
+      const standardizedProducts = this.standardizeProducts(productsData);
+      
+      // Randomize products if requested
+      if (randomize) {
+        return this.randomizeProducts(standardizedProducts, randomizeSeed);
+      }
+      
+      return standardizedProducts;
     } catch (error) {
       console.error('Error fetching products:', error);
       throw error;
@@ -102,6 +150,23 @@ class ProductService {
   standardizeProducts(products) {
     if (!Array.isArray(products)) return [];
     return products.map(product => this.standardizeProduct(product));
+  }
+  
+  /**
+   * Randomize an array of products
+   * @param {Array} products - Products to randomize
+   * @param {boolean} [useTimeSeed=false] - Whether to use current timestamp as seed for true randomness
+   * @returns {Array} - Randomized products array
+   */
+  randomizeProducts(products, useTimeSeed = false) {
+    if (!Array.isArray(products) || products.length === 0) return [];
+    
+    // Generate seed - either based on daily seed or current timestamp
+    const seed = useTimeSeed ? Date.now() : generateDailySeed();
+    console.log(`Randomizing ${products.length} products with seed: ${seed}`);
+    
+    // Shuffle the products using our seeded shuffle function
+    return seededShuffle(products, seed);
   }
   
   /**

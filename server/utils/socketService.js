@@ -1,51 +1,105 @@
 /**
- * Temporary Socket Service (No WebSockets Required)
+ * Socket.io Service for Real-time Updates
  * 
- * This is a placeholder that logs events instead of using WebSockets
- * to allow the server to start without socket.io dependency
+ * This module provides WebSocket functionality for real-time updates
+ * using Socket.io to handle events like transaction updates
  */
 
-// Placeholder for transactions that would be broadcast
+const socketio = require('socket.io');
+let io = null;
+
+// Store transaction events for potential retrieval
 let transactionEvents = [];
 
 /**
- * Initialize the socket service - does nothing in this temporary version
+ * Initialize the socket service with proper configuration
  * @param {Object} server - HTTP server instance
  */
 const initialize = (server) => {
-  console.log('⚠️ Using placeholder socket service (no real-time updates)');
-  return {};
+  if (io) {
+    console.log('Socket.io already initialized');
+    return io;
+  }
+
+  io = socketio(server, {
+    cors: {
+      origin: (origin, callback) => {
+        // Allow all origins in development
+        if (process.env.NODE_ENV !== 'production' || !origin) {
+          return callback(null, true);
+        }
+        
+        // In production, check against allowed origins
+        const allowedOrigins = [process.env.FRONTEND_URL, process.env.BASE_URL].filter(Boolean);
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        
+        callback(new Error('Not allowed by CORS'));
+      },
+      methods: ["GET", "POST"],
+      credentials: true
+    },
+    path: '/ws'
+  });
+
+  io.on('connection', (socket) => {
+    console.log(`🔌 Client connected: ${socket.id}`);
+    
+    // Send recent events to newly connected clients
+    socket.emit('recent_events', transactionEvents);
+    
+    socket.on('disconnect', () => {
+      console.log(`🔌 Client disconnected: ${socket.id}`);
+    });
+  });
+  
+  console.log('✅ Socket.io initialized - Real-time updates enabled');
+  return io;
 };
 
 /**
- * Get the placeholder instance
+ * Get the Socket.io instance
  */
 const getIO = () => {
-  return {};
+  if (!io) {
+    console.warn('⚠️ Socket.io not initialized yet');
+    return null;
+  }
+  return io;
 };
 
 /**
- * Log transaction event instead of broadcasting
+ * Broadcast transaction event to all connected clients
  * @param {string} event - Event name
  * @param {Object} data - Event data
  */
 const broadcastTransaction = (event, data) => {
-  // Just log the event
-  console.log(`📝 Would broadcast ${event}:`, data);
+  // Log the event for debugging
+  console.log(`📝 Broadcasting ${event}`);
   
   // Store in memory for potential retrieval via API
-  transactionEvents.push({
+  const eventData = {
     event,
     data,
     timestamp: new Date()
-  });
+  };
+  
+  transactionEvents.push(eventData);
   
   // Keep only the last 20 events
   if (transactionEvents.length > 20) {
     transactionEvents.shift();
   }
   
-  return true;
+  // Broadcast to all connected clients if socket.io is initialized
+  if (io) {
+    io.emit(event, eventData);
+    return true;
+  } else {
+    console.warn('⚠️ Socket.io not initialized, event not broadcast');
+    return false;
+  }
 };
 
 /**
