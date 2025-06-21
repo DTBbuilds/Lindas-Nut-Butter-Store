@@ -1,0 +1,134 @@
+/* Enhanced Toast Notifications Styling */
+
+/* Container styles */
+.toast-container-custom {
+  position: fixed;
+  z-index: 99999 !important;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+/* Individual toast styles */
+.toast-enhanced {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+  margin-bottom: 12px !important;
+  min-height: auto !important;
+  padding: 12px !important;
+  border-left: 5px solid transparent !important;
+  backdrop-filter: blur(10px);
+  max-width: 350px !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: hidden;
+  transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.5s ease-in-out !important;
+}
+
+/* Toast body styles */
+.toast-body-enhanced {
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  color: #ffffff !important;
+}
+
+/* Progress bar styling */
+.toast-progress {
+  height: 4px !important;
+  opacity: 0.7 !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Status-specific styling */
+.Toastify__toast--success {
+  background-color: rgba(47, 133, 90, 0.95) !important;
+  border-left-color: #1b6e3c !important;
+}
+
+.Toastify__toast--error {
+  background-color: rgba(211, 47, 47, 0.95) !important;
+  border-left-color: #a81c1c !important;
+}
+
+.Toastify__toast--warning {
+  background-color: rgba(237, 162, 12, 0.95) !important;
+  border-left-color: #cc7c02 !important;
+}
+
+.Toastify__toast--info {
+  background-color: rgba(2, 136, 209, 0.95) !important;
+  border-left-color: #01579b !important;
+}
+
+/* Custom animations */
+.Toastify__toast--enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.Toastify__toast--entered {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.Toastify__toast--exit {
+  transform: translateX(100%) scale(0.95);
+  opacity: 0;
+}
+
+/* Close button styling */
+.Toastify__close-button {
+  color: rgba(255, 255, 255, 0.7) !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease-in-out !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+  color: white !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .toast-enhanced {
+    max-width: 300px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .toast-body-enhanced {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Specific styling for payment notifications */
+.payment-notification {
+  background-color: rgba(99, 49, 133, 0.95) !important;
+  border-left-color: #4a2064 !important;
+}
+
+.payment-notification .toast-body-enhanced {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.payment-notification .notification-title {
+  font-weight: 600 !important;
+  margin-bottom: 4px !important;
+}
+
+.payment-notification .notification-message {
+  font-weight: 400 !important;
+  font-size: 0.85rem !important;
+}
+
+/* Specific override for clear cart confirmation toast to ensure it is clickable */
+.clear-cart-toast {
+  z-index: 999999 !important;
+}
+
+/* Force pointer events on clear cart confirmation toast */
+.clear-cart-toast,
+.clear-cart-toast * {
+  pointer-events: auto !important;
+}

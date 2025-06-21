@@ -1,0 +1,21 @@
+{
+  "to": "lmunyendo@gmail.com",
+  "customerEmail": "nehac94795@lesotica.com",
+  "name": "dtb",
+  "shippingAddress": {
+    "orderId": "LNB-250511-R0Q3-969283",
+    "street": "nairobi",
+    "city": "nairobi",
+    "state": "kenya",
+    "country": "Kenya",
+    "location": {
+      "latitude": -1.2921,
+      "longitude": 36.8219,
+      "description": "CBD division, Near kq, Haile Selassie Avenue, City Square sublocation, Starehe location, CBD division, Starehe, Nairobi, Nairobi County, 40476, Kenya"
+    },
+    "deliveryTime": "48 hours",
+    "phoneNumber": "0727068107",
+    "orderDate": "2025-05-11T17:02:49.283Z"
+  },
+  "timestamp": "2025-05-11T17:02:52.194Z"
+}

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build
+
+
+# Environment variables and secrets
+
+
+# Logs
+
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+
+# Testing
+/coverage
+
+# Temporary files
+
+# M-Pesa specific
+**/mpesa-credentials.json
+**/safaricom-keys.json
+
+# MongoDB dumps
+*.dump
+*.bson
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+.vercel

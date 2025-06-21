@@ -1,0 +1,44 @@
+Migration Log - 2025-05-23T12:13:03.537Z
+
+Starting data migration from local MongoDB to MongoDB Atlas...
+Found 5 model files to migrate.
+Connecting to local MongoDB...
+✅ Connected to local MongoDB.
+Connecting to MongoDB Atlas...
+✅ Connected to MongoDB Atlas.
+
+Migrating Admin...
+Found 0 documents in local Admin collection.
+No documents to migrate for Admin.
+
+Migrating Customer...
+Found 2 documents in local Customer collection.
+Processing batch 1/1 for Customer...
+✅ Batch 1: Migrated 0 documents
+✅ Successfully migrated 0 of 2 documents for Customer.
+
+Migrating Feedback...
+Found 0 documents in local Feedback collection.
+No documents to migrate for Feedback.
+
+Migrating Order...
+Found 0 documents in local Order collection.
+No documents to migrate for Order.
+
+Migrating Transaction...
+Found 1 documents in local Transaction collection.
+Processing batch 1/1 for Transaction...
+✅ Batch 1: Migrated 0 documents
+✅ Successfully migrated 0 of 1 documents for Transaction.
+
+=== Migration Summary ===
+Admin: ✅ Migrated 0/0 documents
+Customer: ✅ Migrated 0/2 documents
+Feedback: ✅ Migrated 0/0 documents
+Order: ✅ Migrated 0/0 documents
+Transaction: ✅ Migrated 0/1 documents
+Local MongoDB connection closed.
+MongoDB Atlas connection closed.
+
+Migration process completed. Check migration-log.txt for details.
+Migration script execution completed.

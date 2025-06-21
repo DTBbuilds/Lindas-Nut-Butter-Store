@@ -1,0 +1,28 @@
+Simple Migration Log - 2025-05-23T12:14:21.301Z
+
+Starting simple migration from local MongoDB to MongoDB Atlas...
+Connecting to local MongoDB...
+✅ Connected to local MongoDB
+Found 8 collections in local database:
+- transactions
+- inventorylogs
+- admins
+- products
+- orders
+- feedbacks
+- users
+- customers
+Disconnected from local MongoDB
+Connecting to MongoDB Atlas...
+✅ Connected to MongoDB Atlas
+Reconnecting to local MongoDB for migration...
+✅ Reconnected to local MongoDB
+❌ Migration failed: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at migrateData (D:\Lab 2\Lindas-Nut-Butter-Store Monday Updates\Lindas-Nut-Butter-Store-master\simple-migrate.js:135:56)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+Local MongoDB connection closed
+MongoDB Atlas connection closed
+
+Migration process completed
+Migration script execution completed

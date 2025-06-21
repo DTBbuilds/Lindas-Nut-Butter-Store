@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .price-update-flash {
+    animation: price-flash 0.4s ease-out;
+  }
+
+  @keyframes price-flash {
+    0% { background-color: transparent; transform: scale(1); }
+    50% { background-color: #c6f6d5; transform: scale(1.05); }
+    100% { background-color: transparent; transform: scale(1); }
+  }
+}
+
+/* Override for missing pattern-dots.png file */
+[style*='pattern-dots.png'] {
+  background-image: none !important;
+  background-color: #f5e8c7 !important;
+}
+
+body {
+  @apply bg-warm-beige;
+  @apply font-poppins;
+}
+
+.lora {
+  @apply font-lora;
+}
