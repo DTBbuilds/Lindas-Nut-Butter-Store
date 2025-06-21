@@ -7,7 +7,7 @@ node_modules/
 
 
 # Environment variables and secrets
-
+.env*
 
 # Logs
 
@@ -33,6 +33,7 @@ Thumbs.db
 # MongoDB dumps
 *.dump
 *.bson
+mongodb-data/
 
 # SSL certificates
 *.pem
