@@ -12,23 +12,31 @@ RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 COPY server/package*.json ./server/
 
-# Install all dependencies including devDependencies (skip postinstall script)
+# Copy package files first for better layer caching
+COPY package*.json ./
+
+# Install root dependencies (skip postinstall script)
 RUN if [ -f package-lock.json ]; then \
       npm ci --ignore-scripts; \
     else \
       npm install --ignore-scripts; \
     fi
 
-# Install server dependencies (skip postinstall script)
-RUN cd server && \
-    if [ -f package-lock.json ]; then \
-      npm ci --ignore-scripts; \
-    else \
-      npm install --ignore-scripts; \
-    fi
-
-# Copy source code
+# Copy the rest of the application
 COPY . .
+
+# Install server dependencies (skip postinstall script)
+RUN if [ -d server ] && [ -f server/package.json ]; then \
+      cd server && \
+      if [ -f package-lock.json ]; then \
+        npm ci --ignore-scripts; \
+      else \
+        npm install --ignore-scripts; \
+      fi; \
+      cd ..; \
+    else \
+      echo "Server directory not found or no package.json in server directory"; \
+    fi
 
 # Build the React app with production optimizations
 RUN npm run build
