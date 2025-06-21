@@ -12,19 +12,19 @@ RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 COPY server/package*.json ./server/
 
-# Install all dependencies including devDependencies
+# Install all dependencies including devDependencies (skip postinstall script)
 RUN if [ -f package-lock.json ]; then \
-      npm ci; \
+      npm ci --ignore-scripts; \
     else \
-      npm install; \
+      npm install --ignore-scripts; \
     fi
 
-# Install server dependencies
+# Install server dependencies (skip postinstall script)
 RUN cd server && \
     if [ -f package-lock.json ]; then \
-      npm ci; \
+      npm ci --ignore-scripts; \
     else \
-      npm install; \
+      npm install --ignore-scripts; \
     fi
 
 # Copy source code

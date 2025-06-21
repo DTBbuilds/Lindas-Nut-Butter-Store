@@ -93,6 +93,6 @@
     "build:client": "react-scripts build && cp -r build/* public/",
     "heroku-postbuild": "npm install && npm run build:client",
     "seed": "node server/seedDb.js",
-    "postinstall": "node scripts/kill-ports.js"
+    "postinstall": "if [ -f scripts/kill-ports.js ]; then node scripts/kill-ports.js; else echo 'Skipping kill-ports.js as it does not exist'; fi"
   }
 }
