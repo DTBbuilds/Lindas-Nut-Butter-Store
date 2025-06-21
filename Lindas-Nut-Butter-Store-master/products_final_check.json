@@ -1,0 +1,264 @@
+﻿{
+    "products":  [
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12bf",
+                         "name":  "Cashew Butter- Chilli",
+                         "description":  "A spicy twist on our cashew butter with a kick of chili peppers.",
+                         "price":  1050,
+                         "images":  [
+                                        "/images/spicy-cashew.jpg",
+                                        "/images/spicy-cashew.jpg"
+                                    ],
+                         "category":  "Cashew",
+                         "stockQuantity":  10,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "CAS-017"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12c0",
+                         "name":  "Peanut Butter- Chocolate Mint",
+                         "description":  "Refreshing mint chocolate peanut butter - special order only.",
+                         "price":  600,
+                         "images":  [
+                                        "/images/mint-chocolate-peanut.jpg",
+                                        "/images/mint-chocolate-peanut.jpg"
+                                    ],
+                         "category":  "Peanut",
+                         "stockQuantity":  0,
+                         "inventoryStatus":  "OUT_OF_STOCK",
+                         "sku":  "PNT-018"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12be",
+                         "name":  "Cashew Butter- Coconut",
+                         "description":  "A delightful blend of premium cashews and coconut for a tropical flavor experience.",
+                         "price":  1050,
+                         "images":  [
+                                        "/images/coconut-cashew-butter.jpg",
+                                        "/images/coconut-cashew-butter.jpg"
+                                    ],
+                         "category":  "Cashew",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "CAS-016"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12bc",
+                         "name":  "Pumpkin Seed Butter",
+                         "description":  "Nutritious pumpkin seed butter rich in minerals and antioxidants.",
+                         "price":  1000,
+                         "images":  [
+                                        "/images/pumpkin-seed-butter.jpg",
+                                        "/images/pumpkin-seed-butter.jpg"
+                                    ],
+                         "category":  "Seed Butters",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "SED-014"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12bd",
+                         "name":  "Mixed Seed Butter",
+                         "description":  "A blend of sunflower, pumpkin, flax, and chia seeds for maximum nutrition.",
+                         "price":  1000,
+                         "images":  [
+                                        "/images/placeholder.png",
+                                        "/images/placeholder.png"
+                                    ],
+                         "category":  "Seed Butters",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "SED-015"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12bb",
+                         "name":  "Sunflower Seed Butter",
+                         "description":  "Creamy sunflower seed butter, perfect for those with nut allergies.",
+                         "price":  900,
+                         "images":  [
+                                        "/images/placeholder.png",
+                                        "/images/placeholder.png"
+                                    ],
+                         "category":  "Seed Butters",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "SED-013"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b9",
+                         "name":  "Hazelnut Butter- Chocolate",
+                         "description":  "Indulgent chocolate hazelnut spread made with premium hazelnuts and cocoa.",
+                         "price":  1300,
+                         "images":  [
+                                        "/images/chocolate-hazelnut.jpg",
+                                        "/images/chocolate-hazelnut.jpg"
+                                    ],
+                         "category":  "Hazelnut",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "HAZ-011"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12ba",
+                         "name":  "Pure Hazelnut Butter",
+                         "description":  "Pure hazelnut butter made from roasted hazelnuts with no added ingredients.",
+                         "price":  1200,
+                         "images":  [
+                                        "/images/placeholder.png",
+                                        "/images/placeholder.png"
+                                    ],
+                         "category":  "Hazelnut",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "HAZ-012"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b8",
+                         "name":  "Pure Pistachio Butter",
+                         "description":  "Luxurious and smooth butter made from 100% pure pistachios.",
+                         "price":  1500,
+                         "images":  [
+                                        "/images/placeholder.png",
+                                        "/images/placeholder.png"
+                                    ],
+                         "category":  "Pistachio",
+                         "stockQuantity":  15,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "PIS-010"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b7",
+                         "name":  "Peanut Butter Crunchy",
+                         "description":  "Classic crunchy peanut butter with bits of roasted peanuts for extra texture.",
+                         "price":  500,
+                         "images":  [
+                                        "/images/crunchy-peanut-butter.jpg",
+                                        "/images/crunchy-peanut-butter.jpg"
+                                    ],
+                         "category":  "Peanut",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "PNT-009"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b5",
+                         "name":  "Macadamia Butter- Chocolate",
+                         "description":  "Premium macadamia nut butter blended with rich chocolate for a luxurious spread.",
+                         "price":  1200,
+                         "images":  [
+                                        "/images/chocolate-macadamia.jpg",
+                                        "/images/chocolate-macadamia.jpg"
+                                    ],
+                         "category":  "Macadamia",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "MAC-007"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b6",
+                         "name":  "Peanut Butter- Creamy",
+                         "description":  "Classic smooth peanut butter made with roasted peanuts.",
+                         "price":  500,
+                         "images":  [
+                                        "/images/creamy-peanut-butter.jpg",
+                                        "/images/creamy-peanut-butter.jpg"
+                                    ],
+                         "category":  "Peanut",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "PNT-008"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b4",
+                         "name":  "Macadamia Nut Butter",
+                         "description":  "Premium macadamia nut butter with a rich, buttery texture and flavor.",
+                         "price":  1050,
+                         "images":  [
+                                        "/images/macadamia-butter.jpg",
+                                        "/images/macadamia-butter.jpg"
+                                    ],
+                         "category":  "Macadamia",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "MAC-006"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b3",
+                         "name":  "Cashew Butter- Chocolate",
+                         "description":  "Smooth cashew butter blended with rich chocolate for a decadent treat.",
+                         "price":  1050,
+                         "images":  [
+                                        "/images/chocolate-cashew.jpg",
+                                        "/images/chocolate-cashew.jpg"
+                                    ],
+                         "category":  "Cashew",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "CAS-005"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b2",
+                         "name":  "Cashew Butter- Plain",
+                         "description":  "Luxuriously smooth cashew butter made from organic cashews.",
+                         "price":  900,
+                         "images":  [
+                                        "/images/cashew-butter.jpg",
+                                        "/images/cashew-butter.jpg"
+                                    ],
+                         "category":  "Cashew",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "CAS-004"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b1",
+                         "name":  "Honey",
+                         "description":  "Pure, natural wildflower honey sourced from local Kenyan beekeepers.",
+                         "price":  600,
+                         "images":  [
+                                        "/images/pure-honey.jpg",
+                                        "/images/pure-honey.jpg"
+                                    ],
+                         "category":  "Honey",
+                         "stockQuantity":  10,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "HNY-003"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12b0",
+                         "name":  "Almond Butter- Chocolate",
+                         "description":  "Creamy almond butter with rich chocolate for a delightful flavor experience.",
+                         "price":  1400,
+                         "images":  [
+                                        "/images/chocolate-almond.jpg",
+                                        "/images/chocolate-almond.jpg"
+                                    ],
+                         "category":  "Almonds",
+                         "stockQuantity":  33,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "ALM-002"
+                     },
+                     {
+                         "_id":  "6846d89b9e4ad9da38ad12af",
+                         "name":  "Almond Butter- Creamy",
+                         "description":  "Our signature smooth almond butter made from premium organic almonds.",
+                         "price":  1200,
+                         "images":  [
+                                        "/images/plain-almond.jpg",
+                                        "/images/plain-almond.jpg"
+                                    ],
+                         "category":  "Almonds",
+                         "stockQuantity":  18,
+                         "inventoryStatus":  "IN_STOCK",
+                         "sku":  "ALM-001"
+                     }
+                 ],
+    "pagination":  {
+                       "total":  18,
+                       "page":  1,
+                       "limit":  100,
+                       "pages":  1,
+                       "hasNextPage":  false,
+                       "hasPreviousPage":  false
+                   }
+}

@@ -1,0 +1,76 @@
+# Render Blueprint for Linda's Nut Butter Store
+# Reference: https://render.com/docs/deploy-docker
+services:
+  - type: web
+    name: lindas-nut-butter-store
+    region: oregon  # Choose the region closest to your users
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free  # Options: free, starter, standard, plus, pro, pro_plus, pro_max
+    autoDeploy: true  # Automatically deploy on push to the main branch
+    buildCommand: >-
+      docker build \
+        --build-arg NODE_ENV=production \
+        -t lindas-nut-butter-store .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: lindas-nut-butter-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+        sync: false
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+        sync: false
+      - key: CUSTOMER_JWT_SECRET
+        generateValue: true
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        generateValue: true
+        sync: false
+      - key: ADMIN_REFRESH_TOKEN_SECRET
+        generateValue: true
+        sync: false
+      - key: PUBLIC_URL
+        sync: true  # Will be set to the Render service URL automatically
+    healthCheckPath: /api/health
+    healthCheckTimeout: 10s
+    healthCheckInterval: 60s
+    healthCheckThreshold: 3
+    
+    # Resource settings (adjust based on your needs)
+    instanceSize: free  # Options: free, starter, standard, plus, pro, pro_plus, pro_max
+    numInstances: 1
+    
+    # Auto-scaling (for paid plans)
+    # autoScaling:
+    #   minInstances: 1
+    #   maxInstances: 3
+    #   targetCPUUtilization: 70
+    #   targetMemoryUtilization: 50
+
+# Database configuration
+databases:
+  - name: lindas-nut-butter-db
+    databaseName: lindas-nut-butter
+    user: lindasnutbutter
+    plan: free  # Options: free, starter, standard, plus, pro, pro_plus, pro_max
+    ipAllowList: []  # Allow connections from anywhere
+    
+    # Backup settings (for paid plans)
+    # backupRetentionInDays: 7
+    # backupStartMinute: 0
+    # backupStartHour: 0
+    # backupDayOfWeek: 0
+    
+    # Performance settings (for paid plans)
+    # diskSizeGB: 10
+    # maintenanceWindow:
+    #   day: sunday
+    #   hour: 3
+    #   durationInMinutes: 60

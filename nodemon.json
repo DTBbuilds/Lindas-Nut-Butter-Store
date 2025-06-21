@@ -1,0 +1,23 @@
+{
+  "watch": [
+    "server/"
+  ],
+  "ext": "js,json,env,yaml,yml",
+  "ignore": [
+    "server/logs/**",
+    "server/test/**",
+    "src/**",
+    "public/**",
+    "**/*.log",
+    "**/*.test.js",
+    "**/*.spec.js"
+  ],
+  "verbose": true,
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": "2500",
+  "events": {
+    "restart": "node scripts/kill-ports.js"
+  }
+}
