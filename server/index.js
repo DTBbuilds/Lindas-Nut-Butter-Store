@@ -95,6 +95,10 @@ app.use((req, res, next) => {
   return apiLimiter(req, res, next);
 });
 app.use('/api', apiLimiter);
+=======
+// Apply rate limiting
+app.use('/api/', apiLimiter);
+>>>>>>> d0cfb91a74c7d6ad3a38b6bb55efbefbf6a05719
 app.use('/api/admin/auth', authLimiter);
 
 // =================================================================
