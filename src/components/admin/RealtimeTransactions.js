@@ -22,7 +22,6 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [lastTransactionId, setLastTransactionId] = useState(null);
   const [pollingInterval, setPollingInterval] = useState(10000); // 10 seconds
-  const notificationsRef = useRef([]);
   const timerRef = useRef(null);
   
   // Set up polling for transactions
@@ -62,8 +61,11 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Update connection status on successful API call
+      // Update connection status on successful API call and reset polling interval
       setConnected(true);
+      if (pollingInterval !== 10000) {
+        setPollingInterval(10000); // Reset interval on success
+      }
       
       const transactions = response.data.data || [];
       
@@ -91,10 +93,7 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
               transaction: latestTransaction
             });
             
-            // Call the callback if provided
-            if (onNewTransaction) {
-              onNewTransaction(latestTransaction, 'completed');
-            }
+
           } else if (latestTransaction.status === 'FAILED') {
             handleNewNotification({
               type: 'failed',
@@ -104,10 +103,7 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
               transaction: latestTransaction
             });
             
-            // Call the callback if provided
-            if (onNewTransaction) {
-              onNewTransaction(latestTransaction, 'failed');
-            }
+
           } else if (latestTransaction.status === 'PENDING') {
             handleNewNotification({
               type: 'created',
@@ -117,10 +113,7 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
               transaction: latestTransaction
             });
             
-            // Call the callback if provided
-            if (onNewTransaction) {
-              onNewTransaction(latestTransaction, 'created');
-            }
+
           }
         }
       }
@@ -147,9 +140,8 @@ const RealtimeTransactions = ({ onNewTransaction }) => {
       read: false
     };
     
-    // Update refs and state
-    notificationsRef.current = [newNotification, ...notificationsRef.current].slice(0, 50);
-    setNotifications(notificationsRef.current);
+    // Update state
+    setNotifications(prevNotifications => [newNotification, ...prevNotifications].slice(0, 50));
     
     // Call the onNewTransaction callback if provided
     if (onNewTransaction && typeof onNewTransaction === 'function') {
